@@ -2,6 +2,8 @@
   const FORM_MODE_KEY = "lead_form_mode_intent";
   const FORM_SELECTOR = ".js-lead-form";
   const DEFAULT_MODE = "devis";
+  const SUBJECT_DEVIS = "📩 DEMANDE DE DEVIS - Style & Deco";
+  const SUBJECT_CALLBACK = "🚨 RAPPEL 30 MIN - Style & Deco";
 
   const getModeFromStorage = () => {
     const mode = sessionStorage.getItem(FORM_MODE_KEY);
@@ -24,6 +26,12 @@
     if (hiddenPriority) {
       hiddenPriority.value = isCallbackMode || (checkbox && checkbox.checked) ? "RAPPEL_30_MIN" : "STANDARD";
     }
+  };
+
+  const syncSubject = (form, mode) => {
+    const subjectInput = form.querySelector('input[name="subject"]');
+    if (!subjectInput) return;
+    subjectInput.value = mode === "callback" ? SUBJECT_CALLBACK : SUBJECT_DEVIS;
   };
 
   const syncRequiredState = (elements, enabled) => {
@@ -81,6 +89,7 @@
     }
 
     setPriority(form, isCallbackMode);
+    syncSubject(form, isCallbackMode ? "callback" : "devis");
   };
 
   const applyModeToAllForms = (mode) => {
@@ -103,6 +112,7 @@
     form.addEventListener("submit", () => {
       const hiddenPriority = form.querySelector('input[name="lead_priority"]');
       const priority = hiddenPriority && hiddenPriority.value === "RAPPEL_30_MIN" ? "RAPPEL_30_MIN" : "STANDARD";
+      syncSubject(form, priority === "RAPPEL_30_MIN" ? "callback" : "devis");
       const eventName = priority === "RAPPEL_30_MIN" ? "form_submit_callback" : "form_submit_devis";
 
       window.dataLayer = window.dataLayer || [];
