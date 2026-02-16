@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://styleetdeco.fr/sitemap.xml
