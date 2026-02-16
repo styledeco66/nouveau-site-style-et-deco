@@ -2,6 +2,7 @@
   const FORM_MODE_KEY = "lead_form_mode_intent";
   const FORM_SELECTOR = ".js-lead-form";
   const DEFAULT_MODE = "devis";
+  const MOBILE_CONTACT_OFFSET = 170;
   const SUBJECT_DEVIS = "📩 DEMANDE DE DEVIS - Style & Deco";
   const SUBJECT_CALLBACK = "🚨 RAPPEL 30 MIN - Style & Deco";
 
@@ -411,7 +412,29 @@
     });
   };
 
+  const moveHeroFormBelowReviewsOnMobile = () => {
+    if (!window.matchMedia("(max-width: 720px)").matches) return;
+    const heroForm = document.querySelector("#contact.hero__visual");
+    const reviews = document.querySelector("#avis");
+    if (!heroForm || !reviews) return;
+    reviews.insertAdjacentElement("afterend", heroForm);
+  };
+
+  const flashFocusedForm = (container) => {
+    if (!container) return;
+    const form = container.matches("form") ? container : container.querySelector(".js-lead-form");
+    if (!form) return;
+    form.classList.remove("form--focus-glow");
+    void form.offsetWidth; // restart animation if already applied
+    form.classList.add("form--focus-glow");
+    window.setTimeout(() => {
+      form.classList.remove("form--focus-glow");
+    }, 1400);
+  };
+
   document.addEventListener("DOMContentLoaded", () => {
+    moveHeroFormBelowReviewsOnMobile();
+
     document.querySelectorAll(FORM_SELECTOR).forEach((form) => {
       bindFormPrioritySync(form);
       pushFormSubmitEvent(form);
@@ -428,13 +451,13 @@
       link.addEventListener("click", () => {
         const mode = link.getAttribute("data-form-mode-intent") === "callback" ? "callback" : "devis";
         sessionStorage.setItem(FORM_MODE_KEY, mode);
-        if (link.getAttribute("href") === "#contact") {
+        if (link.getAttribute("href") === "#contact" || link.getAttribute("href") === "#contact-details") {
           applyModeToAllForms(mode);
         }
       });
     });
 
-    document.querySelectorAll('[data-rappel-intent="true"][href="#contact"]').forEach((link) => {
+    document.querySelectorAll('[data-rappel-intent="true"][href="#contact"], [data-rappel-intent="true"][href="#contact-details"]').forEach((link) => {
       link.addEventListener("click", (event) => {
         if (!window.matchMedia("(max-width: 720px)").matches) return;
 
@@ -442,14 +465,16 @@
         sessionStorage.setItem(FORM_MODE_KEY, "callback");
         applyModeToAllForms("callback");
 
-        const contact = document.querySelector("#contact");
+        const targetSelector = link.getAttribute("href") === "#contact-details" ? "#contact-details" : "#contact";
+        const contact = document.querySelector(targetSelector);
         if (!contact) return;
+        flashFocusedForm(contact);
 
         const submitButton = contact.querySelector(".js-form-submit");
         window.requestAnimationFrame(() => {
           if (submitButton) {
             const rect = contact.getBoundingClientRect();
-            const targetY = window.scrollY + rect.top - 120;
+            const targetY = window.scrollY + rect.top - MOBILE_CONTACT_OFFSET;
             window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
           } else {
             contact.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -458,7 +483,7 @@
       });
     });
 
-    document.querySelectorAll('[data-form-mode-intent="devis"][href="#contact"]').forEach((link) => {
+    document.querySelectorAll('[data-form-mode-intent="devis"][href="#contact"], [data-form-mode-intent="devis"][href="#contact-details"]').forEach((link) => {
       link.addEventListener("click", (event) => {
         if (!window.matchMedia("(max-width: 720px)").matches) return;
 
@@ -466,12 +491,14 @@
         sessionStorage.setItem(FORM_MODE_KEY, "devis");
         applyModeToAllForms("devis");
 
-        const contact = document.querySelector("#contact");
+        const targetSelector = link.getAttribute("href") === "#contact-details" ? "#contact-details" : "#contact";
+        const contact = document.querySelector(targetSelector);
         if (!contact) return;
+        flashFocusedForm(contact);
 
         window.requestAnimationFrame(() => {
           const rect = contact.getBoundingClientRect();
-          const targetY = window.scrollY + rect.top - 120;
+          const targetY = window.scrollY + rect.top - MOBILE_CONTACT_OFFSET;
           window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
         });
       });
@@ -485,12 +512,12 @@
     initKpiCounters();
     initMobileMenu();
 
-    if (window.location.hash === "#contact") {
+    if (window.location.hash === "#contact" || window.location.hash === "#contact-details") {
       applyModeToAllForms(consumeModeFromStorage());
     }
 
     window.addEventListener("hashchange", () => {
-      if (window.location.hash === "#contact") {
+      if (window.location.hash === "#contact" || window.location.hash === "#contact-details") {
         applyModeToAllForms(consumeModeFromStorage());
       }
     });

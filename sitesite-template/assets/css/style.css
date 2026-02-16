@@ -1577,6 +1577,21 @@ h1{
   box-shadow: 0 20px 54px rgba(0,0,0,.38);
   backdrop-filter: blur(9px) saturate(1.06);
 }
+.form--focus-glow{
+  animation: form-focus-glow 1.25s ease-out;
+}
+@keyframes form-focus-glow{
+  0%{
+    border-color: rgba(215,181,109,.82);
+    background: linear-gradient(170deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    box-shadow: 0 26px 68px rgba(0,0,0,.50), 0 0 0 2px rgba(215,181,109,.35);
+  }
+  100%{
+    border-color: rgba(255,255,255,.15);
+    background: linear-gradient(170deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    box-shadow: 0 20px 54px rgba(0,0,0,.38);
+  }
+}
 .is-hidden{
   display:none !important;
 }
@@ -2214,7 +2229,7 @@ textarea{ resize: vertical; }
     text-align: center;
   }
   .hero__visual{
-    display: none;
+    display: grid;
     padding: 10px;
     border-radius: 16px;
     overflow: hidden;
@@ -2363,6 +2378,7 @@ textarea{ resize: vertical; }
   .callback30{ scroll-margin-top: 182px; }
   #contact{ scroll-margin-top: 228px; }
   #contact-details{ scroll-margin-top: 170px; }
+  #contact.hero__visual + #rappel30{ margin-top: 36px; }
   .logos{ grid-template-columns: repeat(2, 1fr); }
   .form__grid{ grid-template-columns: 1fr; }
   .hero__contactQuick{
@@ -2476,6 +2492,9 @@ textarea{ resize: vertical; }
     animation: none !important;
   }
   .heroMobilePhoto::before{
+    animation: none !important;
+  }
+  .form--focus-glow{
     animation: none !important;
   }
 }
