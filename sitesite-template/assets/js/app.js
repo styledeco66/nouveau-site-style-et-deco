@@ -203,6 +203,7 @@
 
       let autoTimer = null;
       const startAuto = () => {
+        if (document.hidden) return;
         stopAuto();
         autoTimer = window.setInterval(() => {
           const step = getStep();
@@ -224,6 +225,13 @@
       carousel.addEventListener("mouseleave", startAuto);
       carousel.addEventListener("touchstart", stopAuto, { passive: true });
       carousel.addEventListener("touchend", startAuto, { passive: true });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          stopAuto();
+        } else {
+          startAuto();
+        }
+      });
 
       updateDots();
       startAuto();

@@ -20,6 +20,7 @@
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/images/favicon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon-180.png" />
   <script type="application/ld+json">
@@ -134,10 +135,11 @@
 
 <body>
   <!-- Header -->
-  <header class="header" id="top">
+  <div id="top" aria-hidden="true"></div>
+  <header class="header">
     <div class="container header__inner">
       <a class="brand" href="#top" aria-label="Retour en haut">
-        <img class="brand__logo" src="./assets/images/logo-fin.webp" alt="Logo entreprise" />
+        <img class="brand__logo" src="./assets/images/logo-fin-640.webp" alt="Logo entreprise" width="640" height="427" fetchpriority="high" />
       </a>
 
       <button class="mobileMenuToggle" type="button" aria-label="Ouvrir le menu" aria-controls="mobile-menu" aria-expanded="false">
@@ -149,6 +151,7 @@
       <nav class="nav" aria-label="Navigation principale">
         <a href="#services">Services</a>
         <a href="#realisations">Réalisations</a>
+        <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
         <a href="#process">Méthode</a>
         <a href="#faq">FAQ</a>
         <a href="#contact-details" class="btn btn--ghost">Contact</a>
@@ -164,6 +167,7 @@
   <nav class="mobileMenu" id="mobile-menu" aria-label="Navigation mobile" hidden>
     <a href="#services">Services</a>
     <a href="#realisations">Réalisations</a>
+    <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
     <a href="#process">Méthode</a>
     <a href="#faq">FAQ</a>
     <a href="#contact-details">Contact</a>
@@ -652,6 +656,7 @@
       <div class="footer__right">
         <a href="#services">Services</a>
         <a href="#realisations">Réalisations</a>
+        <a href="./peintre-saint-cyprien/">Peintre Saint-Cyprien</a>
         <a href="#contact" data-form-mode-intent="devis">Devis</a>
         <a href="./legal/mentions-legales.html" aria-label="Mentions légales">Mentions</a>
         <a href="./legal/politique-confidentialite.html" aria-label="Politique de confidentialité">Confidentialité</a>
