@@ -2,3 +2,7 @@ https://www.styleetdeco.fr/* https://styleetdeco.fr/:splat 301!
 
 /mentions-legales /legal/mentions-legales.html 301
 /politique-confidentialite /legal/politique-confidentialite.html 301
+
+/realisations/* /realisations 301
+/legal/mentions-legales.html /mentions-legales 301
+/legal/politique-confidentialite.html /mentions-legales 301
