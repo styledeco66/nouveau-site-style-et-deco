@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://styleetdeco.fr/</loc>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/real-1-2.webp</image:loc>
+      <image:title>Mise en peinture complète d'une maison de standing à Perpignan</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/real-2.webp</image:loc>
+      <image:title>Mise en peinture de façade d'un immeuble à Perpignan</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/real-3.webp</image:loc>
+      <image:title>Pose de parquet dans un local commercial neuf à Perpignan</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/real-4.webp</image:loc>
+      <image:title>Réalisation de joints placo avant mise en peinture à Perpignan</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://styleetdeco.fr/legal/mentions-legales.html</loc>
