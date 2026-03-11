@@ -29,4 +29,11 @@
   <url>
     <loc>https://styleetdeco.fr/peintre-saint-cyprien/</loc>
   </url>
+  <url>
+    <loc>https://styleetdeco.fr/facade-saint-cyprien/</loc>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/banniere-facade.webp</image:loc>
+      <image:title>Ravalement de façade à Saint-Cyprien — artisan façadier littoral méditerranéen</image:title>
+    </image:image>
+  </url>
 </urlset>

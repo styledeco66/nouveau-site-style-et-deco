@@ -80,7 +80,7 @@
         "name": "Est-ce que vous intervenez sur de petites surfaces ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Oui, selon votre zone et le planning. L’objectif reste le même : finition nette et délai respecté."
+          "text": "Oui, selon votre zone et le planning. L'objectif reste le même : finition nette et délai respecté."
         }
       },
       {
@@ -88,7 +88,7 @@
         "name": "Quelles finitions recommandez-vous ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Ça dépend des pièces et de la lumière. Mat pour masquer les défauts, velours pour l’équilibre, satiné pour zones sollicitées."
+          "text": "Ça dépend des pièces et de la lumière. Mat pour masquer les défauts, velours pour l'équilibre, satiné pour zones sollicitées."
         }
       },
       {
@@ -112,7 +112,7 @@
         "name": "Comment est calculé le prix de la prestation (surface, préparation, finition) ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Le tarif dépend surtout de la surface, de l’état des supports, du niveau de préparation et de la finition choisie. Le devis détaille les postes pour rester lisible."
+          "text": "Le tarif dépend surtout de la surface, de l'état des supports, du niveau de préparation et de la finition choisie. Le devis détaille les postes pour rester lisible."
         }
       },
       {
@@ -120,7 +120,7 @@
         "name": "Proposez-vous une visite sur place avant devis ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Oui, si nécessaire pour valider précisément les supports, les contraintes et le rendu attendu, afin d’établir une estimation fiable."
+          "text": "Oui, si nécessaire pour valider précisément les supports, les contraintes et le rendu attendu, afin d'établir une estimation fiable."
         }
       },
       {
@@ -128,7 +128,7 @@
         "name": "Que se passe-t-il si une retouche est nécessaire après chantier ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "En cas d’ajustement, une reprise est organisée rapidement pour livrer un résultat conforme aux attentes validées ensemble."
+          "text": "En cas d'ajustement, une reprise est organisée rapidement pour livrer un résultat conforme aux attentes validées ensemble."
         }
       }
     ]
@@ -138,7 +138,6 @@
 </head>
 
 <body>
-  <!-- Header -->
   <div id="top" aria-hidden="true"></div>
   <header class="header">
     <div class="container header__inner">
@@ -158,6 +157,7 @@
         <a href="#services">Services</a>
         <a href="#realisations">Réalisations</a>
         <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
+        <a href="./facade-saint-cyprien/">Façades</a>
         <a href="#process">Méthode</a>
         <a href="#faq">FAQ</a>
         <a href="#contact-details" class="btn btn--ghost">Contact</a>
@@ -174,12 +174,12 @@
     <a href="#services">Services</a>
     <a href="#realisations">Réalisations</a>
     <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
+    <a href="./facade-saint-cyprien/">Façades</a>
     <a href="#process">Méthode</a>
     <a href="#faq">FAQ</a>
     <a href="#contact-details">Contact</a>
   </nav>
 
-  <!-- Hero -->
   <main>
     <section class="hero" aria-label="Introduction">
       <div class="hero__bgBlend" aria-hidden="true">
@@ -268,13 +268,11 @@
                   autocomplete="address-level2" required />
               </label>
 
-
               <label class="field field--full js-devis-only">
                 <span>Détails</span>
                 <textarea name="details" rows="4" placeholder="Surface, support, contraintes de délai, rendu souhaité…"
                   required></textarea>
               </label>
-
             </div>
 
             <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
@@ -314,7 +312,7 @@
               <article class="reviewCard reviewCard--featured">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">JP</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-                <p class="reviewCard__text">Excellent peintre décorateur dans la région, très rare : lui, c’est une
+                <p class="reviewCard__text">Excellent peintre décorateur dans la région, très rare : lui, c'est une
                   pépite.</p>
                 <p class="reviewCard__meta">JEAN PAUL PIZZUTO • Avis Google • 2026</p>
               </article>
@@ -350,7 +348,7 @@
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">JP</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
                 <p class="reviewCard__text">Je suis très contente du résultat des travaux réalisés dans mes différents
-                  logements. J’ai apprécié le professionnalisme et les conseils judicieux.</p>
+                  logements. J'ai apprécié le professionnalisme et les conseils judicieux.</p>
                 <p class="reviewCard__meta">Jennifer Pichard • Avis Google • 2022</p>
               </article>
               <article class="reviewCard">
@@ -406,7 +404,6 @@
       </div>
     </section>
 
-    <!-- Services -->
     <section class="section" id="services" aria-label="Services">
       <div class="container">
         <div class="section__head">
@@ -458,7 +455,7 @@
 
         <div class="cta-strip">
           <div>
-            <h3>Besoin d’un devis rapide et carré ?</h3>
+            <h3>Besoin d'un devis rapide et carré ?</h3>
             <p>Réponse sous 24h, estimations transparentes, et planning annoncé dès le départ.</p>
           </div>
           <a class="btn btn--primary btn--lg" href="#contact" data-form-mode-intent="devis">Recevoir mon devis</a>
@@ -466,7 +463,6 @@
       </div>
     </section>
 
-    <!-- Réalisations -->
     <section class="section" id="realisations" aria-label="Réalisations">
       <div class="container">
         <div class="section__head">
@@ -508,16 +504,14 @@
             </div>
           </article>
         </div>
-
       </div>
     </section>
 
-    <!-- Process -->
     <section class="section" id="process" aria-label="Méthode">
       <div class="container">
         <div class="section__head">
           <h2>Notre méthode en 3 étapes</h2>
-          <p>3 étapes simples, claires et rapides, du premier contact jusqu’à la réception finale.</p>
+          <p>3 étapes simples, claires et rapides, du premier contact jusqu'à la réception finale.</p>
         </div>
 
         <div class="steps">
@@ -544,13 +538,12 @@
         <p class="process__reassurance">Un seul interlocuteur du premier échange à la réception du chantier.</p>
 
         <div class="quote">
-          <p>“On reconnaît un travail sérieux à la propreté du chantier et aux détails invisibles.”</p>
+          <p>"On reconnaît un travail sérieux à la propreté du chantier et aux détails invisibles."</p>
           <span>— Style &amp; Deco</span>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
     <section class="section" id="faq" aria-label="FAQ">
       <div class="container">
         <div class="section__head">
@@ -564,57 +557,48 @@
             <p>En général, réponse sous 24h. Pour un devis précis, on confirme surfaces, état du support et finition
               attendue.</p>
           </details>
-
           <details class="faq__item">
             <summary>Comment garantissez-vous un chantier propre ?</summary>
             <p>Protection systématique (bâchage/masquage), circulation organisée, nettoyage en fin de journée et fin de
               chantier.</p>
           </details>
-
           <details class="faq__item">
             <summary>Est-ce que vous intervenez sur de petites surfaces ?</summary>
-            <p>Oui, selon votre zone et le planning. L’objectif reste le même : finition nette et délai respecté.</p>
+            <p>Oui, selon votre zone et le planning. L'objectif reste le même : finition nette et délai respecté.</p>
           </details>
-
           <details class="faq__item">
             <summary>Quelles finitions recommandez-vous ?</summary>
-            <p>Ça dépend des pièces et de la lumière. Mat pour masquer les défauts, velours pour l’équilibre, satiné
+            <p>Ça dépend des pièces et de la lumière. Mat pour masquer les défauts, velours pour l'équilibre, satiné
               pour zones sollicitées.</p>
           </details>
-
           <details class="faq__item">
             <summary>Travaillez-vous avec des pros (bureaux, commerces) ?</summary>
             <p>Oui. On peut planifier en horaires adaptés et proposer des solutions durables à entretien facile.</p>
           </details>
-
           <details class="faq__item">
             <summary>Quel est le délai pour démarrer le chantier à Perpignan / Saint-Cyprien ?</summary>
             <p>En fonction du planning, un démarrage peut souvent être proposé rapidement. Le délai est confirmé
               clairement dès le premier échange.</p>
           </details>
-
           <details class="faq__item">
             <summary>Comment est calculé le prix de la prestation (surface, préparation, finition) ?</summary>
-            <p>Le tarif dépend surtout de la surface, de l’état des supports, du niveau de préparation et de la finition
+            <p>Le tarif dépend surtout de la surface, de l'état des supports, du niveau de préparation et de la finition
               choisie. Le devis détaille les postes pour rester lisible.</p>
           </details>
-
           <details class="faq__item">
             <summary>Proposez-vous une visite sur place avant devis ?</summary>
             <p>Oui, si nécessaire pour valider précisément les supports, les contraintes et le rendu attendu, afin
-              d’établir une estimation fiable.</p>
+              d'établir une estimation fiable.</p>
           </details>
-
           <details class="faq__item">
             <summary>Que se passe-t-il si une retouche est nécessaire après chantier ?</summary>
-            <p>En cas d’ajustement, une reprise est organisée rapidement pour livrer un résultat conforme aux attentes
+            <p>En cas d'ajustement, une reprise est organisée rapidement pour livrer un résultat conforme aux attentes
               validées ensemble.</p>
           </details>
         </div>
       </div>
     </section>
 
-    <!-- Contact -->
     <section class="section section--contact" id="contact-details" aria-label="Contact">
       <div class="container contact">
         <div class="contact__left">
@@ -660,29 +644,22 @@
               <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom (optionnel)">Nom</span>
               <input type="text" name="name" placeholder="Votre nom" autocomplete="name" required />
             </label>
-
             <label class="field">
               <span>Téléphone</span>
               <input type="tel" name="phone" placeholder="06…" autocomplete="tel" required />
             </label>
-
             <input type="hidden" name="lead_priority" value="STANDARD">
-
             <label class="field field--full js-devis-only">
               <span>Ville / Zone</span>
               <input type="text" name="city" placeholder="Ex : Perpignan, Saint-Cyprien…" autocomplete="address-level2"
                 required />
             </label>
-
-
             <label class="field field--full js-devis-only">
               <span>Détails</span>
               <textarea name="details" rows="5" placeholder="Surface, support, contraintes de délai, rendu souhaité…"
                 required></textarea>
             </label>
-
           </div>
-
           <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
             data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon devis</button>
           <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
@@ -703,18 +680,17 @@
     </a>
   </nav>
 
-  <!-- Footer -->
   <footer class="footer" aria-label="Pied de page">
     <div class="container footer__inner">
       <div class="footer__left">
         <div class="footer__brand">Style &amp; Deco</div>
         <div class="footer__small">Peinture en bâtiment — finitions soignées.</div>
       </div>
-
       <div class="footer__right">
         <a href="#services">Services</a>
         <a href="#realisations">Réalisations</a>
         <a href="./peintre-saint-cyprien/">Peintre Saint-Cyprien</a>
+        <a href="./facade-saint-cyprien/">Façades Saint-Cyprien</a>
         <a href="#contact" data-form-mode-intent="devis">Devis</a>
         <a href="./legal/mentions-legales.html" aria-label="Mentions légales">Mentions</a>
         <a href="./legal/politique-confidentialite.html" aria-label="Politique de confidentialité">Confidentialité</a>
