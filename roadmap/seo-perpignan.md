@@ -26,10 +26,10 @@ Objectif des actions ci-dessous : atteindre **97-100/100** et un grade A+ sur Mo
 **Modif à appliquer dans [sitesite-template/_headers](../sitesite-template/_headers) :**
 - Renommer `Content-Security-Policy-Report-Only:` → `Content-Security-Policy:`
 - Ajouter `upgrade-insecure-requests` à la fin
-- Étendre `form-action` pour Netlify Forms
+- Garder `form-action 'self'` strict (les formulaires soumettent vers `/merci.html` same-origin ; Netlify Forms intercepte côté serveur, le navigateur ne voit qu'un POST same-origin — pas besoin de whitelister `*.netlify.app` qui ouvrirait une voie d'exfiltration sur un domaine partagé)
 
 ```
-Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self' https://*.netlify.app https://*.netlify.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
 ```
 
 **Si la console signale des ressources légitimes bloquées :** ajuster les directives concernées, puis re-tester avant de retirer `-Report-Only`.
