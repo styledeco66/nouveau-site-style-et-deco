@@ -10,8 +10,16 @@ Audit complet effectué le 2026-06-03 (skill `/security-audit`). Score initial *
 
 Objectif des actions ci-dessous : atteindre **97-100/100** et un grade A+ sur Mozilla Observatory / SecurityHeaders.com.
 
-### Action S1 — 🟡 [ÉLEVÉ] Activer la CSP en mode bloquant
+### Action S1 — ✅ FAIT (2026-06-03) — CSP en mode bloquant
 (Fusionne avec l'action 7b existante — même tâche, formulation consolidée.)
+
+**Livré :** commits `3cb0f04` (activation CSP + CORP same-origin) puis `86c1411` (retrait wildcards Netlify suite au flag MEDIUM de la security review automatisée).
+
+**Validation prod :** console Safari propre sur `/`, `/perpignan.html`, `/facade-saint-cyprien/`, soumission de formulaire test OK → redirection vers `/merci.html`, zéro erreur CSP.
+
+---
+
+### Action S1 — (référence historique)
 
 **Pourquoi :** la CSP actuelle est en `Report-Only` — elle journalise les violations mais ne bloque rien. L'audit du code confirme qu'aucune ressource externe n'est chargée, donc l'activation en mode bloquant est sans régression attendue.
 
@@ -90,7 +98,13 @@ frame-src https://www.google.com/recaptcha/;
 
 ---
 
-### Action S4 — 🟢 [FAIBLE] Durcir `Cross-Origin-Resource-Policy`
+### Action S4 — ✅ FAIT (2026-06-03) — Durcir `Cross-Origin-Resource-Policy`
+
+**Livré :** commit `3cb0f04` (groupé avec S1). `CORP: same-site` → `CORP: same-origin`.
+
+---
+
+### Action S4 — (référence historique)
 
 **Pourquoi :** le site ne sert aucune ressource cross-origin légitime. `same-site` est plus laxiste que nécessaire.
 
@@ -151,15 +165,15 @@ Content-Security-Policy: ... ; report-uri https://<TON-SUBDOMAIN>.report-uri.com
 
 ### Ordre d'exécution recommandé
 
-| # | Action | Priorité | Effort | Quand |
-|---|--------|----------|--------|-------|
-| S1 | CSP en mode bloquant | 🟡 Élevé | 15 min | Dans 3-7 jours (après 2026-06-06) |
-| S2 | reCAPTCHA Netlify | 🟠 Moyen | 30 min | Avant la prochaine campagne SEO Perpignan |
-| S4 | Durcir CORP | 🟢 Faible | 2 min | Même commit que S1 |
-| S3 | Sortir styles inline | 🟠 Moyen | 1-2h | À planifier, idéalement avant S2 (pour ajuster CSP en une fois) |
-| S5 | Convention `rel="noopener"` | 🟢 Faible | 0 | Note immédiate dans CLAUDE.md |
-| S6 | Reporting CSP | 🟢 Faible | 20 min | 1 mois après S1 |
-| S7 | Audit trimestriel | 🟢 Faible | 15 min | 2026-09-03 |
+| # | Action | Priorité | Effort | Statut |
+|---|--------|----------|--------|--------|
+| S1 | CSP en mode bloquant | 🟡 Élevé | 15 min | ✅ FAIT 2026-06-03 |
+| S4 | Durcir CORP | 🟢 Faible | 2 min | ✅ FAIT 2026-06-03 |
+| S2 | reCAPTCHA Netlify | 🟠 Moyen | 30 min | 🟡 À faire — avant prochaine campagne SEO Perpignan |
+| S3 | Sortir styles inline | 🟠 Moyen | 1-2h | 🟡 À faire — idéalement avant S2 |
+| S5 | Convention `rel="noopener"` | 🟢 Faible | 0 | 🟡 Note à graver dans CLAUDE.md |
+| S6 | Reporting CSP | 🟢 Faible | 20 min | 🟢 1 mois après S1 (≥ 2026-07-03) |
+| S7 | Audit trimestriel | 🟢 Faible | 15 min | 🟢 Prochain : 2026-09-03 |
 
 ### Ce qu'on NE fait PAS
 
