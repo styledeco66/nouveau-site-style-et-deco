@@ -13,9 +13,39 @@ Objectif des actions ci-dessous : atteindre **97-100/100** et un grade A+ sur Mo
 ### Action S1 — ✅ FAIT (2026-06-03) — CSP en mode bloquant
 (Fusionne avec l'action 7b existante — même tâche, formulation consolidée.)
 
-**Livré :** commits `3cb0f04` (activation CSP + CORP same-origin) puis `86c1411` (retrait wildcards Netlify suite au flag MEDIUM de la security review automatisée).
+**Livré :** commits `3cb0f04` (activation CSP + CORP same-origin) puis `86c1411` (retrait wildcards Netlify suite au flag MEDIUM de la security review automatisée). Un rollback temporaire de diagnostic (`26c86cb`) a été effectué pour vérifier si la CSP causait le problème mail Netlify — confirmé sans rapport, CSP réactivée immédiatement avec `60a3e9f`.
 
 **Validation prod :** console Safari propre sur `/`, `/perpignan.html`, `/facade-saint-cyprien/`, soumission de formulaire test OK → redirection vers `/merci.html`, zéro erreur CSP.
+
+**État final _headers :**
+```
+Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+Cross-Origin-Resource-Policy: same-origin
+```
+
+---
+
+### 📧 Incident notifications email Netlify Forms — résolu 2026-06-03
+
+**Symptôme :** plus aucune notification email reçue depuis le **9 avril 2026** (dernier mail Netlify), alors que le compteur de soumissions montait normalement côté dashboard Netlify Forms. Confirmé que les soumissions arrivaient bien (test : `lead_hero` est passé de 19 à 20 submissions).
+
+**Diagnostic effectué dans l'ordre :**
+1. ❌ Hypothèse CSP : rollback test `26c86cb` → mail toujours pas reçu → CSP innocente.
+2. ❌ Hypothèse Gmail filtre : test sur seconde adresse mail → idem au début, donc pas un filtre Gmail.
+3. ✅ Cause identifiée : **les notifications Form étaient dans un état cassé côté Netlify** (héritage possible du sous-domaine `iridescent-twilight.netlify.app` antérieur au domaine `styleetdeco.fr`).
+
+**Fix appliqué :** suppression des 2 notifications existantes (`lead_hero`, `lead_contact`) + recréation des 3 (ajout aussi de `lead_perpignan` qui n'avait jamais été configurée) dans le dashboard Netlify → **Form notifications**. Configuration retenue :
+- Event : `New form submission`
+- Email to notify : `style.deco66@gmail.com`
+- Custom subject : `📩 Nouveau lead - {{form_name}}`
+- Form : un par notif (`lead_hero`, `lead_contact`, `lead_perpignan`)
+
+**Validation :** test de soumission → mail reçu sur les deux adresses configurées en ~1 minute.
+
+**⚠️ À surveiller dans les semaines à venir :**
+- Si le problème réapparaît → ouvrir un ticket Netlify Support en mentionnant la dépendance possible au sous-domaine `iridescent-twilight.netlify.app` originel.
+- Vérifier de temps en temps que le compteur Netlify Forms et les mails reçus restent synchronisés (1 soumission = 1 mail).
+- **`lead_perpignan` n'avait aucune notif depuis sa création** → tous les leads Perpignan d'avant aujourd'hui sont récupérables manuellement dans le dashboard Netlify Forms (1 soumission listée actuellement).
 
 ---
 
