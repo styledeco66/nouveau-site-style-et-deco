@@ -4,9 +4,176 @@ Diagnostic basé sur les données Google Search Console (janvier → mai 2026) e
 
 ---
 
-## 🟡 À FAIRE
+## 🔐 Plan d'action sécurité — Audit du 2026-06-03
+
+Audit complet effectué le 2026-06-03 (skill `/security-audit`). Score initial **88/100**. Aucune faille critique. Bon socle : pas de secrets exposés, pas de scripts tiers, pas de patterns XSS dans `app.js`, formulaires Netlify avec honeypot.
+
+Objectif des actions ci-dessous : atteindre **97-100/100** et un grade A+ sur Mozilla Observatory / SecurityHeaders.com.
+
+### Action S1 — 🟡 [ÉLEVÉ] Activer la CSP en mode bloquant
+(Fusionne avec l'action 7b existante — même tâche, formulation consolidée.)
+
+**Pourquoi :** la CSP actuelle est en `Report-Only` — elle journalise les violations mais ne bloque rien. L'audit du code confirme qu'aucune ressource externe n'est chargée, donc l'activation en mode bloquant est sans régression attendue.
+
+**Quand :** 3 à 7 jours après le déploiement du commit `66c582f` (2026-06-03), une fois qu'aucun avertissement `[Report Only]` n'apparaît en DevTools Console.
+
+**Comment tester avant activation :**
+1. Ouvrir https://styleetdeco.fr/ en navigation privée
+2. F12 → onglet **Console**
+3. Naviguer sur les 4 pages principales (`/`, `/perpignan.html`, `/peintre-saint-cyprien/`, `/facade-saint-cyprien/`) + soumettre un formulaire de test
+4. Repérer d'éventuels messages `[Report Only]` listant une ressource bloquée non prévue
+
+**Modif à appliquer dans [sitesite-template/_headers](../sitesite-template/_headers) :**
+- Renommer `Content-Security-Policy-Report-Only:` → `Content-Security-Policy:`
+- Ajouter `upgrade-insecure-requests` à la fin
+- Étendre `form-action` pour Netlify Forms
+
+```
+Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self' https://*.netlify.app https://*.netlify.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+```
+
+**Si la console signale des ressources légitimes bloquées :** ajuster les directives concernées, puis re-tester avant de retirer `-Report-Only`.
+
+**Effort :** 15 minutes (5 min de test + 5 min de modif + 5 min de vérif post-déploiement).
+**Mesure d'efficacité :** scan https://securityheaders.com/?q=styleetdeco.fr → doit passer de B à A.
+
+---
+
+### Action S2 — 🟠 [MOYEN] Activer reCAPTCHA Netlify sur les 3 formulaires
+
+**Pourquoi :** seul le honeypot `bot-field` protège actuellement. Les bots modernes le contournent. Avec la montée du trafic SEO sur `/perpignan.html`, le risque de spam augmente — et le quota Netlify Forms gratuit est 100 soumissions/mois.
+
+**Fichiers concernés :**
+- [sitesite-template/index.html:240](../sitesite-template/index.html#L240) — formulaire `lead_hero`
+- [sitesite-template/index.html:633](../sitesite-template/index.html#L633) — formulaire `lead_contact`
+- [sitesite-template/perpignan.html](../sitesite-template/perpignan.html) — formulaire `lead_perpignan`
+
+**Modif à appliquer (sur chaque formulaire) :**
+```html
+<form ... data-netlify="true" data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
+  ...
+  <div data-netlify-recaptcha="true"></div>
+  <button type="submit">Recevoir mon devis</button>
+</form>
+```
+
+**Note CSP :** reCAPTCHA charge `https://www.google.com/recaptcha/` et `https://www.gstatic.com/recaptcha/`. Si la CSP est déjà bloquante (action S1), il faudra ajouter ces domaines à `script-src` et `frame-src` :
+```
+script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+frame-src https://www.google.com/recaptcha/;
+```
+
+**Effort :** 30 minutes (3 formulaires × 10 min, dont test soumission).
+**Mesure d'efficacité :** zéro soumission spam dans Netlify Forms sur 30 jours.
+
+---
+
+### Action S3 — 🟠 [MOYEN] Sortir les styles inline du HTML pour durcir `style-src`
+
+**Pourquoi :** la CSP autorise `style-src 'unsafe-inline'` à cause des `style="..."` dispersés dans le HTML (honeypots, [merci.html:17](../sitesite-template/merci.html#L17), etc.). Tant que ces styles inline existent, on ne peut pas atteindre une CSP stricte.
+
+**Fichiers à nettoyer :**
+- [sitesite-template/index.html:244](../sitesite-template/index.html#L244) (`style="display:none;"` honeypot — utiliser `.is-hidden` déjà défini en CSS)
+- [sitesite-template/index.html:637](../sitesite-template/index.html#L637) (idem honeypot lead_contact)
+- [sitesite-template/perpignan.html](../sitesite-template/perpignan.html) (honeypot perpignan)
+- [sitesite-template/merci.html:17, 21](../sitesite-template/merci.html) (styles inline `max-width`, `text-align`, `display: grid`)
+- Tout autre `style="..."` détectable via `grep -rn 'style="' sitesite-template/*.html`
+
+**Méthode :**
+1. Lister tous les styles inline : `grep -rn 'style="' sitesite-template/ --include='*.html'`
+2. Pour chaque cas, créer une classe utilitaire dans `assets/css/style.css` (ex: `.u-hidden`, `.u-textCenter`, `.merci__actions`)
+3. Remplacer `style="..."` par `class="..."`
+4. Une fois zéro style inline restant : retirer `'unsafe-inline'` de `style-src` dans `_headers`
+
+**Effort :** 1-2h (dépend du nombre de styles inline à migrer).
+**Mesure d'efficacité :** Mozilla Observatory passe de A à A+ (CSP stricte vaut +20 points sur leur grille).
+
+---
+
+### Action S4 — 🟢 [FAIBLE] Durcir `Cross-Origin-Resource-Policy`
+
+**Pourquoi :** le site ne sert aucune ressource cross-origin légitime. `same-site` est plus laxiste que nécessaire.
+
+**Fichier :** [sitesite-template/_headers:9](../sitesite-template/_headers#L9)
+
+**Modif :**
+```
+Cross-Origin-Resource-Policy: same-origin
+```
+
+**Effort :** 2 minutes. **Risque :** nul (aucun embed externe légitime).
+**À faire après S1** (regrouper en un seul commit headers).
+
+---
+
+### Action S5 — 🟢 [FAIBLE] Adopter la convention `rel="noopener noreferrer"` pour les liens externes
+
+**Pourquoi :** préventif. Tout futur lien `target="_blank"` vers Google Reviews, Instagram, Maps, etc. doit avoir `rel="noopener noreferrer"` pour éviter le tabnabbing.
+
+**Convention à graver dans CLAUDE.md (ou un commentaire en tête de `index.html`) :**
+```html
+<a href="https://google.com/maps/..." target="_blank" rel="noopener noreferrer">Voir sur Google Maps</a>
+```
+
+**Effort :** instantané (note de convention). Aucun lien externe `target="_blank"` actuellement.
+
+---
+
+### Action S6 — 🟢 [FAIBLE] Mettre en place un reporting CSP léger
+
+**Pourquoi :** une fois la CSP active (S1), capter les violations en prod pour détecter des régressions silencieuses (ex: ajout futur d'un script tiers qui casse).
+
+**Option recommandée :** compte gratuit https://report-uri.com/ (500 000 reports/mois gratuits).
+
+**Modif _headers (après création du compte) :**
+```
+Content-Security-Policy: ... ; report-uri https://<TON-SUBDOMAIN>.report-uri.com/r/d/csp/enforce
+```
+
+**Effort :** 20 minutes (création compte + ajout directive + 1 semaine de surveillance).
+**Quand :** 1 mois après S1, une fois la CSP stabilisée.
+
+---
+
+### Action S7 — 🟢 [FAIBLE] Audit récurrent trimestriel
+
+**Pourquoi :** maintenir le grade dans le temps. Sites statiques = surface d'attaque faible, mais une régression (ex: ajout de Google Analytics sans mise à jour CSP) peut casser le socle.
+
+**Procédure trimestrielle (15 min) :**
+1. Re-scan https://securityheaders.com/?q=styleetdeco.fr → grade attendu : A ou A+
+2. Re-scan https://observatory.mozilla.org/analyze/styleetdeco.fr → grade attendu : A+
+3. Vérifier les rapports CSP sur report-uri.com (action S6) → zéro nouvelle violation non-expliquée
+4. Re-relancer le skill `/security-audit` si changement majeur du code
+
+**Prochaine échéance prévue :** 2026-09-03.
+
+---
+
+### Ordre d'exécution recommandé
+
+| # | Action | Priorité | Effort | Quand |
+|---|--------|----------|--------|-------|
+| S1 | CSP en mode bloquant | 🟡 Élevé | 15 min | Dans 3-7 jours (après 2026-06-06) |
+| S2 | reCAPTCHA Netlify | 🟠 Moyen | 30 min | Avant la prochaine campagne SEO Perpignan |
+| S4 | Durcir CORP | 🟢 Faible | 2 min | Même commit que S1 |
+| S3 | Sortir styles inline | 🟠 Moyen | 1-2h | À planifier, idéalement avant S2 (pour ajuster CSP en une fois) |
+| S5 | Convention `rel="noopener"` | 🟢 Faible | 0 | Note immédiate dans CLAUDE.md |
+| S6 | Reporting CSP | 🟢 Faible | 20 min | 1 mois après S1 |
+| S7 | Audit trimestriel | 🟢 Faible | 15 min | 2026-09-03 |
+
+### Ce qu'on NE fait PAS
+
+- **Pas de WAF / Cloudflare** devant Netlify — surcoût injustifié pour un site statique sans backend.
+- **Pas de SRI (`integrity=`) sur les ressources locales** — `style.css` et `app.js` sont servis depuis le même origin, SRI n'apporte rien ici. Pertinent uniquement pour des CDN externes (ce qu'on n'a pas).
+- **Pas de mise en place d'un Bug Bounty** — disproportionné à l'échelle du site.
+
+---
+
+## 🟡 À FAIRE (SEO)
 
 ### 7b. Passer la CSP en mode bloquant (suite de #7)
+
+> ⚠️ Cette section est désormais consolidée dans **Action S1** ci-dessus. Conservée temporairement pour référence — supprimer une fois S1 terminée.
 **Quand :** 3 à 7 jours après le déploiement du commit `66c582f` (2026-06-03), si aucun avertissement CSP imprévu n'apparaît en DevTools Console sur le site déployé.
 
 **Comment tester :**
