@@ -77,32 +77,26 @@ Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'se
 
 ---
 
-### Action S2 — 🟠 [MOYEN] Activer reCAPTCHA Netlify sur les 3 formulaires
+### Action S2 — ❌ ABANDONNÉ (2026-06-04) — reCAPTCHA Netlify (choix UX client)
 
-**Pourquoi :** seul le honeypot `bot-field` protège actuellement. Les bots modernes le contournent. Avec la montée du trafic SEO sur `/perpignan.html`, le risque de spam augmente — et le quota Netlify Forms gratuit est 100 soumissions/mois.
+**Décision finale :** reCAPTCHA **non retenu**. On garde uniquement le honeypot `bot-field` sur les 3 formulaires. Petit gain net conservé : `lead_perpignan` a désormais le honeypot qui lui manquait (commits de la session du 2026-06-04, état final `79ebd93`).
 
-**Fichiers concernés :**
-- [sitesite-template/index.html:240](../sitesite-template/index.html#L240) — formulaire `lead_hero`
-- [sitesite-template/index.html:633](../sitesite-template/index.html#L633) — formulaire `lead_contact`
-- [sitesite-template/perpignan.html](../sitesite-template/perpignan.html) — formulaire `lead_perpignan`
+**Pourquoi abandonné :**
+1. **UX** — reCAPTCHA v2 (case « Je ne suis pas un robot ») escalade automatiquement vers le **défi images** (« sélectionnez les feux / bus… ») dès que Google a un doute. Ce comportement **n'est pas désactivable**. Friction jugée trop pénalisante pour des prospects sur un site vitrine artisan.
+2. **Sécurité du widget manuel** — pour couvrir le `lead_hero` (que l'auto-injection Netlify ignorait, car Netlify ne traite qu'**un seul formulaire reCAPTCHA par page**), on avait testé un widget `g-recaptcha` manuel avec la sitekey Netlify. **Échec confirmé par test** : une soumission POST **sans `g-recaptcha-response`** était acceptée dans « Verified submissions » → le widget manuel **n'est PAS vérifié côté serveur** par Netlify (seul `data-netlify-recaptcha="true"` déclenche la vérif serveur). Un captcha non vérifié = fausse sécurité (flag MEDIUM de la security review automatisée). 
 
-**Modif à appliquer (sur chaque formulaire) :**
-```html
-<form ... data-netlify="true" data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
-  ...
-  <div data-netlify-recaptcha="true"></div>
-  <button type="submit">Recevoir mon devis</button>
-</form>
-```
+**⚠️ Apprentissages à ne pas refaire :**
+- Le widget `g-recaptcha` manuel sur Netlify Forms est **décoratif** (pas de vérif serveur). Ne pas le réutiliser.
+- L'auto-injection `data-netlify-recaptcha` ne couvre qu'**un formulaire par page** → le `lead_hero` de la home restait à découvert de toute façon.
 
-**Note CSP :** reCAPTCHA charge `https://www.google.com/recaptcha/` et `https://www.gstatic.com/recaptcha/`. Si la CSP est déjà bloquante (action S1), il faudra ajouter ces domaines à `script-src` et `frame-src` :
-```
-script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
-frame-src https://www.google.com/recaptcha/;
-```
+**Si on veut une vraie protection anti-bot plus tard (sans reCAPTCHA Google) :**
+- Option A : Netlify Function qui vérifie un token côté serveur avant d'accepter (plus de code).
+- Option B : question anti-bot maison simple (ex. « 2 + 3 = ? ») validée côté Netlify — zéro images, faible friction.
+- Pour l'instant : **honeypot seul suffit** au volume actuel (quota Netlify Forms gratuit = 100 soumissions/mois, marge OK).
 
-**Effort :** 30 minutes (3 formulaires × 10 min, dont test soumission).
-**Mesure d'efficacité :** zéro soumission spam dans Netlify Forms sur 30 jours.
+**Fichiers (état final, honeypot seul) :**
+- [sitesite-template/index.html](../sitesite-template/index.html) — `lead_hero` + `lead_contact`
+- [sitesite-template/perpignan.html](../sitesite-template/perpignan.html) — `lead_perpignan`
 
 ---
 
@@ -199,7 +193,7 @@ Content-Security-Policy: ... ; report-uri https://<TON-SUBDOMAIN>.report-uri.com
 |---|--------|----------|--------|--------|
 | S1 | CSP en mode bloquant | 🟡 Élevé | 15 min | ✅ FAIT 2026-06-03 |
 | S4 | Durcir CORP | 🟢 Faible | 2 min | ✅ FAIT 2026-06-03 |
-| S2 | reCAPTCHA Netlify | 🟠 Moyen | 30 min | 🟡 À faire — avant prochaine campagne SEO Perpignan |
+| S2 | reCAPTCHA Netlify | 🟠 Moyen | — | ❌ ABANDONNÉ 2026-06-04 (choix UX) — honeypot conservé |
 | S3 | Sortir styles inline | 🟠 Moyen | 1-2h | 🟡 À faire — idéalement avant S2 |
 | S5 | Convention `rel="noopener"` | 🟢 Faible | 0 | 🟡 Note à graver dans CLAUDE.md |
 | S6 | Reporting CSP | 🟢 Faible | 20 min | 🟢 1 mois après S1 (≥ 2026-07-03) |
@@ -334,6 +328,23 @@ Analyse GSC du 2026-06-03 sur la période 2026-03-01 → 2026-06-03 : le site g�
 ---
 
 ## ✅ FAIT
+
+### 12. Refonte de la page `/merci.html` — 2026-06-04
+
+Commit `1ffeee6` (push origin/main).
+
+**Avant :** page de confirmation quasi vide (titre + une ligne + 2 boutons), avec styles inline.
+
+**Après :** page rassurante au ton chaleureux (artisan à la 1re personne), dans la charte couleur du site (uniquement tokens existants `--accent` or, `--panel`, `--shadow`… — aucune couleur inventée) :
+- Badge ✓ doré + « Merci pour votre confiance »
+- Bloc « Et maintenant ? » en 3 étapes (demande reçue → rappel sous 24h ouvrées → devis gratuit sans engagement)
+- Contact direct : téléphone cliquable + horaires Lun-Sam 8h-19h
+- Styles dédiés `.merci__*` ajoutés en fin de `assets/css/style.css`
+- **Zéro style inline** (les 2 styles inline d'origine de la page sont éliminés → petit pas vers l'action S3)
+
+Page toujours en `noindex,follow` (correct pour une page de confirmation).
+
+---
 
 ### 8. Extension villages Albères sur `/perpignan.html` — 2026-06-03
 
