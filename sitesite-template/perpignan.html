@@ -200,7 +200,7 @@
 
         <aside class="hero__visual" id="contact">
           <!-- nosemgrep: python.django.security.django-no-csrf-token.django-no-csrf-token -->
-          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/merci.html" data-netlify="true" data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
+          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/merci.html" data-netlify="true" data-netlify-honeypot="bot-field">
             <input type="hidden" name="form-name" value="lead_perpignan" />
             <p style="display:none;">
               <label>Ne pas remplir: <input name="bot-field" /></label>
@@ -213,7 +213,6 @@
               <label class="field field--full"><span>Type de travaux</span><input type="text" name="subject" required /></label>
               <label class="field field--full"><span>Détails</span><textarea name="details" rows="4" required></textarea></label>
             </div>
-            <div data-netlify-recaptcha="true"></div>
             <button class="btn btn--primary btn--lg btn--full" type="submit">Recevoir mon devis</button>
           </form>
         </aside>
