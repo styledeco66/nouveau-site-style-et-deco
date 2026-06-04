@@ -200,7 +200,7 @@
 
         <aside class="hero__visual" id="contact">
           <!-- nosemgrep: python.django.security.django-no-csrf-token.django-no-csrf-token -->
-          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/merci.html" data-netlify="true" data-netlify-honeypot="bot-field">
+          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/merci.html" data-netlify="true" data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
             <input type="hidden" name="form-name" value="lead_perpignan" />
             <p style="display:none;">
               <label>Ne pas remplir: <input name="bot-field" /></label>
@@ -213,7 +213,7 @@
               <label class="field field--full"><span>Type de travaux</span><input type="text" name="subject" required /></label>
               <label class="field field--full"><span>Détails</span><textarea name="details" rows="4" required></textarea></label>
             </div>
-            <div class="g-recaptcha" data-sitekey="6LdnkKEqAAAAAPvyqoRAmjXxvE6evlb5z-5Ol90Y"></div>
+            <div data-netlify-recaptcha="true"></div>
             <button class="btn btn--primary btn--lg btn--full" type="submit">Recevoir mon devis</button>
           </form>
         </aside>
@@ -453,8 +453,5 @@
     </div>
   </footer>
   <script src="./assets/js/app.js"></script>
-  <!-- SRI impossible : Google reCAPTCHA api.js est servi dynamiquement (contenu/sous-ressources variables), un hash integrity casserait le widget. -->
-  <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 </html>
