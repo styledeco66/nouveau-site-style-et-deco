@@ -2509,102 +2509,206 @@ textarea{ resize: vertical; }
 }
 
 /* =========================
-   Page Merci (confirmation)
+   Page Merci (confirmation) — premium
 ========================= */
 .merci{
   min-height: 100vh;
-  display: flex;
-  align-items: center;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 48px 20px;
+  position: relative;
+  z-index: 1;
 }
 .merci__inner{
-  width: min(640px, calc(100% - 40px));
-  margin-inline: auto;
-  text-align: center;
+  width: min(620px, 100%);
 }
+
+/* Carte signature : liseré doré en haut + halo */
 .merci__card{
-  padding: 36px 28px;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(32px, 5vw, 52px) clamp(24px, 4vw, 48px);
+  text-align: center;
   border: 1px solid var(--stroke);
   border-radius: var(--radius2);
-  background: linear-gradient(170deg, var(--panel2), var(--panel));
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(12px) saturate(1.2);
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(215,181,109,.14), transparent 60%),
+    linear-gradient(168deg, var(--panel2), rgba(255,255,255,.03));
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(14px) saturate(1.25);
+  animation: merciCard .7s cubic-bezier(.22,.61,.36,1) both;
 }
+.merci__card::before{
+  content:"";
+  position:absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(215,181,109,.25) 18%,
+    var(--accent) 50%,
+    rgba(123,215,255,.4) 82%,
+    transparent);
+  opacity:.9;
+}
+
+/* Badge ✓ avec halo pulsé */
 .merci__badge{
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 18px;
+  --size: 76px;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  margin: 0 auto 22px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  font-size: 30px;
-  color: var(--bg);
-  background: linear-gradient(160deg, var(--accent), #c79f4f);
-  box-shadow: 0 12px 30px rgba(215,181,109,.32);
+  font-size: 34px;
+  font-weight: 700;
+  color: #1a1408;
+  background: radial-gradient(circle at 32% 28%, #f0d493, var(--accent) 46%, #b8924a);
+  box-shadow: 0 14px 34px rgba(215,181,109,.4), inset 0 1px 1px rgba(255,255,255,.5);
+  animation: merciPop .6s cubic-bezier(.34,1.56,.64,1) .15s both;
+}
+.merci__badge::after{
+  content:"";
+  position:absolute;
+  inset:-10px;
+  border-radius:50%;
+  border:1px solid rgba(215,181,109,.35);
+  animation: merciHalo 2.6s ease-out infinite;
+}
+
+.merci__eyebrow{
+  display:inline-block;
+  margin: 0 0 12px;
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: merciUp .6s ease both .25s;
 }
 .merci__title{
-  margin: 0 0 8px;
-  font-size: clamp(24px, 3vw, 32px);
-  letter-spacing: -0.3px;
+  margin: 0 0 12px;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  animation: merciUp .6s ease both .3s;
 }
 .merci__lead{
   margin: 0 auto;
-  max-width: 46ch;
+  max-width: 44ch;
   color: var(--muted);
+  font-size: clamp(15px, 1.6vw, 17px);
+  animation: merciUp .6s ease both .38s;
 }
+
+/* Timeline verticale élégante */
 .merci__steps{
   list-style: none;
   counter-reset: merci;
-  margin: 26px 0 0;
+  margin: 32px auto 0;
   padding: 0;
-  display: grid;
-  gap: 12px;
+  max-width: 420px;
   text-align: left;
+  position: relative;
+}
+.merci__steps::before{
+  content:"";
+  position:absolute;
+  left: 17px;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--accent), rgba(215,181,109,.12));
 }
 .merci__step{
   counter-increment: merci;
   position: relative;
-  padding: 14px 16px 14px 56px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  background: var(--panel);
+  padding: 0 0 22px 52px;
+  animation: merciUp .55s ease both;
 }
+.merci__step:nth-child(1){ animation-delay:.44s; }
+.merci__step:nth-child(2){ animation-delay:.52s; }
+.merci__step:nth-child(3){ animation-delay:.6s; padding-bottom:0; }
 .merci__step::before{
   content: counter(merci);
   position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  left: 0;
+  top: -2px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   font-weight: 700;
   font-size: 14px;
-  color: var(--bg);
-  background: var(--accent);
+  color: #1a1408;
+  background: radial-gradient(circle at 35% 30%, #f0d493, var(--accent));
+  box-shadow: 0 6px 16px rgba(215,181,109,.3);
 }
-.merci__step strong{ display: block; }
-.merci__step span{ color: var(--muted); font-size: 14px; }
+.merci__step strong{
+  display: block;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+.merci__step span{ color: var(--muted); font-size: 14px; line-height:1.5; }
+
+/* Encart contact */
 .merci__contact{
-  margin: 24px 0 0;
-  padding-top: 22px;
-  border-top: 1px solid var(--stroke);
+  margin: 30px auto 0;
+  padding: 20px;
+  max-width: 420px;
+  border: 1px solid rgba(215,181,109,.22);
+  border-radius: var(--radius);
+  background: rgba(215,181,109,.05);
+  animation: merciUp .6s ease both .66s;
 }
-.merci__contact p{ margin: 0 0 4px; color: var(--muted); }
+.merci__contact p{ margin: 0; color: var(--muted); font-size: 14px; }
 .merci__phone{
-  font-size: clamp(20px, 2.4vw, 24px);
-  font-weight: 700;
+  display:inline-block;
+  margin: 6px 0 2px;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+  letter-spacing: .5px;
   color: var(--accent);
+  transition: transform .2s ease, text-shadow .2s ease;
 }
-.merci__hours{ font-size: 14px; color: var(--muted2); }
+.merci__phone:hover{ transform: translateY(-1px); text-shadow: 0 6px 20px rgba(215,181,109,.35); }
+.merci__hours{ font-size: 13px; color: var(--muted2); }
+
 .merci__actions{
   display: grid;
-  gap: 10px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 28px;
+  animation: merciUp .6s ease both .74s;
 }
 @media (min-width: 520px){
   .merci__actions{ grid-template-columns: 1fr 1fr; }
+}
+
+@keyframes merciCard{
+  from{ opacity:0; transform: translateY(22px) scale(.985); }
+  to{ opacity:1; transform: none; }
+}
+@keyframes merciPop{
+  from{ opacity:0; transform: scale(.5) rotate(-12deg); }
+  to{ opacity:1; transform: none; }
+}
+@keyframes merciUp{
+  from{ opacity:0; transform: translateY(12px); }
+  to{ opacity:1; transform: none; }
+}
+@keyframes merciHalo{
+  0%{ transform: scale(1); opacity:.7; }
+  70%{ transform: scale(1.35); opacity:0; }
+  100%{ opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .merci__card, .merci__badge, .merci__badge::after, .merci__eyebrow,
+  .merci__title, .merci__lead, .merci__step, .merci__contact, .merci__actions{
+    animation: none;
+  }
 }
 
 
