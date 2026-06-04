@@ -238,7 +238,7 @@
 
         <aside class="hero__visual" id="contact" aria-label="Formulaire de devis rapide">
           <form class="form form--hero js-lead-form" name="lead_hero" method="POST" action="/merci.html"
-            data-netlify="true" data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
+            data-netlify="true" data-netlify-honeypot="bot-field">
             <input type="hidden" name="form-name" value="lead_hero" />
             <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
             <p style="display:none;">
@@ -278,7 +278,7 @@
               </label>
             </div>
 
-            <div data-netlify-recaptcha="true"></div>
+            <div class="g-recaptcha" data-sitekey="6LdnkKEqAAAAAPvyqoRAmjXxvE6evlb5z-5Ol90Y"></div>
             <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
               data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon
               devis</button>
@@ -632,7 +632,7 @@
         </div>
 
         <form class="form js-lead-form" name="lead_contact" method="POST" action="/merci.html" data-netlify="true"
-          data-netlify-honeypot="bot-field" data-netlify-recaptcha="true">
+          data-netlify-honeypot="bot-field">
           <input type="hidden" name="form-name" value="lead_contact" />
           <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
           <p style="display:none;">
@@ -664,7 +664,7 @@
                 required></textarea>
             </label>
           </div>
-          <div data-netlify-recaptcha="true"></div>
+          <div class="g-recaptcha" data-sitekey="6LdnkKEqAAAAAPvyqoRAmjXxvE6evlb5z-5Ol90Y"></div>
           <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
             data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon devis</button>
           <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
@@ -703,6 +703,9 @@
     </div>
   </footer>
   <script src="./assets/js/app.js"></script>
+  <!-- SRI impossible : Google reCAPTCHA api.js est servi dynamiquement (contenu/sous-ressources variables), un hash integrity casserait le widget. -->
+  <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 
 </html>
