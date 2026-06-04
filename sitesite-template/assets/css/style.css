@@ -2508,4 +2508,103 @@ textarea{ resize: vertical; }
   }
 }
 
+/* =========================
+   Page Merci (confirmation)
+========================= */
+.merci{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+.merci__inner{
+  width: min(640px, calc(100% - 40px));
+  margin-inline: auto;
+  text-align: center;
+}
+.merci__card{
+  padding: 36px 28px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius2);
+  background: linear-gradient(170deg, var(--panel2), var(--panel));
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px) saturate(1.2);
+}
+.merci__badge{
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 30px;
+  color: var(--bg);
+  background: linear-gradient(160deg, var(--accent), #c79f4f);
+  box-shadow: 0 12px 30px rgba(215,181,109,.32);
+}
+.merci__title{
+  margin: 0 0 8px;
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.3px;
+}
+.merci__lead{
+  margin: 0 auto;
+  max-width: 46ch;
+  color: var(--muted);
+}
+.merci__steps{
+  list-style: none;
+  counter-reset: merci;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+.merci__step{
+  counter-increment: merci;
+  position: relative;
+  padding: 14px 16px 14px 56px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+.merci__step::before{
+  content: counter(merci);
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--bg);
+  background: var(--accent);
+}
+.merci__step strong{ display: block; }
+.merci__step span{ color: var(--muted); font-size: 14px; }
+.merci__contact{
+  margin: 24px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--stroke);
+}
+.merci__contact p{ margin: 0 0 4px; color: var(--muted); }
+.merci__phone{
+  font-size: clamp(20px, 2.4vw, 24px);
+  font-weight: 700;
+  color: var(--accent);
+}
+.merci__hours{ font-size: 14px; color: var(--muted2); }
+.merci__actions{
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+@media (min-width: 520px){
+  .merci__actions{ grid-template-columns: 1fr 1fr; }
+}
+
 
