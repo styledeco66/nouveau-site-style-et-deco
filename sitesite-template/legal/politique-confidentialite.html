@@ -21,7 +21,7 @@
       <h2>1. Responsable de traitement</h2>
       <p>
         EI Style et Deco<br />
-        SIRET : 79325004400044<br />
+        SIRET : 79325004400047<br />
         Adresse : 18 rue Madame de la Fayette, 66750 Saint-Cyprien, France<br />
         Email : <a href="mailto:style.deco66@gmail.com">style.deco66@gmail.com</a><br />
         Téléphone : <a href="tel:+33650756242">+33 6 50 75 62 42</a><br />
@@ -30,13 +30,13 @@
 
       <h2>2. Données collectées</h2>
       <h3>2.1 Formulaires Netlify</h3>
-      <p>Le site utilise Netlify Forms avec deux formulaires : <code>lead_hero</code> et <code>lead_contact</code>.</p>
+      <p>Le site utilise Netlify Forms avec trois formulaires : <code>lead_hero</code>, <code>lead_contact</code> et <code>lead_perpignan</code>.</p>
       <ul>
-        <li><code>name</code></li>
-        <li><code>phone</code></li>
-        <li><code>city</code> (mode devis)</li>
-        <li><code>details</code> (mode devis)</li>
-        <li><code>lead_priority</code> (<code>STANDARD</code> ou <code>RAPPEL_30_MIN</code>)</li>
+        <li><code>name</code>, <code>phone</code> et <code>details</code> sont collectés par tous les formulaires.</li>
+        <li><code>lead_hero</code> et <code>lead_contact</code> collectent également <code>city</code> et <code>lead_priority</code> (<code>STANDARD</code> ou <code>RAPPEL_30_MIN</code>), ainsi qu'un champ technique <code>subject</code> prérempli automatiquement (non saisi par l'utilisateur).</li>
+        <li><code>lead_perpignan</code> collecte également <code>subject</code>, ici saisi par l'utilisateur pour indiquer le type de travaux souhaité.</li>
+        <li><code>form-name</code> est un champ technique identifiant le formulaire soumis auprès de Netlify Forms.</li>
+        <li><code>bot-field</code> est un champ anti-spam (honeypot) présent dans les formulaires, non destiné à être rempli par un utilisateur.</li>
       </ul>
 
       <h3>2.2 Données techniques</h3>
