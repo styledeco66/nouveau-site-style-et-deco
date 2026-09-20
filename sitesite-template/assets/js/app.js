@@ -93,9 +93,11 @@
     syncSubject(form, isCallbackMode ? "callback" : "devis");
   };
 
+  const isModeManagedForm = (form) => Boolean(form.querySelector('input[name="lead_priority"]'));
+
   const applyModeToAllForms = (mode) => {
     document.querySelectorAll(FORM_SELECTOR).forEach((form) => {
-      applyModeToForm(form, mode);
+      if (isModeManagedForm(form)) applyModeToForm(form, mode);
     });
   };
 
@@ -106,21 +108,6 @@
 
     checkbox.addEventListener("change", () => {
       hiddenPriority.value = checkbox.checked ? "RAPPEL_30_MIN" : "STANDARD";
-    });
-  };
-
-  const pushFormSubmitEvent = (form) => {
-    form.addEventListener("submit", () => {
-      const hiddenPriority = form.querySelector('input[name="lead_priority"]');
-      const priority = hiddenPriority && hiddenPriority.value === "RAPPEL_30_MIN" ? "RAPPEL_30_MIN" : "STANDARD";
-      syncSubject(form, priority === "RAPPEL_30_MIN" ? "callback" : "devis");
-      const eventName = priority === "RAPPEL_30_MIN" ? "form_submit_callback" : "form_submit_devis";
-
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: eventName,
-        lead_priority: priority
-      });
     });
   };
 
@@ -445,7 +432,6 @@
 
     document.querySelectorAll(FORM_SELECTOR).forEach((form) => {
       bindFormPrioritySync(form);
-      pushFormSubmitEvent(form);
     });
 
     document.querySelectorAll(".js-mode-switch").forEach((button) => {

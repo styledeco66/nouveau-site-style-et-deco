@@ -29,13 +29,13 @@
       </p>
 
       <h2>2. Données collectées</h2>
-      <h3>2.1 Formulaires Netlify</h3>
-      <p>Le site utilise Netlify Forms avec trois formulaires : <code>lead_hero</code>, <code>lead_contact</code> et <code>lead_perpignan</code>.</p>
+      <h3>2.1 Formulaires de contact</h3>
+      <p>Le site utilise une fonction Netlify qui transmet les demandes par e-mail via le service Resend, avec trois formulaires : <code>lead_hero</code>, <code>lead_contact</code> et <code>lead_perpignan</code>.</p>
       <ul>
         <li><code>name</code>, <code>phone</code> et <code>details</code> sont collectés par tous les formulaires.</li>
         <li><code>lead_hero</code> et <code>lead_contact</code> collectent également <code>city</code> et <code>lead_priority</code> (<code>STANDARD</code> ou <code>RAPPEL_30_MIN</code>), ainsi qu'un champ technique <code>subject</code> prérempli automatiquement (non saisi par l'utilisateur).</li>
         <li><code>lead_perpignan</code> collecte également <code>subject</code>, ici saisi par l'utilisateur pour indiquer le type de travaux souhaité.</li>
-        <li><code>form-name</code> est un champ technique identifiant le formulaire soumis auprès de Netlify Forms.</li>
+        <li><code>form-name</code> est un champ technique identifiant le formulaire soumis, et <code>submission_id</code> un identifiant aléatoire généré par votre navigateur pour éviter les envois en double.</li>
         <li><code>bot-field</code> est un champ anti-spam (honeypot) présent dans les formulaires, non destiné à être rempli par un utilisateur.</li>
       </ul>
 
@@ -66,7 +66,7 @@
       <h2>5. Destinataires des données</h2>
       <p>
         Les données sont destinées à EI Style et Deco et, lorsque nécessaire, à des prestataires techniques
-        indispensables au service (notamment Netlify). Les données ne sont pas vendues.
+        indispensables au service (notamment Netlify pour l’hébergement et Resend pour l’envoi des e-mails de demande). Les données ne sont pas vendues.
       </p>
 
       <h2>6. Durées de conservation</h2>

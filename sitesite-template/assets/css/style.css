@@ -1789,6 +1789,14 @@ textarea{ resize: vertical; }
   margin: 0 0 12px;
   text-align: left;
 }
+.form__status{
+  margin: 10px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+}
+.form__status[hidden]{ display: none; }
 .form__modeSwitch{
   margin-top: 10px;
   background: transparent;

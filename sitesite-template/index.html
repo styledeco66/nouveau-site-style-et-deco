@@ -237,12 +237,11 @@
         </div>
 
         <aside class="hero__visual" id="contact" aria-label="Formulaire de devis rapide">
-          <form class="form form--hero js-lead-form" name="lead_hero" method="POST" action="/merci.html"
-            data-netlify="true" data-netlify-honeypot="bot-field">
+          <form class="form form--hero js-lead-form" name="lead_hero" method="POST" action="/.netlify/functions/lead">
             <input type="hidden" name="form-name" value="lead_hero" />
             <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
             <p style="display:none;">
-              <label>Ne pas remplir: <input name="bot-field" /></label>
+              <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
             <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
             <h2 class="form__title js-form-title" data-title-devis="Demander un devis en 1 minute"
@@ -281,6 +280,7 @@
             <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
               data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon
               devis</button>
+            <p class="form__status js-form-status" role="alert" hidden></p>
             <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
               complète</button>
           </form>
@@ -631,12 +631,11 @@
           </div>
         </div>
 
-        <form class="form js-lead-form" name="lead_contact" method="POST" action="/merci.html" data-netlify="true"
-          data-netlify-honeypot="bot-field">
+        <form class="form js-lead-form" name="lead_contact" method="POST" action="/.netlify/functions/lead">
           <input type="hidden" name="form-name" value="lead_contact" />
           <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
           <p style="display:none;">
-            <label>Ne pas remplir: <input name="bot-field" /></label>
+            <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
           </p>
           <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
           <p class="form__hint form__hint--top js-form-intro"
@@ -666,6 +665,7 @@
           </div>
           <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
             data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon devis</button>
+          <p class="form__status js-form-status" role="alert" hidden></p>
           <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
             complète</button>
           <p class="form__hint">Réponse sous 24h ouvrées. Vos informations restent confidentielles.</p>
@@ -701,6 +701,7 @@
       </div>
     </div>
   </footer>
+  <script src="./assets/js/lead-form.js"></script>
   <script src="./assets/js/app.js"></script>
 </body>
 

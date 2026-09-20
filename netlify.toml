@@ -1,2 +1,5 @@
 [build]
   publish = "sitesite-template"
+
+[functions]
+  directory = "netlify/functions"
