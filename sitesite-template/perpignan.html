@@ -200,10 +200,10 @@
 
         <aside class="hero__visual" id="contact">
           <!-- nosemgrep: python.django.security.django-no-csrf-token.django-no-csrf-token -->
-          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/merci.html" data-netlify="true" data-netlify-honeypot="bot-field">
+          <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/.netlify/functions/lead">
             <input type="hidden" name="form-name" value="lead_perpignan" />
             <p style="display:none;">
-              <label>Ne pas remplir: <input name="bot-field" /></label>
+              <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
             <h2 class="form__title">Votre projet à Perpignan</h2>
             <p class="form__hint">Réponse sous 24h ouvrées. Devis gratuit.</p>
@@ -214,6 +214,7 @@
               <label class="field field--full"><span>Détails</span><textarea name="details" rows="4" required></textarea></label>
             </div>
             <button class="btn btn--primary btn--lg btn--full" type="submit">Recevoir mon devis</button>
+            <p class="form__status js-form-status" role="alert" hidden></p>
           </form>
         </aside>
       </div>
@@ -451,6 +452,7 @@
       </div>
     </div>
   </footer>
+  <script src="./assets/js/lead-form.js"></script>
   <script src="./assets/js/app.js"></script>
 </body>
 </html>

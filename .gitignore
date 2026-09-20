@@ -1,2 +1,10 @@
 .DS_Store
 **/.DS_Store
+
+# Secrets locaux (voir docs/lead-delivery.md)
+.env
+.env.*
+
+# Artefacts de tests Python
+__pycache__/
+*.pyc
