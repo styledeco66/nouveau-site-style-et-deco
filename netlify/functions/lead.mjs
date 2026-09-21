@@ -32,12 +32,30 @@ const errorResponse = (status, code, wantsHtml, extraHeaders = {}) => {
   return Response.json({ ok: false, error: code }, { status, headers });
 };
 
+// En production (et en branch deploy), seule la liste explicite (LEAD_ALLOWED_ORIGINS ou, à
+// défaut, le domaine canonique) est autorisée. Sur un Deploy Preview Netlify uniquement
+// (CONTEXT === "deploy-preview"), `DEPLOY_PRIME_URL` est fournie automatiquement par Netlify et
+// vaut l'adresse canonique de CE preview (ex. https://deploy-preview-12--site.netlify.app) :
+// elle change à chaque PR sans intervention manuelle, contrairement à LEAD_ALLOWED_ORIGINS.
+// Elle est ajoutée telle quelle (jamais de wildcard ni de *.netlify.app générique), et jamais
+// hors du contexte deploy-preview, même si la variable est présente (production, branch deploy).
 const parseAllowedOrigins = (env) => {
   const configured = String(env.LEAD_ALLOWED_ORIGINS || "")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
-  return configured.length ? configured : DEFAULT_ALLOWED_ORIGINS;
+  const allowed = configured.length ? configured : DEFAULT_ALLOWED_ORIGINS;
+
+  if (String(env.CONTEXT || "").trim() !== "deploy-preview") return allowed;
+  const previewUrl = String(env.DEPLOY_PRIME_URL || "").trim();
+  if (!previewUrl || allowed.includes(previewUrl)) return allowed;
+  if (!previewUrl.startsWith("https://")) return allowed;
+  try {
+    if (new URL(previewUrl).origin !== previewUrl) return allowed;
+  } catch {
+    return allowed;
+  }
+  return [...allowed, previewUrl];
 };
 
 const requestOrigin = (request) => {

@@ -251,6 +251,54 @@ test("origine autorisée par défaut si LEAD_ALLOWED_ORIGINS absent : domaine ca
   assert.equal(ko.response.status, 403);
 });
 
+test("origine : sur un Deploy Preview Netlify (CONTEXT=deploy-preview), DEPLOY_PRIME_URL est accepté automatiquement, sans wildcard", async () => {
+  const previewUrl = "https://deploy-preview-42--styledeco.netlify.app";
+  const env = { ...ENV, CONTEXT: "deploy-preview", DEPLOY_PRIME_URL: previewUrl };
+
+  const preview = await run(jsonRequest(validDevis(), { origin: previewUrl }), { env });
+  assert.equal(preview.response.status, 200);
+
+  // Un autre sous-domaine Netlify (pas celui de CE preview) reste refusé : pas de wildcard *.netlify.app.
+  const otherPreview = await run(
+    jsonRequest(validDevis(), { origin: "https://deploy-preview-999--styledeco.netlify.app" }),
+    { env }
+  );
+  assert.equal(otherPreview.response.status, 403);
+
+  // La liste explicite de production n'est pas affaiblie : un domaine hors liste reste refusé même avec DEPLOY_PRIME_URL défini.
+  const stillForeign = await run(jsonRequest(validDevis(), { origin: "https://evil.example" }), { env });
+  assert.equal(stillForeign.response.status, 403);
+});
+
+test("origine : DEPLOY_PRIME_URL est ignoré hors contexte deploy-preview (production, branch deploy, absent)", async () => {
+  const previewUrl = "https://deploy-preview-42--styledeco.netlify.app";
+
+  // Production : CONTEXT absent (comportement réel en production), DEPLOY_PRIME_URL tout de même présent.
+  const prod = await run(jsonRequest(validDevis(), { origin: previewUrl }), {
+    env: { ...ENV, DEPLOY_PRIME_URL: previewUrl },
+  });
+  assert.equal(prod.response.status, 403);
+
+  // Production explicite : CONTEXT="production" avec DEPLOY_PRIME_URL présent ne gagne aucune origine.
+  const explicitProd = await run(jsonRequest(validDevis(), { origin: previewUrl }), {
+    env: { ...ENV, CONTEXT: "production", DEPLOY_PRIME_URL: previewUrl },
+  });
+  assert.equal(explicitProd.response.status, 403);
+
+  // Branch deploy : CONTEXT="branch-deploy" avec DEPLOY_PRIME_URL présent ne gagne aucune origine.
+  const branchUrl = "https://ma-branche--styledeco.netlify.app";
+  const branch = await run(jsonRequest(validDevis(), { origin: branchUrl }), {
+    env: { ...ENV, CONTEXT: "branch-deploy", DEPLOY_PRIME_URL: branchUrl },
+  });
+  assert.equal(branch.response.status, 403);
+
+  // L'ancienne variable `URL` n'est plus utilisée pour cette autorisation automatique, même en deploy-preview.
+  const urlIgnored = await run(jsonRequest(validDevis(), { origin: previewUrl }), {
+    env: { ...ENV, CONTEXT: "deploy-preview", URL: previewUrl },
+  });
+  assert.equal(urlIgnored.response.status, 403);
+});
+
 test("méthodes autres que POST refusées (405)", async () => {
   const { response } = await run(jsonRequest(null, { method: "GET" }));
   assert.equal(response.status, 405);
