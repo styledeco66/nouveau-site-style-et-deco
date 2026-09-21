@@ -19,7 +19,8 @@ const SUBJECT_CALLBACK = "🚨 RAPPEL 30 MIN - Style & Deco";
 const PRIORITY_CALLBACK = "RAPPEL_30_MIN";
 
 const FORMS = new Set(["lead_hero", "lead_contact", "lead_perpignan"]);
-const MAX_LENGTH = { name: 100, city: 100, subject: 150, details: 3000 };
+const MAX_LENGTH = { name: 100, email: 254, city: 100, subject: 150, details: 3000 };
+const EMAIL_PATTERN = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 const SUBMISSION_ID = /^[A-Za-z0-9_-]{8,64}$/;
 
 const errorResponse = (status, code, wantsHtml, extraHeaders = {}) => {
@@ -80,6 +81,8 @@ const validateLead = (raw) => {
     priority: callback ? PRIORITY_CALLBACK : "STANDARD",
     name: cleanLine(raw.name),
     phone: cleanLine(raw.phone),
+    // L'e-mail n'est demandé que pour les devis : un rappel urgent l'ignore totalement.
+    email: callback ? "" : cleanLine(raw.email),
     city: isPerpignan ? "" : cleanLine(raw.city),
     details: cleanMultiline(raw.details),
     subject: isPerpignan ? cleanLine(raw.subject) : "",
@@ -89,8 +92,9 @@ const validateLead = (raw) => {
   for (const [field, max] of Object.entries(MAX_LENGTH)) {
     if (lead[field].length > max) return { invalid: true };
   }
+  if (!lead.name) return { invalid: true };
   if (!callback) {
-    if (!lead.name || !lead.details) return { invalid: true };
+    if (!lead.details || !EMAIL_PATTERN.test(lead.email)) return { invalid: true };
     if (isPerpignan ? !lead.subject : !lead.city) return { invalid: true };
   }
   return { lead };
@@ -111,6 +115,7 @@ const emailRows = (lead, receivedAt) =>
     ["Priorité", lead.priority],
     ["Nom", lead.name],
     ["Téléphone", lead.phone],
+    ["E-mail", lead.email],
     ["Ville / Zone", lead.city],
     ["Type de travaux", lead.subject],
     ["Détails", lead.details],
@@ -130,7 +135,10 @@ const buildEmail = (lead, receivedAt, env) => {
     .split(",")
     .map((address) => address.trim())
     .filter(Boolean);
-  return { from: env.LEAD_FROM_EMAIL, to, subject: emailSubject(lead), text, html };
+  const email = { from: env.LEAD_FROM_EMAIL, to, subject: emailSubject(lead), text, html };
+  // Répondre au prospect depuis la boîte de réception ; aucun e-mail n'est envoyé au prospect.
+  if (lead.email) email.reply_to = lead.email;
+  return email;
 };
 
 // Clé d'idempotence Resend : submission_id généré par le navigateur (stable entre tentatives),
@@ -140,7 +148,7 @@ const idempotencyKey = (raw, lead, now) => {
   if (SUBMISSION_ID.test(submissionId)) return `lead-${submissionId}`;
   const bucket = Math.floor(now().getTime() / IDEMPOTENCY_WINDOW_MS);
   const digest = createHash("sha256")
-    .update(JSON.stringify([lead.form, lead.priority, lead.name, lead.phone, lead.city, lead.subject, lead.details, bucket]))
+    .update(JSON.stringify([lead.form, lead.priority, lead.name, lead.phone, lead.email, lead.city, lead.subject, lead.details, bucket]))
     .digest("hex")
     .slice(0, 32);
   return `lead-${digest}`;

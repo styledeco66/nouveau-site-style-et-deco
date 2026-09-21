@@ -18,6 +18,7 @@ const validDevis = (overrides = {}) => ({
   submission_id: "3f2b8c1e-6a4d-4c55-9a51-0d5e2f7a9b10",
   name: "Marie Durand",
   phone: "06 12 34 56 78",
+  email: "marie.durand@example.test",
   city: "Perpignan",
   details: "Peinture salon 25 m²",
   lead_priority: "STANDARD",
@@ -64,7 +65,8 @@ test("succès : envoie un e-mail via Resend et répond ok", async () => {
   assert.equal(body.from, "Site <no-reply@example.test>");
   assert.deepEqual(body.to, ["destinataire@example.test"]);
   assert.equal(body.subject, "📩 DEMANDE DE DEVIS - Style & Deco");
-  for (const value of ["Marie Durand", "06 12 34 56 78", "Perpignan", "Peinture salon 25 m²", "lead_contact"]) {
+  assert.equal(body.reply_to, "marie.durand@example.test");
+  for (const value of ["Marie Durand", "06 12 34 56 78", "marie.durand@example.test", "Perpignan", "Peinture salon 25 m²", "lead_contact"]) {
     assert.ok(body.text.includes(value), `text contient ${value}`);
     assert.ok(body.html.includes(value.replace("²", "²")), `html contient ${value}`);
   }
@@ -76,20 +78,98 @@ test("le sujet est fixé côté serveur : le champ subject du client est ignoré
   assert.ok(!fetchImpl.calls[0].body.text.includes("Bcc:"));
 });
 
-test("rappel 30 min : nom et ville/détails optionnels, sujet prioritaire", async () => {
-  const payload = validDevis({ lead_priority: "RAPPEL_30_MIN", name: "", city: undefined, details: undefined });
+test("rappel 30 min : nom et téléphone obligatoires, ville/détails optionnels, sujet prioritaire", async () => {
+  const payload = validDevis({ lead_priority: "RAPPEL_30_MIN", email: undefined, city: undefined, details: undefined });
   const { response, fetchImpl } = await run(jsonRequest(payload));
   assert.equal(response.status, 200);
   assert.equal(fetchImpl.calls[0].body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
+
+  for (const field of ["name", "phone"]) {
+    const missing = await run(jsonRequest({ ...payload, [field]: "   " }));
+    assert.equal(missing.response.status, 400, field);
+    assert.equal(missing.fetchImpl.calls.length, 0, `aucun envoi si ${field} manque`);
+  }
 });
 
-test("devis : nom, ville et détails obligatoires", async () => {
-  for (const field of ["name", "city", "details", "phone"]) {
-    const { response, fetchImpl } = await run(jsonRequest(validDevis({ [field]: "   " })));
-    assert.equal(response.status, 400, field);
-    assert.equal((await response.json()).ok, false);
-    assert.equal(fetchImpl.calls.length, 0, `aucun envoi si ${field} manque`);
+test("rappel 30 min : aucune adresse e-mail demandée, validée, transmise, affichée ni utilisée en reply_to", async () => {
+  const withoutEmail = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email: undefined })));
+  assert.equal(withoutEmail.response.status, 200);
+  assert.ok(!("reply_to" in withoutEmail.fetchImpl.calls[0].body));
+  assert.ok(!withoutEmail.fetchImpl.calls[0].body.text.includes("E-mail"));
+
+  for (const email of ["marie.durand@example.test", "pas-un-email", "a".repeat(300)]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email })));
+    assert.equal(response.status, 200, `un e-mail (${email.slice(0, 12)}) ne bloque pas un rappel`);
+    const body = fetchImpl.calls[0].body;
+    assert.ok(!("reply_to" in body));
+    assert.ok(!JSON.stringify(body).includes(email), "l'e-mail fourni n'est pas transmis à Resend");
+    assert.deepEqual(body.to, ["destinataire@example.test"]);
   }
+
+  const first = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", submission_id: undefined, email: "a@example.test" })));
+  const second = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", submission_id: undefined, email: undefined })));
+  assert.equal(
+    first.fetchImpl.calls[0].init.headers["Idempotency-Key"],
+    second.fetchImpl.calls[0].init.headers["Idempotency-Key"],
+    "l'e-mail ignoré n'entre pas dans l'empreinte d'idempotence"
+  );
+});
+
+test("devis : nom, e-mail, ville et détails obligatoires", async () => {
+  for (const field of ["name", "email", "city", "details", "phone"]) {
+    for (const blank of ["   ", undefined]) {
+      const { response, fetchImpl } = await run(jsonRequest(validDevis({ [field]: blank })));
+      assert.equal(response.status, 400, field);
+      assert.equal((await response.json()).ok, false);
+      assert.equal(fetchImpl.calls.length, 0, `aucun envoi si ${field} manque`);
+    }
+  }
+});
+
+test("devis : e-mail invalide rejeté, formats courants acceptés", async () => {
+  const invalid = [
+    "marie",
+    "marie@",
+    "@example.test",
+    "marie@example",
+    "marie durand@example.test",
+    "marie@example.test, autre@example.test",
+    "Marie <marie@example.test>",
+    "marie@example.test\r\nBcc: x@example.test",
+    "marie@@example.test",
+    `${"a".repeat(250)}@example.test`,
+  ];
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    for (const email of invalid) {
+      const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, email })));
+      assert.equal(response.status, 400, `${form} : ${email}`);
+      assert.equal(fetchImpl.calls.length, 0);
+    }
+  }
+  for (const email of ["marie@example.test", "marie.durand+devis@sub.example.test", "M_D-66@example.fr"]) {
+    const { response } = await run(jsonRequest(validDevis({ email })));
+    assert.equal(response.status, 200, email);
+  }
+});
+
+test("devis : l'e-mail est affiché dans la notification et utilisé comme reply_to, sans e-mail vers le prospect", async () => {
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, email: "  Marie.Durand@Example.test " })));
+    assert.equal(response.status, 200, form);
+    assert.equal(fetchImpl.calls.length, 1, "un seul e-mail : la notification interne");
+    const body = fetchImpl.calls[0].body;
+    assert.equal(body.reply_to, "Marie.Durand@Example.test");
+    assert.deepEqual(body.to, ["destinataire@example.test"]);
+    assert.ok(!("cc" in body) && !("bcc" in body));
+    assert.ok(body.text.includes("E-mail : Marie.Durand@Example.test"));
+    assert.ok(body.html.includes("Marie.Durand@Example.test"));
+  }
+});
+
+test("devis : l'e-mail entre dans l'empreinte d'idempotence sans submission_id", async () => {
+  const a = await run(jsonRequest(validDevis({ submission_id: undefined })));
+  const b = await run(jsonRequest(validDevis({ submission_id: undefined, email: "autre@example.test" })));
+  assert.notEqual(a.fetchImpl.calls[0].init.headers["Idempotency-Key"], b.fetchImpl.calls[0].init.headers["Idempotency-Key"]);
 });
 
 test("rappel : le téléphone reste obligatoire", async () => {
@@ -110,7 +190,7 @@ test("téléphone invalide rejeté, formats français courants acceptés", async
 });
 
 test("longueurs maximales imposées", async () => {
-  for (const [field, length] of [["name", 101], ["city", 101], ["details", 3001]]) {
+  for (const [field, length] of [["name", 101], ["city", 101], ["details", 3001], ["email", 255]]) {
     const { response } = await run(jsonRequest(validDevis({ [field]: "a".repeat(length) })));
     assert.equal(response.status, 400, field);
   }
@@ -128,9 +208,14 @@ test("lead_perpignan : subject = type de travaux saisi, requis, repris dans le s
   assert.equal(response.status, 200);
   assert.ok(fetchImpl.calls[0].body.text.includes("Ravalement façade"));
   assert.ok(fetchImpl.calls[0].body.subject.includes("Perpignan"));
+  assert.equal(fetchImpl.calls[0].body.reply_to, "marie.durand@example.test");
 
   const missing = await run(jsonRequest({ ...payload, subject: "" }));
   assert.equal(missing.response.status, 400);
+
+  const noEmail = await run(jsonRequest({ ...payload, email: "" }));
+  assert.equal(noEmail.response.status, 400);
+  assert.equal(noEmail.fetchImpl.calls.length, 0);
 });
 
 test("honeypot rempli : rien n'est envoyé et la réponse n'est pas un succès", async () => {
@@ -292,6 +377,48 @@ test("le contenu HTML de l'e-mail est échappé", async () => {
   assert.ok(text.includes("<img src=x"));
 });
 
+test("le contenu HTML échappe aussi un e-mail valide contenant des caractères HTML", async () => {
+  // Seuls & et ' sont à la fois des adresses valides (atext) et des caractères HTML spéciaux.
+  const email = "o'brien&sons@example.test";
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ email })));
+  assert.equal(response.status, 200);
+  const { html, text, reply_to: replyTo } = fetchImpl.calls[0].body;
+  assert.ok(html.includes("o&#39;brien&amp;sons@example.test"));
+  assert.ok(!html.includes(email), "l'adresse brute n'apparaît pas dans le HTML");
+  assert.ok(text.includes(`E-mail : ${email}`));
+  assert.equal(replyTo, email);
+});
+
+test("devis : une valeur e-mail JSON non textuelle est refusée", async () => {
+  const nonText = [123, true, null, ["marie.durand@example.test"], { address: "marie.durand@example.test" }];
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    for (const email of nonText) {
+      const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, email })));
+      assert.equal(response.status, 400, `${form} : ${JSON.stringify(email)}`);
+      assert.equal(fetchImpl.calls.length, 0);
+    }
+  }
+});
+
+test("lead_perpignan n'est jamais un rappel urgent, même avec un lead_priority forgé ; l'e-mail reste obligatoire", async () => {
+  const forged = { ...validDevis({ "form-name": "lead_perpignan", subject: "Ravalement façade", lead_priority: "RAPPEL_30_MIN" }), city: undefined };
+
+  const withEmail = await run(jsonRequest(forged));
+  assert.equal(withEmail.response.status, 200);
+  const body = withEmail.fetchImpl.calls[0].body;
+  assert.equal(body.subject, "📩 DEMANDE DE DEVIS - Perpignan - Ravalement façade");
+  assert.ok(!body.subject.includes("RAPPEL"));
+  assert.ok(body.text.includes("Priorité : STANDARD"));
+  assert.ok(!body.text.includes("RAPPEL_30_MIN"));
+  assert.equal(body.reply_to, "marie.durand@example.test");
+
+  for (const email of [undefined, "", "   ", "pas-un-email"]) {
+    const { response, fetchImpl } = await run(jsonRequest({ ...forged, email }));
+    assert.equal(response.status, 400, `e-mail ${JSON.stringify(email)} refusé malgré lead_priority forgé`);
+    assert.equal(fetchImpl.calls.length, 0);
+  }
+});
+
 test("aucune donnée personnelle ni secret dans les logs", async () => {
   const captured = [];
   const original = { log: console.log, error: console.error, warn: console.warn };
@@ -302,7 +429,7 @@ test("aucune donnée personnelle ni secret dans les logs", async () => {
     Object.assign(console, original);
   }
   const output = captured.join("\n");
-  for (const leaked of ["Marie Durand", "06 12 34 56 78", "re_test_fake_key", "destinataire@example.test"]) {
+  for (const leaked of ["Marie Durand", "06 12 34 56 78", "marie.durand@example.test", "re_test_fake_key", "destinataire@example.test"]) {
     assert.ok(!output.includes(leaked), `log ne doit pas contenir ${leaked}`);
   }
 });
