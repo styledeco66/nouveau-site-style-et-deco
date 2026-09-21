@@ -57,7 +57,6 @@
     const title = form.querySelector(".js-form-title");
     const intro = form.querySelector(".js-form-intro");
     const submit = form.querySelector(".js-form-submit");
-    const nameInput = form.querySelector('input[name="name"]');
     const nameLabel = form.querySelector(".js-name-label");
 
     form.classList.toggle("form--callback-mode", isCallbackMode);
@@ -81,12 +80,6 @@
     }
     if (nameLabel) {
       nameLabel.textContent = isCallbackMode ? nameLabel.dataset.labelCallback : nameLabel.dataset.labelDevis;
-    }
-    if (nameInput) {
-      if (nameInput.dataset.wasRequired === undefined) {
-        nameInput.dataset.wasRequired = nameInput.required ? "1" : "0";
-      }
-      nameInput.required = !isCallbackMode && nameInput.dataset.wasRequired === "1";
     }
 
     setPriority(form, isCallbackMode);

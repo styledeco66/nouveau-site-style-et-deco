@@ -253,7 +253,7 @@
 
             <div class="form__grid">
               <label class="field">
-                <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom (optionnel)">Nom</span>
+                <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom">Nom</span>
                 <input type="text" name="name" placeholder="Votre nom" autocomplete="name" required />
               </label>
 
@@ -263,6 +263,11 @@
               </label>
 
               <input type="hidden" name="lead_priority" value="STANDARD">
+
+              <label class="field field--full js-devis-only">
+                <span>E-mail</span>
+                <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+              </label>
 
               <label class="field field--full js-devis-only">
                 <span>Ville / Zone</span>
@@ -644,7 +649,7 @@
             Réponse sous 24h ouvrées. Sans engagement.</p>
           <div class="form__grid">
             <label class="field">
-              <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom (optionnel)">Nom</span>
+              <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom">Nom</span>
               <input type="text" name="name" placeholder="Votre nom" autocomplete="name" required />
             </label>
             <label class="field">
@@ -652,6 +657,10 @@
               <input type="tel" name="phone" placeholder="06…" autocomplete="tel" required />
             </label>
             <input type="hidden" name="lead_priority" value="STANDARD">
+            <label class="field field--full js-devis-only">
+              <span>E-mail</span>
+              <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+            </label>
             <label class="field field--full js-devis-only">
               <span>Ville / Zone</span>
               <input type="text" name="city" placeholder="Ex : Perpignan, Saint-Cyprien…" autocomplete="address-level2"

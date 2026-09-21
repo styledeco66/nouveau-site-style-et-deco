@@ -15,9 +15,21 @@ commitée** ; les fichiers `.env` / `.env.*` sont ignorés par git.
 | `RESEND_API_KEY`       | oui | Clé API Resend (droit d'envoi uniquement). |
 | `LEAD_TO_EMAIL`        | oui | Destinataire(s) des demandes ; plusieurs adresses séparées par des virgules. |
 | `LEAD_FROM_EMAIL`      | oui | Expéditeur, sur un domaine vérifié chez Resend (ex. `Nom <adresse@domaine>`). |
-| `LEAD_ALLOWED_ORIGINS` | non | Origines autorisées, séparées par des virgules (ex. un domaine de préproduction). Défaut : `https://styleetdeco.fr`. |
+| `LEAD_ALLOWED_ORIGINS` | non | Liste explicite et stricte des origines autorisées **en production et en branch deploy**, séparées par des virgules. Défaut : `https://styleetdeco.fr`. Ne jamais y ajouter une URL de preview : voir ci-dessous. |
 
 Si une variable obligatoire manque, la function répond 500 et le visiteur voit le message d'erreur : jamais de faux succès.
+
+### Origine sur les Deploy Previews Netlify
+
+`LEAD_ALLOWED_ORIGINS` reste la seule source de vérité en production et en branch deploy : aucun domaine en dehors de
+cette liste explicite n'est jamais accepté, quel que soit le contexte. Sur un **Deploy Preview** Netlify uniquement
+(quand la variable système `CONTEXT` fournie par Netlify vaut exactement `deploy-preview`), la function autorise en
+plus, et uniquement, l'origine correspondant à `DEPLOY_PRIME_URL` — la variable système Netlify contenant l'URL
+canonique de ce preview précis (ex. `https://deploy-preview-42--styleetdeco.netlify.app`). Ces deux variables sont
+fournies automatiquement par Netlify à chaque déploiement de preview : **il n'est plus nécessaire de modifier
+`LEAD_ALLOWED_ORIGINS` à la main à chaque pull request**. Hors du contexte `deploy-preview` (production, branch
+deploy, ou `CONTEXT` absent), `DEPLOY_PRIME_URL` est ignorée même si elle est présente, et aucune origine n'est ajoutée
+à la liste explicite. Aucun autre domaine Netlify (`*.netlify.app` générique) n'est jamais accepté par wildcard.
 
 ## Comportement
 
@@ -33,9 +45,16 @@ Si une variable obligatoire manque, la function répond 500 et le visiteur voit 
 - **Contrôle d'origine** : l'en-tête `Origin` (à défaut `Referer`) doit correspondre exactement à une origine autorisée ;
   sinon 403.
 - **Validation serveur** : formulaire connu, téléphone (9 à 15 chiffres), longueurs max (nom 100, ville 100, type de
-  travaux 150, détails 3000), champs obligatoires selon le mode (devis : nom, téléphone, ville, détails ; rappel
-  30 min : téléphone seul ; Perpignan : nom, téléphone, type de travaux, détails), corps ≤ 20 000 caractères,
+  travaux 150, détails 3000, e-mail 254), champs obligatoires selon le mode (devis : nom, téléphone, e-mail, ville,
+  détails ; rappel 30 min : nom et téléphone uniquement ; Perpignan : nom, téléphone, e-mail, type de travaux,
+  détails), corps ≤ 20 000 caractères,
   `application/json` ou `application/x-www-form-urlencoded` uniquement. Le sujet est fixé côté serveur pour les formulaires d’accueil et de contact ; pour Perpignan, le serveur construit le sujet à partir du type de travaux validé.
+- **Adresse e-mail** : demandée, validée (navigateur : `type="email"` ; serveur : une seule adresse, format usuel,
+  254 caractères max) et obligatoire uniquement pour les demandes de devis (`lead_hero` / `lead_contact` en mode devis,
+  `lead_perpignan`). Elle est affichée dans la notification interne et transmise à Resend comme `reply_to`, pour
+  répondre directement au prospect. Aucun e-mail automatique n'est envoyé au prospect (le seul destinataire reste
+  `LEAD_TO_EMAIL`). En mode rappel 30 min, le champ est masqué et désactivé côté navigateur, et la function ignore toute
+  valeur reçue : rien n'est validé, transmis à Resend, affiché ni utilisé en `reply_to`.
 - **Idempotence** : le navigateur génère un `submission_id` par formulaire, conservé entre les tentatives ; la function
   le transmet à Resend dans l'en-tête `Idempotency-Key` (`lead-<submission_id>`). Une nouvelle tentative après une
   réponse perdue ne produit pas un second e-mail. Sans `submission_id` valide (ex. envoi sans JavaScript), la clé est
