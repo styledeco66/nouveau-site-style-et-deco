@@ -1,5 +1,7 @@
 [build]
   publish = "sitesite-template"
+  # Échoue si une référence CSS/JS n'a plus l'empreinte du fichier (voir docs/asset-versioning.md).
+  command = "node scripts/asset-versions.mjs --check"
 
 [functions]
   directory = "netlify/functions"

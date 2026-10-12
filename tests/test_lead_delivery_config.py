@@ -110,8 +110,9 @@ class LeadFormMarkupTests(unittest.TestCase):
     def test_lead_form_script_is_loaded_before_app_script_on_form_pages(self):
         for page in FORMS:
             scripts = parse(page).scripts
-            lead = [i for i, src in enumerate(scripts) if src.endswith("assets/js/lead-form.js")]
-            app = [i for i, src in enumerate(scripts) if src.endswith("assets/js/app.js")]
+            paths = [src.split("?")[0] for src in scripts]  # ?v=<empreinte> : voir docs/asset-versioning.md
+            lead = [i for i, src in enumerate(paths) if src.endswith("assets/js/lead-form.js")]
+            app = [i for i, src in enumerate(paths) if src.endswith("assets/js/app.js")]
             self.assertEqual(len(lead), 1, page)
             self.assertEqual(len(app), 1, page)
             self.assertLess(lead[0], app[0], page)
