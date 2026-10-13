@@ -290,3 +290,62 @@ test("les formulaires, la fonction d'envoi, les CSS/JS et les en-têtes ne sont 
     assert.match(html, /assets\/js\/lead-form\.js\?v=[0-9a-f]{10}/);
   }
 });
+
+test("engagements confirmés : rappel sous 30 min, devis sous 24 h, démarrage sous 1 à 3 semaines, formulés de façon homogène", () => {
+  const pages = [...Object.keys(PUBLIC_PAGES), "merci.html", "lead-rate-limited.html"];
+  for (const file of pages) {
+    const html = read(file);
+    assert.doesNotMatch(html, /\b24h\b/, `${file} : écrire « 24 h »`);
+    assert.doesNotMatch(html, /24 ?h ouvrées|heures ouvrées|En période normale|selon la période|peut souvent être proposé/, `${file} : ancienne formulation de délai`);
+  }
+  const home = read("index.html");
+  assert.match(home, /On vous rappelle en moins de 30 minutes/);
+  assert.match(home, /pendant nos horaires d'ouverture/);
+  assert.match(home, /Réponse sous 24 h\. Sans engagement\./);
+  assert.match(home, /Le démarrage des travaux intervient sous 1 à 3 semaines après validation du devis\./);
+  const perpignan = read("perpignan.html");
+  assert.match(perpignan, /Démarrage du chantier sous 1 à 3 semaines après validation du devis\./);
+  assert.match(perpignan, /Sous 1 à 3 semaines après validation du devis\./);
+  assert.match(read("merci.html"), /Je vous recontacte sous 24 h/);
+});
+
+test("nombre de chantiers : 104 exactement, sans « plus de » ni ancien chiffre", () => {
+  const home = read("index.html");
+  assert.match(home, /<div class="trust__kpi js-kpi-counter" data-value="104">104<\/div>\s*<div class="trust__label">chantiers réalisés<\/div>/);
+  for (const file of Object.keys(PUBLIC_PAGES)) {
+    const text = visibleText(read(file));
+    assert.doesNotMatch(text, /\+ ?90|plus de (?:90|104)|\+ ?104/i, file);
+  }
+  assert.doesNotMatch(home, /data-prefix=/);
+});
+
+test("avis Google : les 4 avis récents sont intégrés tels quels (5 étoiles), sans la réponse du propriétaire", () => {
+  const html = read("index.html");
+  const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
+  const cards = [...track.matchAll(/<article class="(reviewCard[^"]*)">([\s\S]*?)<\/article>/g)].map((match) => ({
+    cls: match[1],
+    stars: match[2].match(/aria-label="(\d) sur 5"/)[1],
+    text: squash(match[2].match(/reviewCard__text">([\s\S]*?)<\/p>/)[1]),
+    meta: squash(match[2].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]),
+  }));
+  assert.equal(cards.length, 15, "4 nouveaux avis + 11 avis déjà présents (aucun avis existant retiré)");
+  assert.equal(cards.filter((card) => card.cls.includes("featured")).length, 1);
+  assert.ok(cards[0].cls.includes("featured"));
+  const expected = [
+    ["Jean Despinoy (Maxitoon) • Avis Google • 2026", "Suite recherche j’ai voulu essayer car avis au top. Envoi du devis, très détaillé ce qui est super, assurances jointes […]"],
+    ["Brigitte Hardy • Avis Google • 2026", "Artisan très professionnel et sérieux. Travail impeccable, finitions soignées et chantier laissé parfaitement propre. De très bons conseils et un vrai souci du détail. Je recommande vivement !"],
+    ["Stéphanie Munoz • Avis Google • 2026", "Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. […] Je le recommande vivement."],
+    ["Nathalie COPIN • Avis Google • 2026", "Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. […] Professionnalisme et excellent rapport qualité/prix"],
+  ];
+  expected.forEach(([meta, text], index) => {
+    assert.equal(cards[index].meta, meta);
+    assert.equal(cards[index].text, text);
+    assert.equal(cards[index].stars, "5");
+  });
+  const visible = visibleText(html);
+  for (const reply of ["Nous sommes particulièrement sensibles", "Merci beaucoup Stéphanie", "Merci beaucoup Brigitte", "Bonjour Monsieur Despinoy", "Propriétaire"]) {
+    assert.ok(!visible.includes(reply), `réponse du propriétaire reprise par erreur : ${reply}`);
+  }
+  assert.ok(html.includes('href="https://www.google.com/maps?cid=3698755901832647189"'), "lien vers les avis Google conservé");
+  assert.ok(squash(track).includes("Excellent peintre décorateur dans la région"), "avis existants conservés");
+});
