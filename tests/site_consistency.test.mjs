@@ -71,9 +71,9 @@ test("les coordonnées du balisage correspondent au texte visible des pages", ()
   assert.equal(node.address.addressCountry, "FR");
 });
 
-test("aucune donnée non confirmée ni interdite : horaires, prix, avis notés, commerces non exercés", () => {
+test("aucune donnée non confirmée ni interdite : prix, avis notés, géolocalisation, prestations non exercées", () => {
   for (const { file, node } of allNodes()) {
-    for (const forbidden of ["openingHours", "openingHoursSpecification", "priceRange", "aggregateRating", "review", "geo"]) {
+    for (const forbidden of ["openingHours", "priceRange", "aggregateRating", "review", "geo"]) {
       assert.ok(!(forbidden in node), `${file} : ${forbidden} ne doit pas être renseigné sans confirmation`);
     }
     assert.ok(!typesOf(node).some((type) => ["Review", "AggregateRating", "Offer"].includes(type) && type !== "Offer"), file);
@@ -348,4 +348,47 @@ test("avis Google : les 4 avis récents sont intégrés tels quels (5 étoiles),
   }
   assert.ok(html.includes('href="https://www.google.com/maps?cid=3698755901832647189"'), "lien vers les avis Google conservé");
   assert.ok(squash(track).includes("Excellent peintre décorateur dans la région"), "avis existants conservés");
+});
+
+test("horaires de la fiche Google (lundi-vendredi 8 h-18 h, week-end fermé) identiques dans le texte et le balisage", () => {
+  const { node } = allNodes().find(({ node }) => node["@id"] === BIZ);
+  assert.deepEqual(node.openingHoursSpecification, [
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "08:00:00", closes: "18:00:00" },
+  ]);
+  assert.match(visibleText(read("index.html")), /Lun - Ven 8h - 18h/);
+  assert.match(visibleText(read("merci.html")), /Du lundi au vendredi, 8h – 18h/);
+  for (const file of [...Object.keys(PUBLIC_PAGES), ...OTHER_PAGES]) {
+    const text = visibleText(read(file));
+    assert.doesNotMatch(text, /Lun - Sam|lundi au samedi|8h – 19h|8h - 19h|\b19h\b/i, `${file} : ancien horaire`);
+    assert.doesNotMatch(text, /7 ?j(ours)? ?(sur|\/) ?7|7\/7|24 ?h ?\/ ?24|permanence|week-end|dimanche/i, `${file} : aucune promesse de disponibilité 7 jours sur 7`);
+  }
+});
+
+test("note Google 4,9/5 et 16 avis affichés ; aucune note balisée", () => {
+  const home = read("index.html");
+  assert.match(home, /<strong>4,9\/5<\/strong>\s*<span>sur Google \(16 avis\)<\/span>/);
+  assert.match(home, /data-value="4\.9"[^>]*>4,9\/5<\/div>\s*<div class="trust__label">16 avis Google<\/div>/);
+  assert.doesNotMatch(JSON.stringify(allNodes()), /aggregateRating|ratingValue|reviewCount/);
+});
+
+test("étoiles des 15 avis : note déclarée = étoiles dessinées = note d'origine (2 avis restent à 4 étoiles)", () => {
+  const html = read("index.html");
+  const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
+  const cards = [...track.matchAll(/<article class="reviewCard[^"]*">([\s\S]*?)<\/article>/g)].map((match) => ({
+    author: squash(match[1].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]).split(" • ")[0],
+    declared: Number(match[1].match(/aria-label="(\d) sur 5"/)[1]),
+    drawn: (match[1].match(/&#9733;/g) || []).length,
+  }));
+  const expected = {
+    "Jean Despinoy (Maxitoon)": 5, "Brigitte Hardy": 5, "Stéphanie Munoz": 5, "Nathalie COPIN": 5,
+    "JEAN PAUL PIZZUTO": 5, "Marina IJ": 5, "Eva Martinez": 5, "Loïc Guillaumes": 5,
+    "Carlos Mateus da Silva": 4, "Jennifer Pichard": 5, "John B": 5, "Anissa Anissa": 5,
+    "Jonathan Pueyo": 5, "Gabriel Merotto": 5, "FLORIAN ASTORGA": 4,
+  };
+  assert.deepEqual(cards.map((card) => card.author), Object.keys(expected));
+  for (const card of cards) {
+    assert.equal(card.declared, expected[card.author], `${card.author} : note déclarée`);
+    assert.equal(card.drawn, expected[card.author], `${card.author} : étoiles dessinées`);
+  }
+  assert.equal(cards.filter((card) => card.declared === 4).length, 2);
 });
