@@ -104,117 +104,234 @@
     });
   };
 
+  // Avis clients : une carte à la fois, fondu progressif, navigation manuelle (boutons, points, clavier, balayage).
+  // Amélioration progressive : sans JavaScript, le défilement horizontal d'origine reste utilisable.
+  // Le défilement automatique est lent (durée proportionnelle au nombre de mots de l'avis), se met en pause au survol, au
+  // focus, au toucher et sur demande, et n'existe pas lorsque l'utilisateur préfère réduire les animations.
+  // À chaque changement d'avis, un reflet doré (CSS) glisse sur la bordure ; la hauteur du bloc suit l'avis affiché.
   const initReviewsCarousel = () => {
+    const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const DWELL_BASE_MS = 3500;
+    const DWELL_PER_WORD_MS = 330; // ~180 mots par minute, transitions comprises
+    const DWELL_MIN_MS = 7000;
+    const DWELL_MAX_MS = 45000;
+    const TOUCH_RESUME_MS = 8000;
+
     document.querySelectorAll(".js-reviews-carousel").forEach((carousel) => {
-      const viewport = carousel.querySelector(".reviewsViewport");
       const track = carousel.querySelector(".reviewsTrack");
-      const cards = Array.from(carousel.querySelectorAll(".reviewCard"));
+      const viewport = carousel.querySelector(".reviewsViewport");
+      const slides = Array.from(carousel.querySelectorAll(".reviewCard"));
+      if (!track || slides.length < 2) return;
+
+      const controls = carousel.querySelector(".reviewsControls");
       const dots = Array.from(carousel.querySelectorAll(".reviewsDot"));
-      const prev = carousel.querySelector('.reviewsNav[data-dir="-1"]');
-      const next = carousel.querySelector('.reviewsNav[data-dir="1"]');
-      if (!viewport || !track || cards.length < 2) return;
+      const prevButton = carousel.querySelector('.reviewsNav[data-dir="-1"]');
+      const nextButton = carousel.querySelector('.reviewsNav[data-dir="1"]');
+      const pauseButton = carousel.querySelector(".reviewsPause");
 
-      // Duplicate cards once to create a seamless forward loop.
-      const loopFragment = document.createDocumentFragment();
-      cards.forEach((card) => {
-        loopFragment.appendChild(card.cloneNode(true));
-      });
-      track.appendChild(loopFragment);
+      let index = 0;
+      let timer = null;
+      let touchTimer = null;
+      let userPaused = false;
+      let hovering = false;
+      let focusInside = false;
+      let touching = false;
+      let offscreen = false;
 
-      const getStep = () => {
-        const first = cards[0];
-        if (!first) return viewport.clientWidth;
-        const style = window.getComputedStyle(track);
-        const gap = parseFloat(style.columnGap || style.gap || "0") || 0;
-        return first.getBoundingClientRect().width + gap;
+      const reduced = () => Boolean(reduceQuery && reduceQuery.matches);
+      // Durée de lecture : proportionnelle au nombre de mots du texte de l'avis (pas du balisage ni de l'auteur).
+      const wordCount = (slide) => {
+        const parts = typeof slide.querySelectorAll === "function" ? Array.from(slide.querySelectorAll(".reviewCard__text")) : [];
+        const text = parts.length ? parts.map((part) => part.textContent).join(" ") : slide.textContent;
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        return words.length;
       };
+      const dwellFor = (slide) =>
+        Math.min(DWELL_MAX_MS, Math.max(DWELL_MIN_MS, DWELL_BASE_MS + wordCount(slide) * DWELL_PER_WORD_MS));
+      const canAutoplay = () =>
+        !reduced() && !userPaused && !hovering && !focusInside && !touching && !offscreen && !document.hidden;
 
-      const getCycleWidth = () => getStep() * cards.length;
-      let isLoopAdjusting = false;
-
-      const normalizeLoop = () => {
-        if (isLoopAdjusting) return;
-        const cycleWidth = getCycleWidth();
-        if (cycleWidth <= 0) return;
-        if (viewport.scrollLeft >= cycleWidth) {
-          isLoopAdjusting = true;
-          viewport.scrollLeft -= cycleWidth;
-          window.requestAnimationFrame(() => {
-            isLoopAdjusting = false;
-          });
+      // La fenêtre prend la hauteur de l'avis affiché : pas de grande zone vide, transition douce (CSS).
+      const fitHeight = (immediate) => {
+        if (!viewport) return;
+        const height = slides[index].offsetHeight;
+        if (!height) return;
+        if (immediate) viewport.style.transition = "none";
+        viewport.style.height = `${height}px`;
+        if (immediate) {
+          void viewport.offsetHeight;
+          viewport.style.transition = "";
         }
       };
 
-      const updateDots = () => {
-        if (!dots.length) return;
-        const step = getStep();
-        const rawIndex = Math.round(viewport.scrollLeft / step);
-        const index = ((rawIndex % cards.length) + cards.length) % cards.length;
-        dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index));
+      // Reflet doré sur la bordure, uniquement lors d'un changement d'avis (jamais avec « réduire les animations »).
+      const playShimmer = () => {
+        if (reduced()) return;
+        carousel.classList.remove("is-shimmering");
+        void carousel.offsetWidth; // relance l'animation
+        carousel.classList.add("is-shimmering");
       };
 
-      const goToIndex = (index) => {
-        const step = getStep();
-        viewport.scrollTo({
-          left: Math.max(0, Math.min(cards.length - 1, index)) * step,
-          behavior: "smooth"
+      const render = () => {
+        slides.forEach((slide, i) => {
+          const active = i === index;
+          slide.classList.toggle("is-active", active);
+          slide.setAttribute("aria-hidden", active ? "false" : "true");
+          if ("inert" in slide) slide.inert = !active;
         });
+        dots.forEach((dot, i) => {
+          if (i === index) dot.setAttribute("aria-current", "true");
+          else dot.removeAttribute("aria-current");
+        });
+        fitHeight(false);
       };
 
-      if (prev) {
-        prev.addEventListener("click", () => {
-          const step = getStep();
-          viewport.scrollBy({ left: -step, behavior: "smooth" });
-        });
+      const restartProgress = (running, dwell) => {
+        carousel.classList.remove("is-running");
+        if (!running) return;
+        carousel.style.setProperty("--reviews-dwell", `${dwell}ms`);
+        void carousel.offsetWidth; // relance l'animation de la barre de progression
+        carousel.classList.add("is-running");
+      };
+
+      const stop = () => {
+        if (timer) {
+          window.clearTimeout(timer);
+          timer = null;
+        }
+        restartProgress(false);
+        track.setAttribute("aria-live", "polite"); // annonce les changements demandés par l'utilisateur
+      };
+
+      const schedule = () => {
+        stop();
+        if (!canAutoplay()) return;
+        const dwell = dwellFor(slides[index]);
+        track.setAttribute("aria-live", "off"); // pas d'annonce répétée pendant le défilement automatique
+        restartProgress(true, dwell);
+        timer = window.setTimeout(() => {
+          index = (index + 1) % slides.length;
+          playShimmer();
+          render();
+          schedule();
+        }, dwell);
+      };
+
+      const goTo = (target) => {
+        const next = ((target % slides.length) + slides.length) % slides.length;
+        if (next !== index) playShimmer();
+        index = next;
+        render();
+        schedule();
+      };
+
+      const syncPauseButton = () => {
+        if (!pauseButton) return;
+        pauseButton.hidden = reduced();
+        pauseButton.setAttribute("aria-pressed", userPaused ? "true" : "false");
+        pauseButton.setAttribute(
+          "aria-label",
+          userPaused ? "Reprendre le défilement automatique des avis" : "Mettre en pause le défilement automatique des avis"
+        );
+        carousel.classList.toggle("is-user-paused", userPaused);
+      };
+
+      carousel.classList.add("is-enhanced");
+      if (controls) controls.hidden = false;
+      render();
+      fitHeight(true);
+      syncPauseButton();
+
+      // Le reflet est retiré à la fin de son animation ; la hauteur suit les changements de largeur ou de police.
+      carousel.addEventListener("animationend", (event) => {
+        if (event.animationName === "reviewsRing") carousel.classList.remove("is-shimmering");
+      });
+      if (typeof ResizeObserver === "function") {
+        const observer = new ResizeObserver(() => fitHeight(true));
+        slides.forEach((slide) => observer.observe(slide));
+      } else {
+        window.addEventListener("resize", () => fitHeight(true));
       }
-      if (next) {
-        next.addEventListener("click", () => {
-          const step = getStep();
-          viewport.scrollBy({ left: step, behavior: "smooth" });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitHeight(true));
+
+      if (prevButton) prevButton.addEventListener("click", () => goTo(index - 1));
+      if (nextButton) nextButton.addEventListener("click", () => goTo(index + 1));
+      dots.forEach((dot, i) => dot.addEventListener("click", () => goTo(i)));
+      if (pauseButton) {
+        pauseButton.addEventListener("click", () => {
+          userPaused = !userPaused;
+          syncPauseButton();
+          schedule();
         });
       }
 
-      dots.forEach((dot) => {
-        dot.addEventListener("click", () => {
-          const index = Number(dot.dataset.index || "0");
-          goToIndex(index);
-        });
+      carousel.addEventListener("keydown", (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        const keys = { ArrowLeft: () => goTo(index - 1), ArrowRight: () => goTo(index + 1), Home: () => goTo(0), End: () => goTo(slides.length - 1) };
+        if (!keys[event.key]) return;
+        event.preventDefault();
+        keys[event.key]();
       });
 
-      let autoTimer = null;
-      const startAuto = () => {
-        if (document.hidden) return;
-        stopAuto();
-        autoTimer = window.setInterval(() => {
-          const step = getStep();
-          viewport.scrollBy({ left: step, behavior: "smooth" });
-        }, 4800);
-      };
-      const stopAuto = () => {
-        if (autoTimer) {
-          window.clearInterval(autoTimer);
-          autoTimer = null;
-        }
-      };
+      // Pause pendant toute interaction : survol, focus clavier, toucher.
+      carousel.addEventListener("pointerenter", (event) => {
+        if (event.pointerType !== "mouse") return; // un toucher n'est pas un survol durable
+        hovering = true;
+        schedule();
+      });
+      carousel.addEventListener("pointerleave", (event) => {
+        if (event.pointerType !== "mouse") return;
+        hovering = false;
+        schedule();
+      });
+      carousel.addEventListener("focusin", () => { focusInside = true; schedule(); });
+      carousel.addEventListener("focusout", (event) => {
+        if (event.relatedTarget && carousel.contains(event.relatedTarget)) return;
+        focusInside = false;
+        schedule();
+      });
 
-      viewport.addEventListener("scroll", () => {
-        normalizeLoop();
-        updateDots();
+      let touchStartX = 0;
+      let touchStartY = 0;
+      carousel.addEventListener("touchstart", (event) => {
+        const point = event.touches && event.touches[0];
+        if (point) {
+          touchStartX = point.clientX;
+          touchStartY = point.clientY;
+        }
+        touching = true;
+        if (touchTimer) window.clearTimeout(touchTimer);
+        schedule();
       }, { passive: true });
-      carousel.addEventListener("mouseenter", stopAuto);
-      carousel.addEventListener("mouseleave", startAuto);
-      carousel.addEventListener("touchstart", stopAuto, { passive: true });
-      carousel.addEventListener("touchend", startAuto, { passive: true });
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          stopAuto();
-        } else {
-          startAuto();
+      carousel.addEventListener("touchend", (event) => {
+        const point = event.changedTouches && event.changedTouches[0];
+        if (point) {
+          const dx = point.clientX - touchStartX;
+          const dy = point.clientY - touchStartY;
+          if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) goTo(dx < 0 ? index + 1 : index - 1);
         }
-      });
+        if (touchTimer) window.clearTimeout(touchTimer);
+        touchTimer = window.setTimeout(() => {
+          touching = false;
+          schedule();
+        }, TOUCH_RESUME_MS);
+      }, { passive: true });
 
-      updateDots();
-      startAuto();
+      document.addEventListener("visibilitychange", schedule);
+      if (reduceQuery && typeof reduceQuery.addEventListener === "function") {
+        reduceQuery.addEventListener("change", () => {
+          syncPauseButton();
+          schedule();
+        });
+      }
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((entries) => {
+          offscreen = !entries.some((entry) => entry.isIntersecting);
+          schedule();
+        }, { threshold: 0.2 }).observe(carousel);
+      }
+
+      schedule();
     });
   };
 
