@@ -351,7 +351,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="./assets/css/style.css?v=911b2caf76" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=033dce3b35" />
 </head>
 
 <body>
@@ -531,48 +531,66 @@
           </div>
         </div>
 
-        <div class="reviewsCarousel js-reviews-carousel" aria-label="Avis clients">
+        <div class="reviewsCarousel js-reviews-carousel" role="region" aria-roledescription="carousel" aria-label="Avis clients publiés sur Google">
           <div class="reviewsViewport">
             <div class="reviewsTrack">
-              <article class="reviewCard reviewCard--featured">
+              <article class="reviewCard reviewCard--featured" role="group" aria-roledescription="slide" aria-label="Avis 1 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">JD</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
                 <p class="reviewCard__text">Suite recherche j’ai voulu essayer car avis au top. Envoi du devis, très détaillé ce qui est super, assurances jointes […]</p>
                 <p class="reviewCard__meta">Jean Despinoy (Maxitoon) • Avis Google • 2026</p>
               </article>
-              <article class="reviewCard">
+              <article class="reviewCard" role="group" aria-roledescription="slide" aria-label="Avis 2 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">BH</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
                 <p class="reviewCard__text">Artisan très professionnel et sérieux. Travail impeccable, finitions soignées et chantier laissé parfaitement propre. De très bons conseils et un vrai souci du détail. Je recommande vivement !</p>
                 <p class="reviewCard__meta">Brigitte Hardy • Avis Google • 2026</p>
               </article>
-              <article class="reviewCard">
+              <article class="reviewCard" role="group" aria-roledescription="slide" aria-label="Avis 3 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">SM</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-                <p class="reviewCard__text">Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. […] Je le recommande vivement.</p>
+                <p class="reviewCard__text">J’ai fait appel à Nicolas pour des travaux de rafraîchissement (joints, peinture et parquet) et je suis très satisfaite du résultat. Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. En plus d’être très professionnel, il est respectueux et agréable. Je le recommande vivement.</p>
                 <p class="reviewCard__meta">Stéphanie Munoz • Avis Google • 2026</p>
               </article>
-              <article class="reviewCard">
+              <article class="reviewCard" role="group" aria-roledescription="slide" aria-label="Avis 4 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">NC</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-                <p class="reviewCard__text">Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. […] Professionnalisme et excellent rapport qualité/prix</p>
+                <p class="reviewCard__text">Après l’achat de mon appartement à Saint-Estève, j’ai confié la rénovation complète en peinture à Style et déco , et le résultat est impeccable.</p>
+                <p class="reviewCard__text">Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. L’entreprise a totalement transformé mon appartement.</p>
+                <p class="reviewCard__text">Je recommande Style et déco pour tous travaux de peinture intérieure et rénovation d’appartement à Saint-Estève et aux alentours de Perpignan.</p>
+                <p class="reviewCard__text">Professionnalisme et excellent rapport qualité/prix</p>
                 <p class="reviewCard__meta">Nathalie COPIN • Avis Google • 2026</p>
               </article>
-              <article class="reviewCard">
+              <article class="reviewCard" role="group" aria-roledescription="slide" aria-label="Avis 5 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">MI</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-                <p class="reviewCard__text">Travail de qualité et attitude de professionnel, tout en sachant établir une
-                  relation de confiance avec ses clients et en cherchant à les satisfaire.</p>
+                <p class="reviewCard__text">Travail de qualité et attitude de professionnel, tout en sachant établir une relation de confiance avec ses clients et en cherchant à les satisfaire.</p>
                 <p class="reviewCard__meta">Marina IJ • Avis Google • 2025</p>
               </article>
-              <article class="reviewCard">
+              <article class="reviewCard" role="group" aria-roledescription="slide" aria-label="Avis 6 sur 6">
                 <p class="reviewCard__stars" aria-label="5 sur 5"><span
                     class="reviewCard__avatar">LG</span>&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-                <p class="reviewCard__text">Déjà 2 fois que je fais appel aux talents de M. Pluchart et toujours aussi
-                  content du résultat. Travail de très haute qualité et de très bons conseils.</p>
+                <p class="reviewCard__text">Déjà 2 fois que je fais appel aux talents de M. Pluchart et toujours aussi content du résultat. Travail de très haute qualité et de très bons conseils.</p>
                 <p class="reviewCard__meta">Loïc Guillaumes • Avis Google • 2023</p>
               </article>
             </div>
+          </div>
+          <div class="reviewsProgress" aria-hidden="true"><span></span></div>
+          <div class="reviewsControls" hidden>
+            <button class="reviewsPause" type="button" aria-pressed="false" aria-label="Mettre en pause le défilement automatique des avis">
+              <svg class="reviewsIcon reviewsIcon--pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14"/></svg>
+              <svg class="reviewsIcon reviewsIcon--play" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"/></svg>
+            </button>
+            <button class="reviewsNav" type="button" data-dir="-1" aria-label="Avis précédent"><svg class="reviewsIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <div class="reviewsDots">
+                <button class="reviewsDot" type="button" data-index="0" aria-label="Afficher l’avis 1 sur 6"></button>
+                <button class="reviewsDot" type="button" data-index="1" aria-label="Afficher l’avis 2 sur 6"></button>
+                <button class="reviewsDot" type="button" data-index="2" aria-label="Afficher l’avis 3 sur 6"></button>
+                <button class="reviewsDot" type="button" data-index="3" aria-label="Afficher l’avis 4 sur 6"></button>
+                <button class="reviewsDot" type="button" data-index="4" aria-label="Afficher l’avis 5 sur 6"></button>
+                <button class="reviewsDot" type="button" data-index="5" aria-label="Afficher l’avis 6 sur 6"></button>
+            </div>
+            <button class="reviewsNav" type="button" data-dir="1" aria-label="Avis suivant"><svg class="reviewsIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg></button>
           </div>
         </div>
       </div>
@@ -891,7 +909,7 @@
     </div>
   </footer>
   <script src="./assets/js/lead-form.js?v=50e7677486"></script>
-  <script src="./assets/js/app.js?v=211d33feaa"></script>
+  <script src="./assets/js/app.js?v=16ba1e8851"></script>
 </body>
 
 </html>

@@ -319,13 +319,13 @@ test("nombre de chantiers : 104 exactement, sans « plus de » ni ancien chiffre
   assert.doesNotMatch(home, /data-prefix=/);
 });
 
-test("avis Google : 6 témoignages au plus (4 récents + 2 anciens choisis), textes originaux, sans la réponse du propriétaire", () => {
+test("avis Google : 6 témoignages, textes complets lorsqu'ils sont disponibles (Despinoy : seul le début est connu), sans la réponse du propriétaire", () => {
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
-  const cards = [...track.matchAll(/<article class="(reviewCard[^"]*)">([\s\S]*?)<\/article>/g)].map((match) => ({
+  const cards = [...track.matchAll(/<article class="(reviewCard[^"]*)"[^>]*>([\s\S]*?)<\/article>/g)].map((match) => ({
     cls: match[1],
     stars: match[2].match(/aria-label="(\d) sur 5"/)[1],
-    text: squash(match[2].match(/reviewCard__text">([\s\S]*?)<\/p>/)[1]),
+    text: [...match[2].matchAll(/reviewCard__text">([\s\S]*?)<\/p>/g)].map((paragraph) => squash(paragraph[1])).join(" "),
     meta: squash(match[2].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]),
   }));
   assert.equal(cards.length, 6, "6 témoignages au maximum : 4 avis récents + 2 anciens");
@@ -335,8 +335,8 @@ test("avis Google : 6 témoignages au plus (4 récents + 2 anciens choisis), tex
   const expected = [
     ["Jean Despinoy (Maxitoon) • Avis Google • 2026", "Suite recherche j’ai voulu essayer car avis au top. Envoi du devis, très détaillé ce qui est super, assurances jointes […]"],
     ["Brigitte Hardy • Avis Google • 2026", "Artisan très professionnel et sérieux. Travail impeccable, finitions soignées et chantier laissé parfaitement propre. De très bons conseils et un vrai souci du détail. Je recommande vivement !"],
-    ["Stéphanie Munoz • Avis Google • 2026", "Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. […] Je le recommande vivement."],
-    ["Nathalie COPIN • Avis Google • 2026", "Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. […] Professionnalisme et excellent rapport qualité/prix"],
+    ["Stéphanie Munoz • Avis Google • 2026", "J’ai fait appel à Nicolas pour des travaux de rafraîchissement (joints, peinture et parquet) et je suis très satisfaite du résultat. Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. En plus d’être très professionnel, il est respectueux et agréable. Je le recommande vivement."],
+    ["Nathalie COPIN • Avis Google • 2026", "Après l’achat de mon appartement à Saint-Estève, j’ai confié la rénovation complète en peinture à Style et déco , et le résultat est impeccable. Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. L’entreprise a totalement transformé mon appartement. Je recommande Style et déco pour tous travaux de peinture intérieure et rénovation d’appartement à Saint-Estève et aux alentours de Perpignan. Professionnalisme et excellent rapport qualité/prix"],
   ];
   expected.forEach(([meta, text], index) => {
     assert.equal(cards[index].meta, meta);
@@ -379,7 +379,7 @@ test("note Google 4,9/5 et 16 avis affichés ; aucune note balisée", () => {
 test("étoiles : note déclarée = étoiles dessinées = note d'origine pour chaque avis affiché (aucun 4 étoiles transformé en 5)", () => {
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
-  const cards = [...track.matchAll(/<article class="reviewCard[^"]*">([\s\S]*?)<\/article>/g)].map((match) => ({
+  const cards = [...track.matchAll(/<article class="reviewCard[^"]*"[^>]*>([\s\S]*?)<\/article>/g)].map((match) => ({
     author: squash(match[1].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]).split(" • ")[0],
     declared: Number(match[1].match(/aria-label="(\d) sur 5"/)[1]),
     drawn: (match[1].match(/&#9733;/g) || []).length,
@@ -397,4 +397,31 @@ test("étoiles : note déclarée = étoiles dessinées = note d'origine pour cha
     assert.equal(card.declared, original[card.author], `${card.author} : note déclarée`);
     assert.equal(card.drawn, original[card.author], `${card.author} : étoiles dessinées`);
   }
+});
+
+test("carrousel des avis : structure accessible, 6 avis, commandes manuelles et amélioration progressive", () => {
+  const html = read("index.html");
+  const carousel = html.slice(html.indexOf('<div class="reviewsCarousel'), html.indexOf('<section class="callback30"'));
+  assert.match(carousel, /role="region" aria-roledescription="carousel" aria-label="Avis clients publiés sur Google"/);
+  assert.equal((carousel.match(/aria-roledescription="slide"/g) || []).length, 6);
+  for (let i = 1; i <= 6; i += 1) assert.ok(carousel.includes(`aria-label="Avis ${i} sur 6"`), `diapositive ${i}`);
+  assert.equal((carousel.match(/class="reviewsDot"/g) || []).length, 6);
+  assert.equal((carousel.match(/aria-label="Afficher l’avis \d sur 6"/g) || []).length, 6);
+  assert.match(carousel, /data-dir="-1" aria-label="Avis précédent"/);
+  assert.match(carousel, /data-dir="1" aria-label="Avis suivant"/);
+  assert.match(carousel, /class="reviewsPause" type="button" aria-pressed="false" aria-label="Mettre en pause le défilement automatique des avis"/);
+  assert.match(carousel, /<div class="reviewsControls" hidden>/, "commandes révélées par le JavaScript (amélioration progressive)");
+  assert.doesNotMatch(carousel, /\son[a-z]+=|javascript:/i, "aucun gestionnaire en ligne (CSP)");
+  assert.equal((carousel.match(/<svg[^>]*aria-hidden="true"/g) || []).length, 4, "icônes décoratives masquées aux lecteurs d'écran");
+  // la note globale et le lien vers la fiche restent en dehors du carrousel, inchangés
+  assert.match(html, /<strong>4,9\/5<\/strong>\s*<span>sur Google \(16 avis\)<\/span>/);
+});
+
+test("feuille de style du carrousel : respect de prefers-reduced-motion et focus visible", () => {
+  const css = readFileSync(path.join(SITE, "assets", "css", "style.css"), "utf8");
+  const block = css.slice(css.indexOf("Avis clients : une carte à la fois"));
+  assert.match(block, /@media \(prefers-reduced-motion: reduce\)\{[\s\S]*transition: none !important;[\s\S]*\.reviewsProgress\{ display: none; \}/);
+  assert.match(block, /\.reviewsNav:focus-visible[\s\S]*outline: 2px solid var\(--accent\)/);
+  assert.match(block, /\.reviewsCarousel\.is-enhanced \.reviewCard\{[\s\S]*grid-area: 1 \/ 1;/);
+  assert.match(block, /width: 44px; height: 44px;/, "cibles tactiles de 44 px sur mobile");
 });
