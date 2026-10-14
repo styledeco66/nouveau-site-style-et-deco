@@ -1385,15 +1385,7 @@ h1{
 .shot__meta p{ margin:0; color: var(--muted); font-size: 13px; }
 
 /* Abstract “matières” (sans photos) */
-.shot__media--a{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-1-2.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
+.shot__media--a{ --shot-glow: radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%); }
 .shot__media--b{
   background-image:
     linear-gradient(155deg, rgba(6,8,12,.44), rgba(6,8,12,.20)),
@@ -1403,32 +1395,47 @@ h1{
   background-position: center;
   background-blend-mode: multiply, screen, normal;
 }
-.shot__media--c{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 55% 30%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-2.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
-.shot__media--d{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 45% 35%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-3.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
+.shot__media--c{ --shot-glow: radial-gradient(260px 220px at 55% 30%, rgba(215,181,109,.09), transparent 70%); }
+.shot__media--d{ --shot-glow: radial-gradient(260px 220px at 45% 35%, rgba(215,181,109,.09), transparent 70%); }
+.shot__media--e{ --shot-glow: radial-gradient(260px 220px at 48% 30%, rgba(215,181,109,.09), transparent 70%); }
+/* Photos de réalisations : vraies images <img> (indexables), rendu identique aux anciens fonds CSS
+   (même recadrage « cover », même voile sombre 155°, même halo doré en mode « screen »). */
+.shot__media--a,
+.shot__media--c,
+.shot__media--d,
 .shot__media--e{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 48% 30%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-4.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
+  overflow: hidden;
+  isolation: isolate;
+}
+.shot__media > img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+.shot__media--a::before,
+.shot__media--c::before,
+.shot__media--d::before,
+.shot__media--e::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--shot-glow);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.shot__media--a::after,
+.shot__media--c::after,
+.shot__media--d::after,
+.shot__media--e::after{
+  z-index: 2;
+  background:
+    linear-gradient(180deg, transparent, rgba(0,0,0,.40)),
+    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11));
 }
 .shot--placeholder{
   border-color: rgba(215,181,109,.28);

@@ -7,20 +7,20 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/real-1-2.webp</image:loc>
-      <image:title>Mise en peinture complète d'une maison de standing à Perpignan</image:title>
+      <image:loc>https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp</image:loc>
+      <image:title>Grand séjour ouvert aux murs blancs avec baie vitrée coulissante</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/real-2.webp</image:loc>
-      <image:title>Mise en peinture de façade d'un immeuble à Perpignan</image:title>
+      <image:loc>https://styleetdeco.fr/assets/images/facade-immeuble-balcons-enduit-creme-bande-grise.webp</image:loc>
+      <image:title>Façade d'immeuble avec balcons, enduit crème et bande grise</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/real-3.webp</image:loc>
-      <image:title>Pose de parquet dans un local commercial neuf à Perpignan</image:title>
+      <image:loc>https://styleetdeco.fr/assets/images/grand-local-sol-clair-murs-placo.webp</image:loc>
+      <image:title>Grand local aux murs en plaques de plâtre et au sol clair aspect bois</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/real-4.webp</image:loc>
-      <image:title>Réalisation de joints placo avant mise en peinture à Perpignan</image:title>
+      <image:loc>https://styleetdeco.fr/assets/images/interieur-murs-placo-joints-enduits.webp</image:loc>
+      <image:title>Murs et plafonds en plaques de plâtre aux joints enduits</image:title>
     </image:image>
   </url>
   <url>
@@ -28,22 +28,30 @@
     <lastmod>2026-10-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/peinture-plafond-perpignan-avant-1280.webp</image:loc>
+      <image:title>Chantier de peinture de plafond à Perpignan : protection du chantier avant travaux</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/peinture-plafond-perpignan-apres-1280.webp</image:loc>
+      <image:title>Chantier de peinture de plafond à Perpignan : plafond après peinture</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://styleetdeco.fr/peintre-saint-cyprien/</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/chantier-st-cyprien.webp</image:loc>
+      <image:title>Mur intérieur à l'enduit écaillé en préparation avant peinture à Saint-Cyprien</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://styleetdeco.fr/facade-saint-cyprien/</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/banniere-facade.webp</image:loc>
-      <image:title>Ravalement de façade à Saint-Cyprien — artisan façadier littoral méditerranéen</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://styleetdeco.fr/legal/mentions-legales.html</loc>

@@ -6,3 +6,13 @@ https://www.styleetdeco.fr/* https://styleetdeco.fr/:splat 301!
 /politique-confidentialite/ /legal/politique-confidentialite.html 301
 /legal/mentions-legales.html /legal/mentions-legales.html 200
 /legal/politique-confidentialite.html /legal/politique-confidentialite.html 200
+
+# Anciennes URL d'images (JPEG remplacés par des WebP sans métadonnées GPS ; fichiers renommés)
+/assets/images/peinture-plafond-perpignan-avant.jpg /assets/images/peinture-plafond-perpignan-avant-1280.webp 301
+/assets/images/peinture-plafond-perpignan-apres.jpg /assets/images/peinture-plafond-perpignan-apres-1280.webp 301
+/assets/images/chantier-st-cyprien.jpg /assets/images/chantier-st-cyprien.webp 301
+/assets/images/logo-fin.webp /assets/images/logo-fin-640.webp 301
+/assets/images/real-1-2.webp /assets/images/interieur-sejour-murs-blancs-baie-vitree.webp 301
+/assets/images/real-2.webp /assets/images/facade-immeuble-balcons-enduit-creme-bande-grise.webp 301
+/assets/images/real-3.webp /assets/images/grand-local-sol-clair-murs-placo.webp 301
+/assets/images/real-4.webp /assets/images/interieur-murs-placo-joints-enduits.webp 301
