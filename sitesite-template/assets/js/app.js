@@ -106,18 +106,20 @@
 
   // Avis clients : une carte à la fois, fondu progressif, navigation manuelle (boutons, points, clavier, balayage).
   // Amélioration progressive : sans JavaScript, le défilement horizontal d'origine reste utilisable.
-  // Le défilement automatique est lent (durée proportionnelle à la longueur de l'avis), se met en pause au survol, au
+  // Le défilement automatique est lent (durée proportionnelle au nombre de mots de l'avis), se met en pause au survol, au
   // focus, au toucher et sur demande, et n'existe pas lorsque l'utilisateur préfère réduire les animations.
+  // À chaque changement d'avis, un reflet doré (CSS) glisse sur la bordure ; la hauteur du bloc suit l'avis affiché.
   const initReviewsCarousel = () => {
     const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const DWELL_BASE_MS = 5000;
-    const DWELL_PER_CHAR_MS = 50;
-    const DWELL_MIN_MS = 9000;
-    const DWELL_MAX_MS = 26000;
+    const DWELL_BASE_MS = 3500;
+    const DWELL_PER_WORD_MS = 330; // ~180 mots par minute, transitions comprises
+    const DWELL_MIN_MS = 7000;
+    const DWELL_MAX_MS = 45000;
     const TOUCH_RESUME_MS = 8000;
 
     document.querySelectorAll(".js-reviews-carousel").forEach((carousel) => {
       const track = carousel.querySelector(".reviewsTrack");
+      const viewport = carousel.querySelector(".reviewsViewport");
       const slides = Array.from(carousel.querySelectorAll(".reviewCard"));
       if (!track || slides.length < 2) return;
 
@@ -137,16 +139,38 @@
       let offscreen = false;
 
       const reduced = () => Boolean(reduceQuery && reduceQuery.matches);
-      // Durée de lecture : calculée sur le texte de l'avis (pas sur les espaces du balisage ni sur l'auteur).
-      const readableLength = (slide) => {
+      // Durée de lecture : proportionnelle au nombre de mots du texte de l'avis (pas du balisage ni de l'auteur).
+      const wordCount = (slide) => {
         const parts = typeof slide.querySelectorAll === "function" ? Array.from(slide.querySelectorAll(".reviewCard__text")) : [];
         const text = parts.length ? parts.map((part) => part.textContent).join(" ") : slide.textContent;
-        return text.trim().length;
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        return words.length;
       };
       const dwellFor = (slide) =>
-        Math.min(DWELL_MAX_MS, Math.max(DWELL_MIN_MS, DWELL_BASE_MS + readableLength(slide) * DWELL_PER_CHAR_MS));
+        Math.min(DWELL_MAX_MS, Math.max(DWELL_MIN_MS, DWELL_BASE_MS + wordCount(slide) * DWELL_PER_WORD_MS));
       const canAutoplay = () =>
         !reduced() && !userPaused && !hovering && !focusInside && !touching && !offscreen && !document.hidden;
+
+      // La fenêtre prend la hauteur de l'avis affiché : pas de grande zone vide, transition douce (CSS).
+      const fitHeight = (immediate) => {
+        if (!viewport) return;
+        const height = slides[index].offsetHeight;
+        if (!height) return;
+        if (immediate) viewport.style.transition = "none";
+        viewport.style.height = `${height}px`;
+        if (immediate) {
+          void viewport.offsetHeight;
+          viewport.style.transition = "";
+        }
+      };
+
+      // Reflet doré sur la bordure, uniquement lors d'un changement d'avis (jamais avec « réduire les animations »).
+      const playShimmer = () => {
+        if (reduced()) return;
+        carousel.classList.remove("is-shimmering");
+        void carousel.offsetWidth; // relance l'animation
+        carousel.classList.add("is-shimmering");
+      };
 
       const render = () => {
         slides.forEach((slide, i) => {
@@ -159,6 +183,7 @@
           if (i === index) dot.setAttribute("aria-current", "true");
           else dot.removeAttribute("aria-current");
         });
+        fitHeight(false);
       };
 
       const restartProgress = (running, dwell) => {
@@ -186,13 +211,16 @@
         restartProgress(true, dwell);
         timer = window.setTimeout(() => {
           index = (index + 1) % slides.length;
+          playShimmer();
           render();
           schedule();
         }, dwell);
       };
 
       const goTo = (target) => {
-        index = ((target % slides.length) + slides.length) % slides.length;
+        const next = ((target % slides.length) + slides.length) % slides.length;
+        if (next !== index) playShimmer();
+        index = next;
         render();
         schedule();
       };
@@ -211,7 +239,20 @@
       carousel.classList.add("is-enhanced");
       if (controls) controls.hidden = false;
       render();
+      fitHeight(true);
       syncPauseButton();
+
+      // Le reflet est retiré à la fin de son animation ; la hauteur suit les changements de largeur ou de police.
+      carousel.addEventListener("animationend", (event) => {
+        if (event.animationName === "reviewsRing") carousel.classList.remove("is-shimmering");
+      });
+      if (typeof ResizeObserver === "function") {
+        const observer = new ResizeObserver(() => fitHeight(true));
+        slides.forEach((slide) => observer.observe(slide));
+      } else {
+        window.addEventListener("resize", () => fitHeight(true));
+      }
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitHeight(true));
 
       if (prevButton) prevButton.addEventListener("click", () => goTo(index - 1));
       if (nextButton) nextButton.addEventListener("click", () => goTo(index + 1));

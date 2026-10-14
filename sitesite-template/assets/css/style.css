@@ -2734,20 +2734,96 @@ textarea{ resize: vertical; }
   }
 }
 
-
-
-
 /* =========================
-   Avis clients : une carte à la fois, apparition progressive, navigation manuelle
-   Amélioration progressive : activée par le JavaScript (.is-enhanced) ; sans lui, le
+   Avis clients : présentation premium (noir, anthracite et or)
+   Amélioration progressive : activée par le JavaScript via .is-enhanced ; sans lui, le
    défilement horizontal d'origine reste utilisable.
 ========================= */
 .reviewsControls[hidden],
 .reviewsPause[hidden]{ display: none; }
 
+/* Composants hors mode amélioré : pied d'auteur lisible dans tous les cas */
+.reviewCard__author{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.reviewCard__author .reviewCard__meta{ margin: 0; }
+.reviewCard__name{
+  color: rgba(255,255,255,.95);
+  font-weight: 650;
+}
+.reviewCard__text{ line-height: 1.55; }
+.reviewCard__text + .reviewCard__text{ margin-top: .6em; }
+
+@media (min-width: 981px){
+  /* Plus de largeur pour le texte : lecture confortable et blocs plus bas */
+  .reviewsWrap{ grid-template-columns: .74fr 1.26fr; }
+}
+
+/* ---- Cadre ---- */
+.reviewsCarousel.is-enhanced{
+  --gold: 215, 181, 109;
+  position: relative;
+  padding: 0;
+  overflow: visible;
+  border-radius: 22px;
+  border: 1px solid rgba(var(--gold), .24);
+  background:
+    radial-gradient(540px 230px at 100% 0%, rgba(var(--gold), .10), transparent 70%),
+    linear-gradient(180deg, rgba(21,25,31,.94), rgba(10,13,18,.92));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 40px rgba(0,0,0,.30);
+}
+/* Reflet doré qui glisse sur la bordure (uniquement lors d'un changement d'avis) */
+.reviewsCarousel.is-enhanced::before{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 0 40%, rgba(255,230,168,.95) 50%, transparent 60% 100%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+}
+.reviewsCarousel.is-enhanced.is-shimmering::before{
+  animation: reviewsRing .75s cubic-bezier(.45,.05,.25,1) .1s both;
+}
+@keyframes reviewsRing{
+  0%{ background-position: 100% 0; opacity: 1; }
+  100%{ background-position: 0 0; opacity: 1; }
+}
+
+/* ---- Fenêtre : la hauteur suit l'avis affiché (pas de grande zone vide, transition douce) ---- */
 .reviewsCarousel.is-enhanced .reviewsViewport{
+  position: relative;
   overflow: hidden;
   scroll-snap-type: none;
+  border-radius: 21px 21px 0 0;
+  transition: height .6s cubic-bezier(.4,0,.2,1);
+}
+/* Léger reflet sur la surface, en même temps que celui de la bordure */
+.reviewsCarousel.is-enhanced .reviewsViewport::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(var(--gold), .09) 50%, transparent 62%);
+  transform: translateX(-115%);
+  opacity: 0;
+  pointer-events: none;
+}
+.reviewsCarousel.is-enhanced.is-shimmering .reviewsViewport::after{
+  animation: reviewsSheen .8s ease-in-out .1s both;
+}
+@keyframes reviewsSheen{
+  0%{ transform: translateX(-115%); opacity: 1; }
+  100%{ transform: translateX(115%); opacity: 1; }
 }
 .reviewsCarousel.is-enhanced .reviewsTrack{
   display: grid;
@@ -2756,48 +2832,98 @@ textarea{ resize: vertical; }
   grid-auto-columns: 100%;
   gap: 0;
 }
-/* Toutes les cartes occupent la même cellule : la hauteur du bloc suit l'avis le plus long et ne saute pas. */
+
+/* ---- Carte ---- */
 .reviewsCarousel.is-enhanced .reviewCard{
+  position: relative;
   grid-area: 1 / 1;
+  align-self: start;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding: 24px 30px 16px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(12px);
-  transition: opacity .6s ease, transform .6s ease, visibility 0s linear .6s;
+  transform: translateY(8px);
+  transition: opacity .45s ease, transform .45s ease, visibility 0s linear .45s;
 }
 .reviewsCarousel.is-enhanced .reviewCard.is-active{
   opacity: 1;
   visibility: visible;
   transform: none;
-  transition: opacity .9s ease .2s, transform .9s ease .2s, visibility 0s;
+  transition: opacity .75s ease .3s, transform .75s ease .3s, visibility 0s;
 }
-/* Apparition progressive : étoiles, puis commentaire, puis auteur. */
+.reviewsCarousel.is-enhanced .reviewCard::before{
+  content: "\201C" / "";
+  position: absolute;
+  top: 8px;
+  right: 24px;
+  font: 700 88px/1 Georgia, "Times New Roman", serif;
+  color: rgba(var(--gold), .15);
+  pointer-events: none;
+}
+.reviewsCarousel.is-enhanced .reviewCard__stars{
+  align-self: flex-start;
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 3px;
+  color: #f3cd6f;
+}
+.reviewsCarousel.is-enhanced .reviewCard__text{
+  margin: 0;
+  max-width: 62ch;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.62;
+  color: rgba(255,255,255,.92);
+}
+.reviewsCarousel.is-enhanced .reviewCard__text + .reviewCard__text{ margin-top: .65em; }
+.reviewsCarousel.is-enhanced .reviewCard__author{
+  margin-top: 18px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(var(--gold), .18);
+}
+.reviewsCarousel.is-enhanced .reviewCard__avatar{
+  flex: none;
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  border-color: rgba(var(--gold), .45);
+  background: linear-gradient(135deg, rgba(var(--gold), .30), rgba(255,255,255,.04));
+}
+.reviewsCarousel.is-enhanced .reviewCard__meta{
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted2);
+}
+.reviewsCarousel.is-enhanced .reviewCard__name{ font-size: 14px; }
+
+/* Apparition progressive : étoiles, puis commentaire, puis auteur */
 .reviewsCarousel.is-enhanced .reviewCard__stars,
 .reviewsCarousel.is-enhanced .reviewCard__text,
-.reviewsCarousel.is-enhanced .reviewCard__meta{
+.reviewsCarousel.is-enhanced .reviewCard__author{
   opacity: 0;
   transform: translateY(8px);
   transition: opacity .3s ease, transform .3s ease;
 }
 .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__stars,
 .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__text,
-.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__meta{
+.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__author{
   opacity: 1;
   transform: none;
   transition: opacity .7s ease, transform .7s ease;
 }
-.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__stars{ transition-delay: .35s; }
+.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__stars{ transition-delay: .4s; }
 .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__text{ transition-delay: .6s; }
-.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__text + .reviewCard__text{ transition-delay: .8s; }
-.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__meta{ transition-delay: 1s; }
+.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__text + .reviewCard__text{ transition-delay: .75s; }
+.reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__author{ transition-delay: .95s; }
 
-.reviewCard__stars{ align-self: flex-start; }
-.reviewCard__text{ line-height: 1.55; }
-.reviewCard__text + .reviewCard__text{ margin-top: .7em; }
-.reviewsCarousel.is-enhanced .reviewCard__meta{ margin-top: auto; padding-top: 14px; }
-
+/* ---- Barre de progression dorée ---- */
 .reviewsProgress{
   height: 2px;
   margin-top: 12px;
@@ -2805,10 +2931,16 @@ textarea{ resize: vertical; }
   background: rgba(255,255,255,.08);
   overflow: hidden;
 }
+.reviewsCarousel.is-enhanced .reviewsProgress{
+  margin: 0;
+  border-radius: 0;
+  background: rgba(var(--gold), .10);
+}
 .reviewsProgress span{
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, rgba(215,181,109,.25), var(--accent));
+  background: linear-gradient(90deg, rgba(215,181,109,.12), rgba(215,181,109,.95));
+  box-shadow: 0 0 8px rgba(215,181,109,.55);
   transform-origin: left center;
   transform: scaleX(0);
 }
@@ -2819,32 +2951,38 @@ textarea{ resize: vertical; }
   to{ transform: scaleX(1); }
 }
 
+/* ---- Commandes ---- */
 .reviewsControls{
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
+  padding: 8px 14px 10px 24px;
+}
+.reviewsButtons{
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .reviewsNav,
 .reviewsPause{
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(215,181,109,.28);
+  background: rgba(255,255,255,.03);
   color: rgba(255,255,255,.88);
   cursor: pointer;
   transition: border-color .25s ease, background .25s ease, color .25s ease;
 }
 .reviewsNav:hover,
 .reviewsPause:hover{
-  border-color: rgba(215,181,109,.56);
-  background: rgba(215,181,109,.10);
+  border-color: rgba(215,181,109,.65);
+  background: rgba(215,181,109,.12);
   color: #fff;
 }
 .reviewsNav:focus-visible,
@@ -2854,8 +2992,8 @@ textarea{ resize: vertical; }
   outline-offset: 2px;
 }
 .reviewsIcon{
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -2883,35 +3021,52 @@ textarea{ resize: vertical; }
 }
 .reviewsDot::before{
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
-  background: rgba(255,255,255,.30);
+  background: rgba(255,255,255,.28);
   transition: width .35s ease, background .35s ease;
 }
-.reviewsDot:hover::before{ background: rgba(255,255,255,.55); }
+.reviewsDot:hover::before{ background: rgba(215,181,109,.65); }
 .reviewsDot[aria-current="true"]::before{
   width: 22px;
-  background: var(--accent);
+  background: #d7b56d;
 }
+
+/* ---- Mobile : carte compacte, texte toujours à 16 px, cibles tactiles de 44 px ---- */
 @media (max-width: 720px){
+  .reviewsCarousel.is-enhanced{ border-radius: 18px; }
+  .reviewsCarousel.is-enhanced .reviewsViewport{ border-radius: 17px 17px 0 0; }
+  .reviewsCarousel.is-enhanced .reviewCard{ padding: 18px 16px 12px; }
+  .reviewsCarousel.is-enhanced .reviewCard::before{ top: 4px; right: 14px; font-size: 64px; }
+  .reviewsCarousel.is-enhanced .reviewCard__stars{ margin-bottom: 9px; font-size: 14px; }
+  .reviewsCarousel.is-enhanced .reviewCard__text{ max-width: none; font-size: 16px; line-height: 1.55; }
+  .reviewsCarousel.is-enhanced .reviewCard__author{ margin-top: 14px; padding-top: 11px; gap: 10px; }
+  .reviewsCarousel.is-enhanced .reviewCard__avatar{ width: 30px; height: 30px; font-size: 11px; }
+  .reviewsControls{ padding: 4px 8px 6px 14px; gap: 4px; }
+  .reviewsButtons{ gap: 4px; }
   .reviewsNav,
   .reviewsPause{ width: 44px; height: 44px; }
-  .reviewsControls{ gap: 6px; }
+  .reviewsDot{ width: 22px; }
 }
+
+/* ---- Préférence « réduire les animations » : aucun mouvement, navigation inchangée ---- */
 @media (prefers-reduced-motion: reduce){
+  .reviewsCarousel.is-enhanced .reviewsViewport,
   .reviewsCarousel.is-enhanced .reviewCard,
   .reviewsCarousel.is-enhanced .reviewCard.is-active,
   .reviewsCarousel.is-enhanced .reviewCard__stars,
   .reviewsCarousel.is-enhanced .reviewCard__text,
-  .reviewsCarousel.is-enhanced .reviewCard__meta,
+  .reviewsCarousel.is-enhanced .reviewCard__author,
   .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__stars,
   .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__text,
-  .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__meta{
+  .reviewsCarousel.is-enhanced .reviewCard.is-active .reviewCard__author{
     transition: none !important;
     transform: none !important;
   }
-  .reviewsProgress{ display: none; }
+  .reviewsCarousel.is-enhanced::before,
+  .reviewsCarousel.is-enhanced .reviewsViewport::after,
+  .reviewsProgress{ display: none !important; }
   .reviewsDot::before,
   .reviewsNav,
   .reviewsPause{ transition: none; }

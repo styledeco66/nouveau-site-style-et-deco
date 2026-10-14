@@ -35,7 +35,8 @@ const makeElement = (extra = {}) => {
   return element;
 };
 
-const LENGTHS = [118, 190, 330, 520, 150, 151]; // longueurs d'avis proches des textes réels
+const WORDS = [97, 31, 56, 77, 22, 26]; // nombres de mots proches des six avis réels
+const HEIGHTS = [260, 150, 210, 280, 130, 140];
 
 const setup = ({ reduced = false } = {}) => {
   const timers = new Map();
@@ -58,18 +59,20 @@ const setup = ({ reduced = false } = {}) => {
   // plusieurs observateurs existent (révélation au défilement, carrousel) : on retient celui du carrousel (seuil 0,2)
   window.IntersectionObserver = class { constructor(callback, options) { if (options && options.threshold === 0.2) observerCallback = callback; } observe() {} unobserve() {} };
 
-  const slides = LENGTHS.map((length) => makeElement({ textContent: "x".repeat(length) }));
+  const slides = WORDS.map((words, i) => makeElement({ textContent: Array(words).fill("mot").join(" "), offsetHeight: HEIGHTS[i] }));
+  const viewport = makeElement();
   const dots = slides.map(() => makeElement());
   const prev = makeElement();
   const next = makeElement();
   const pause = makeElement();
   const controls = makeElement({ hidden: true });
   const track = makeElement();
-  const members = new Set([...slides, ...dots, prev, next, pause, controls, track]);
+  const members = new Set([...slides, ...dots, prev, next, pause, controls, track, viewport]);
   const carousel = makeElement({
     contains: (node) => members.has(node),
     querySelector: (selector) => ({
       ".reviewsTrack": track,
+      ".reviewsViewport": viewport,
       ".reviewsControls": controls,
       '.reviewsNav[data-dir="-1"]': prev,
       '.reviewsNav[data-dir="1"]': next,
@@ -102,7 +105,7 @@ const setup = ({ reduced = false } = {}) => {
     }
   };
   return {
-    slides, dots, prev, next, pause, controls, track, carousel, document, media, mediaListeners,
+    slides, dots, prev, next, pause, controls, track, viewport, carousel, document, media, mediaListeners,
     active, pending, advance,
     hidden: (value) => { document.hidden = value; visibilityHandlers.forEach((handler) => handler()); },
     observe: (isIntersecting) => observerCallback([{ isIntersecting }]),
@@ -121,18 +124,19 @@ test("initialisation : première carte active, commandes révélées, une seule 
   assert.equal(c.track.getAttribute("aria-live"), "off", "pas d'annonce pendant le défilement automatique");
 });
 
-test("défilement automatique lent : durée proportionnelle à la longueur, entre 9 s et 26 s", () => {
+test("défilement automatique lent : durée proportionnelle au nombre de mots (3,5 s + 0,33 s par mot, entre 7 s et 45 s)", () => {
   const c = setup();
-  const expected = (length) => Math.min(26000, Math.max(9000, 5000 + length * 50));
+  const expected = (words) => Math.min(45000, Math.max(7000, 3500 + words * 330));
   assert.equal(c.pending().length, 1);
-  for (let i = 0; i < LENGTHS.length; i += 1) {
-    assert.equal(c.pending()[0].delay, expected(LENGTHS[i]), `carte ${i + 1}`);
-    assert.ok(c.pending()[0].delay >= 9000, "au moins 9 s de lecture");
+  for (let i = 0; i < WORDS.length; i += 1) {
+    assert.equal(c.pending()[0].delay, expected(WORDS[i]), `carte ${i + 1}`);
+    assert.ok(c.pending()[0].delay >= 7000, "au moins 7 s de lecture");
     c.advance(c.pending()[0].delay);
   }
   assert.equal(c.active(), 0, "retour à la première carte après un tour complet");
-  assert.equal(expected(520), 26000);
-  assert.ok(expected(118) > 10000);
+  assert.ok(expected(97) > 30000, "le long avis de M. Despinoy (~97 mots) reste affiché plus de 30 s");
+  assert.ok(expected(22) < 12000, "un avis court n'attend pas inutilement");
+  assert.ok(expected(97) / 97 < expected(22) / 22, "proportionnel : le temps par mot est plus faible pour un long avis (durée de base amortie)");
 });
 
 test("le défilement n'est jamais plus rapide que la lecture : aucune avance avant la fin de la durée", () => {
@@ -212,7 +216,7 @@ test("balayage tactile : vers la gauche = suivant, vers la droite = précédent 
   assert.equal(c.active(), 0, "geste vertical ou trop court : ignoré");
   assert.equal(c.pending().some((timer) => timer.delay === 8000), true);
   c.advance(8000);
-  assert.ok(c.pending().some((timer) => timer.delay >= 9000), "défilement relancé");
+  assert.ok(c.pending().some((timer) => timer.delay >= 7000), "défilement relancé");
 });
 
 test("bouton pause : bascule, état annoncé (aria-pressed, libellé), arrêt et reprise du défilement", () => {
@@ -274,4 +278,37 @@ test("un carrousel de moins de deux avis n'est pas activé (le contenu reste lis
   vm.runInNewContext(readFileSync(SOURCE, "utf8"), { document, window, sessionStorage: { getItem() { return null; }, removeItem() {}, setItem() {} } });
   onReady();
   assert.ok(!carousel.classes.has("is-enhanced"));
+});
+
+test("hauteur : la fenêtre prend la hauteur de l'avis affiché, sans saut à l'initialisation", () => {
+  const c = setup();
+  assert.equal(c.viewport.style.height, `${HEIGHTS[0]}px`);
+  c.next.dispatch("click");
+  assert.equal(c.viewport.style.height, `${HEIGHTS[1]}px`);
+  c.dots[3].dispatch("click");
+  assert.equal(c.viewport.style.height, `${HEIGHTS[3]}px`);
+  assert.equal(c.viewport.style.transition, "", "transition CSS conservée après l'ajustement immédiat initial");
+});
+
+test("reflet doré : déclenché uniquement lors d'un changement d'avis, retiré à la fin de l'animation", () => {
+  const c = setup();
+  assert.ok(!c.carousel.classes.has("is-shimmering"), "aucune lumière au chargement");
+  c.next.dispatch("click");
+  assert.ok(c.carousel.classes.has("is-shimmering"));
+  c.carousel.dispatch("animationend", { animationName: "reviewsSheen" });
+  assert.ok(c.carousel.classes.has("is-shimmering"), "seule la fin de l'animation de la bordure retire le reflet");
+  c.carousel.dispatch("animationend", { animationName: "reviewsRing" });
+  assert.ok(!c.carousel.classes.has("is-shimmering"), "aucune lumière permanente");
+  c.dots[1].dispatch("click"); // déjà sur l'avis 2 : pas de changement, pas de reflet
+  assert.ok(!c.carousel.classes.has("is-shimmering"));
+  c.advance(c.pending()[0].delay); // changement automatique
+  assert.ok(c.carousel.classes.has("is-shimmering"));
+});
+
+test("reflet doré : supprimé avec la préférence de réduction des animations", () => {
+  const c = setup({ reduced: true });
+  c.next.dispatch("click");
+  c.dots[3].dispatch("click");
+  assert.equal(c.active(), 3, "navigation fonctionnelle");
+  assert.ok(!c.carousel.classes.has("is-shimmering"));
 });

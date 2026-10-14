@@ -24,6 +24,7 @@ const read = (file) => readFileSync(path.join(SITE, file), "utf8");
 const decode = (text) =>
   text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ");
 const squash = (text) => decode(text).replace(/\s+/g, " ").trim();
+const plain = (html) => squash(html.replace(/<[^>]+>/g, " ")).replace(/\s+([,.])/g, "$1");
 const visibleText = (html) =>
   squash(html.split("</head>")[1].replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " "));
 
@@ -319,21 +320,21 @@ test("nombre de chantiers : 104 exactement, sans « plus de » ni ancien chiffre
   assert.doesNotMatch(home, /data-prefix=/);
 });
 
-test("avis Google : 6 témoignages, textes complets lorsqu'ils sont disponibles (Despinoy : seul le début est connu), sans la réponse du propriétaire", () => {
+test("avis Google : 6 témoignages, textes intégraux (Despinoy compris), sans point de suspension artificiel ni réponse du propriétaire", () => {
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
   const cards = [...track.matchAll(/<article class="(reviewCard[^"]*)"[^>]*>([\s\S]*?)<\/article>/g)].map((match) => ({
     cls: match[1],
     stars: match[2].match(/aria-label="(\d) sur 5"/)[1],
     text: [...match[2].matchAll(/reviewCard__text">([\s\S]*?)<\/p>/g)].map((paragraph) => squash(paragraph[1])).join(" "),
-    meta: squash(match[2].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]),
+    meta: squash(match[2].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1].replace(/<[^>]+>/g, "")),
   }));
   assert.equal(cards.length, 6, "6 témoignages au maximum : 4 avis récents + 2 anciens");
   assert.deepEqual(cards.map((card) => card.meta.split(" • ")[0]), ["Jean Despinoy (Maxitoon)", "Brigitte Hardy", "Stéphanie Munoz", "Nathalie COPIN", "Marina IJ", "Loïc Guillaumes"]);
   assert.equal(cards.filter((card) => card.cls.includes("featured")).length, 1);
   assert.ok(cards[0].cls.includes("featured"));
   const expected = [
-    ["Jean Despinoy (Maxitoon) • Avis Google • 2026", "Suite recherche j’ai voulu essayer car avis au top. Envoi du devis, très détaillé ce qui est super, assurances jointes […]"],
+    ["Jean Despinoy (Maxitoon) • Avis Google • 2026", "Suite recherche j’ai voulu essayer car avis au top. Envoi du devis, très détaillé ce qui est super, assurances jointes ce qui est extrêmement rare. Travaux : Ponctuel, très professionnel, excellente protection du chantier, s’applique à ce que tout soit parfait, fin de chantier nickel avec nettoyage complet. Résultats exceptionnels, on voit que cet artisan est un vrai pro avec un travail soigné et de qualité. Rangé dans la catégorie des super artisans avec un haut niveau de compétences dans son domaine. Merci à lui."],
     ["Brigitte Hardy • Avis Google • 2026", "Artisan très professionnel et sérieux. Travail impeccable, finitions soignées et chantier laissé parfaitement propre. De très bons conseils et un vrai souci du détail. Je recommande vivement !"],
     ["Stéphanie Munoz • Avis Google • 2026", "J’ai fait appel à Nicolas pour des travaux de rafraîchissement (joints, peinture et parquet) et je suis très satisfaite du résultat. Son travail est minutieux, très soigné et réalisé avec beaucoup de sérieux. La qualité est irréprochable et tout est laissé propre. En plus d’être très professionnel, il est respectueux et agréable. Je le recommande vivement."],
     ["Nathalie COPIN • Avis Google • 2026", "Après l’achat de mon appartement à Saint-Estève, j’ai confié la rénovation complète en peinture à Style et déco , et le résultat est impeccable. Travail soigné, finitions parfaites, respect des délais et chantier propre du début à la fin. L’entreprise a totalement transformé mon appartement. Je recommande Style et déco pour tous travaux de peinture intérieure et rénovation d’appartement à Saint-Estève et aux alentours de Perpignan. Professionnalisme et excellent rapport qualité/prix"],
@@ -348,6 +349,7 @@ test("avis Google : 6 témoignages, textes complets lorsqu'ils sont disponibles 
     assert.ok(!visible.includes(reply), `réponse du propriétaire reprise par erreur : ${reply}`);
   }
   assert.ok(html.includes('href="https://www.google.com/maps?cid=3698755901832647189"'), "lien vers les avis Google conservé");
+  for (const card of cards) assert.doesNotMatch(card.text, /…|\[\.\.\.\]|\[…\]|\.\.\./, `${card.meta} : aucune coupe ni point de suspension artificiel`);
   assert.equal(cards[4].text, "Travail de qualité et attitude de professionnel, tout en sachant établir une relation de confiance avec ses clients et en cherchant à les satisfaire.");
   assert.equal(cards[4].meta, "Marina IJ • Avis Google • 2025");
   assert.equal(cards[5].text, "Déjà 2 fois que je fais appel aux talents de M. Pluchart et toujours aussi content du résultat. Travail de très haute qualité et de très bons conseils.");
@@ -380,7 +382,7 @@ test("étoiles : note déclarée = étoiles dessinées = note d'origine pour cha
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
   const cards = [...track.matchAll(/<article class="reviewCard[^"]*"[^>]*>([\s\S]*?)<\/article>/g)].map((match) => ({
-    author: squash(match[1].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]).split(" • ")[0],
+    author: squash(match[1].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1].replace(/<[^>]+>/g, "")).split(" • ")[0],
     declared: Number(match[1].match(/aria-label="(\d) sur 5"/)[1]),
     drawn: (match[1].match(/&#9733;/g) || []).length,
   }));
@@ -417,11 +419,38 @@ test("carrousel des avis : structure accessible, 6 avis, commandes manuelles et 
   assert.match(html, /<strong>4,9\/5<\/strong>\s*<span>sur Google \(16 avis\)<\/span>/);
 });
 
-test("feuille de style du carrousel : respect de prefers-reduced-motion et focus visible", () => {
+test("feuille de style du carrousel : reflet doré bref et ponctuel, animations réduites, focus visible, lisibilité mobile", () => {
   const css = readFileSync(path.join(SITE, "assets", "css", "style.css"), "utf8");
-  const block = css.slice(css.indexOf("Avis clients : une carte à la fois"));
-  assert.match(block, /@media \(prefers-reduced-motion: reduce\)\{[\s\S]*transition: none !important;[\s\S]*\.reviewsProgress\{ display: none; \}/);
+  const block = css.slice(css.indexOf("Avis clients : présentation premium"));
+  // reflet : une seule passe de 0,5 à 0,8 s, uniquement pendant .is-shimmering, aucune lumière permanente
+  const ring = block.match(/\.reviewsCarousel\.is-enhanced\.is-shimmering::before\{\s*animation: reviewsRing ([\d.]+)s [^;]*;/);
+  assert.ok(ring, "animation du reflet de bordure");
+  assert.ok(Number(ring[1]) >= 0.5 && Number(ring[1]) <= 0.8, `durée du reflet ${ring[1]} s`);
+  assert.match(block, /\.reviewsCarousel\.is-enhanced::before\{[\s\S]*?opacity: 0;/, "bordure lumineuse invisible au repos");
+  assert.match(block, /\.reviewsCarousel\.is-enhanced\.is-shimmering \.reviewsViewport::after\{\s*animation: reviewsSheen/);
+  assert.doesNotMatch(block, /animation:[^;]*infinite/, "aucune animation en boucle");
+  assert.match(block, /mask-composite: exclude/);
+  // préférence de réduction des animations
+  assert.match(block, /@media \(prefers-reduced-motion: reduce\)\{[\s\S]*transition: none !important;[\s\S]*display: none !important;/);
+  // accessibilité et mobile
   assert.match(block, /\.reviewsNav:focus-visible[\s\S]*outline: 2px solid var\(--accent\)/);
-  assert.match(block, /\.reviewsCarousel\.is-enhanced \.reviewCard\{[\s\S]*grid-area: 1 \/ 1;/);
+  assert.match(block, /\.reviewsCarousel\.is-enhanced \.reviewCard\{[\s\S]*?grid-area: 1 \/ 1;/);
   assert.match(block, /width: 44px; height: 44px;/, "cibles tactiles de 44 px sur mobile");
+  assert.match(block, /font-size: 16px; line-height: 1\.55/, "texte à 16 px sur mobile, jamais réduit");
+  assert.doesNotMatch(block, /overflow-y: ?(auto|scroll)|overflow: ?(auto|scroll)/, "aucune barre de défilement interne");
+  assert.match(block, /transition: height \.6s/, "la hauteur suit l'avis affiché avec une transition douce");
+});
+
+test("carte d'avis : étoiles, texte(s) en HTML, pied d'auteur ; initiales décoratives ; aucun texte généré par JavaScript", () => {
+  const html = read("index.html");
+  const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
+  const articles = [...track.matchAll(/<article class="reviewCard[^"]*"[^>]*>([\s\S]*?)<\/article>/g)].map((match) => match[1]);
+  assert.equal(articles.length, 6);
+  for (const article of articles) {
+    assert.match(article, /<p class="reviewCard__stars" aria-label="\d sur 5">(?:&#9733;){4,5}<\/p>/);
+    assert.match(article, /<p class="reviewCard__text">[^<]{40,}<\/p>/, "le texte est dans le HTML (indexable)");
+    assert.match(article, /<div class="reviewCard__author">\s*<span class="reviewCard__avatar" aria-hidden="true">[A-Z]{2}<\/span>\s*<p class="reviewCard__meta"><span class="reviewCard__name">[^<]+<\/span> • Avis Google • 20\d\d<\/p>/);
+  }
+  const js = readFileSync(path.join(SITE, "assets", "js", "app.js"), "utf8");
+  assert.doesNotMatch(js, /textContent\s*=\s*[^;]*review|innerHTML\s*=[^;]*review/i, "les avis ne sont pas écrits lettre par lettre par le JavaScript");
 });
