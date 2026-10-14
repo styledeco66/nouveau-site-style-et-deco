@@ -319,7 +319,7 @@ test("nombre de chantiers : 104 exactement, sans « plus de » ni ancien chiffre
   assert.doesNotMatch(home, /data-prefix=/);
 });
 
-test("avis Google : les 4 avis récents sont intégrés tels quels (5 étoiles), sans la réponse du propriétaire", () => {
+test("avis Google : 6 témoignages au plus (4 récents + 2 anciens choisis), textes originaux, sans la réponse du propriétaire", () => {
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
   const cards = [...track.matchAll(/<article class="(reviewCard[^"]*)">([\s\S]*?)<\/article>/g)].map((match) => ({
@@ -328,7 +328,8 @@ test("avis Google : les 4 avis récents sont intégrés tels quels (5 étoiles),
     text: squash(match[2].match(/reviewCard__text">([\s\S]*?)<\/p>/)[1]),
     meta: squash(match[2].match(/reviewCard__meta">([\s\S]*?)<\/p>/)[1]),
   }));
-  assert.equal(cards.length, 15, "4 nouveaux avis + 11 avis déjà présents (aucun avis existant retiré)");
+  assert.equal(cards.length, 6, "6 témoignages au maximum : 4 avis récents + 2 anciens");
+  assert.deepEqual(cards.map((card) => card.meta.split(" • ")[0]), ["Jean Despinoy (Maxitoon)", "Brigitte Hardy", "Stéphanie Munoz", "Nathalie COPIN", "Marina IJ", "Loïc Guillaumes"]);
   assert.equal(cards.filter((card) => card.cls.includes("featured")).length, 1);
   assert.ok(cards[0].cls.includes("featured"));
   const expected = [
@@ -347,7 +348,11 @@ test("avis Google : les 4 avis récents sont intégrés tels quels (5 étoiles),
     assert.ok(!visible.includes(reply), `réponse du propriétaire reprise par erreur : ${reply}`);
   }
   assert.ok(html.includes('href="https://www.google.com/maps?cid=3698755901832647189"'), "lien vers les avis Google conservé");
-  assert.ok(squash(track).includes("Excellent peintre décorateur dans la région"), "avis existants conservés");
+  assert.equal(cards[4].text, "Travail de qualité et attitude de professionnel, tout en sachant établir une relation de confiance avec ses clients et en cherchant à les satisfaire.");
+  assert.equal(cards[4].meta, "Marina IJ • Avis Google • 2025");
+  assert.equal(cards[5].text, "Déjà 2 fois que je fais appel aux talents de M. Pluchart et toujours aussi content du résultat. Travail de très haute qualité et de très bons conseils.");
+  assert.equal(cards[5].meta, "Loïc Guillaumes • Avis Google • 2023");
+  assert.ok(!squash(track).includes("Refais mon plafond"), "avis comportant une faute : écarté");
 });
 
 test("horaires de la fiche Google (lundi-vendredi 8 h-18 h, week-end fermé) identiques dans le texte et le balisage", () => {
@@ -371,7 +376,7 @@ test("note Google 4,9/5 et 16 avis affichés ; aucune note balisée", () => {
   assert.doesNotMatch(JSON.stringify(allNodes()), /aggregateRating|ratingValue|reviewCount/);
 });
 
-test("étoiles des 15 avis : note déclarée = étoiles dessinées = note d'origine (2 avis restent à 4 étoiles)", () => {
+test("étoiles : note déclarée = étoiles dessinées = note d'origine pour chaque avis affiché (aucun 4 étoiles transformé en 5)", () => {
   const html = read("index.html");
   const track = html.slice(html.indexOf('class="reviewsTrack"'), html.indexOf('<section class="callback30"'));
   const cards = [...track.matchAll(/<article class="reviewCard[^"]*">([\s\S]*?)<\/article>/g)].map((match) => ({
@@ -379,16 +384,17 @@ test("étoiles des 15 avis : note déclarée = étoiles dessinées = note d'orig
     declared: Number(match[1].match(/aria-label="(\d) sur 5"/)[1]),
     drawn: (match[1].match(/&#9733;/g) || []).length,
   }));
-  const expected = {
+  // notes d'origine des 15 avis déjà présents ou intégrés (historique du site depuis le 16/02/2026 et captures Google)
+  const original = {
     "Jean Despinoy (Maxitoon)": 5, "Brigitte Hardy": 5, "Stéphanie Munoz": 5, "Nathalie COPIN": 5,
     "JEAN PAUL PIZZUTO": 5, "Marina IJ": 5, "Eva Martinez": 5, "Loïc Guillaumes": 5,
     "Carlos Mateus da Silva": 4, "Jennifer Pichard": 5, "John B": 5, "Anissa Anissa": 5,
     "Jonathan Pueyo": 5, "Gabriel Merotto": 5, "FLORIAN ASTORGA": 4,
   };
-  assert.deepEqual(cards.map((card) => card.author), Object.keys(expected));
+  assert.equal(cards.length, 6);
   for (const card of cards) {
-    assert.equal(card.declared, expected[card.author], `${card.author} : note déclarée`);
-    assert.equal(card.drawn, expected[card.author], `${card.author} : étoiles dessinées`);
+    assert.ok(card.author in original, `${card.author} : avis inconnu`);
+    assert.equal(card.declared, original[card.author], `${card.author} : note déclarée`);
+    assert.equal(card.drawn, original[card.author], `${card.author} : étoiles dessinées`);
   }
-  assert.equal(cards.filter((card) => card.declared === 4).length, 2);
 });
