@@ -78,7 +78,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../assets/css/style.css?v=932e1c1c5e" />
+  <link rel="stylesheet" href="../assets/css/style.css?v=304b7def63" />
   <style>
     .local-page main {
       overflow: clip;
@@ -94,15 +94,32 @@
       background-repeat: no-repeat;
     }
 
-    .local-page-hero::before {
+    /* Sélecteur renforcé : la règle globale « .section::before » (filet de 1 px) neutralisait ce voile */
+    .section.local-page-hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg,
+      width: auto;
+      height: auto;
+      transform: none;
+      opacity: 1;
+      /* Voile sombre concentré derrière le texte (gauche), photo préservée à droite */
+      background:
+        linear-gradient(90deg,
           rgba(6, 8, 12, .90) 0%,
-          rgba(6, 8, 12, .72) 60%,
-          rgba(6, 8, 12, .55) 100%);
+          rgba(6, 8, 12, .84) 38%,
+          rgba(6, 8, 12, .68) 70%,
+          rgba(6, 8, 12, .30) 100%),
+        linear-gradient(180deg,
+          rgba(6, 8, 12, .30) 0%,
+          rgba(6, 8, 12, 0) 35%,
+          rgba(6, 8, 12, .34) 100%);
       z-index: 0;
+    }
+
+    .local-page-hero h1,
+    .local-page-hero .lead {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 2px 18px rgba(0, 0, 0, .40);
     }
 
     .local-page-hero .container {
@@ -127,7 +144,7 @@
     .local-page-hero .lead {
       font-size: clamp(1.02rem, 1.5vw, 1.2rem);
       line-height: 1.6;
-      color: rgba(255, 255, 255, .85);
+      color: rgba(255, 255, 255, .94);
     }
 
     .local-page-cta {
@@ -229,8 +246,9 @@
     }
 
     .local-page .section__head {
+      display: block;
       margin-bottom: 20px;
-      max-width: 900px;
+      max-width: none;
     }
 
     .local-page .section__head h2 {
@@ -238,6 +256,10 @@
       line-height: 1.2;
       letter-spacing: -0.01em;
       text-wrap: balance;
+    }
+
+    .local-page .section__head h2 + p {
+      margin-top: 14px;
     }
 
     .local-page .section__head p,
@@ -345,8 +367,26 @@
     }
 
     @media (max-width: 720px) {
-      .local-page-hero {
-        padding: 64px 0 48px;
+      /* Mobile : la photographie occupe toute la partie haute, nette et lumineuse ; le titre et le texte
+         se posent en dessous sur fond anthracite (aucun voile sur la photo, seulement un fondu bas). */
+      .local-page .section.local-page-hero {
+        --hero-photo-h: clamp(220px, 64vw, 340px);
+        padding: calc(var(--hero-photo-h) - 30px) 0 40px;
+        background-image: none;
+        background-color: #0b0d10;
+      }
+
+      .section.local-page-hero::before {
+        inset: 0 0 auto 0;
+        height: var(--hero-photo-h);
+        background:
+          linear-gradient(180deg, rgba(11, 13, 16, 0) 58%, rgba(11, 13, 16, .70) 84%, #0b0d10 100%),
+          url("../assets/images/banniere-facade-900.webp") center 42% / cover no-repeat;
+      }
+
+      .local-page-hero h1,
+      .local-page-hero .lead {
+        text-shadow: none;
       }
 
       .local-page-hero h1 {
@@ -642,7 +682,7 @@
     </div>
   </footer>
 
-  <script src="../assets/js/app.js?v=dc889d216c"></script>
+  <script src="../assets/js/app.js?v=5612bbaafc"></script>
 </body>
 
 </html>

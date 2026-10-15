@@ -479,6 +479,19 @@
     const menu = document.querySelector(".mobileMenu");
     if (!toggle || !menu) return;
 
+    const header = document.querySelector(".header");
+    let rafId = 0;
+    // Place le menu juste sous l'en-tête réel (hauteur variable selon la largeur, le logo et le défilement).
+    const placeMenu = () => {
+      rafId = 0;
+      if (!header) return;
+      const bottom = Math.max(0, Math.round(header.getBoundingClientRect().bottom));
+      menu.style.setProperty("--mobile-menu-top", `${bottom + 6}px`);
+    };
+    const schedulePlace = () => {
+      if (!rafId) rafId = window.requestAnimationFrame(placeMenu);
+    };
+
     const closeMenu = () => {
       toggle.classList.remove("is-open");
       menu.classList.remove("is-open");
@@ -491,6 +504,7 @@
       menu.classList.add("is-open");
       toggle.setAttribute("aria-expanded", "true");
       menu.hidden = false;
+      placeMenu();
     };
 
     toggle.addEventListener("click", () => {
@@ -511,10 +525,16 @@
     });
 
     window.addEventListener("resize", () => {
-      if (!window.matchMedia("(max-width: 720px)").matches) {
+      if (!window.matchMedia("(max-width: 980px)").matches) {
         closeMenu();
+      } else if (menu.classList.contains("is-open")) {
+        schedulePlace();
       }
     });
+    window.addEventListener("orientationchange", schedulePlace);
+    window.addEventListener("scroll", () => {
+      if (menu.classList.contains("is-open")) schedulePlace();
+    }, { passive: true });
   };
 
   const moveHeroFormBelowReviewsOnMobile = () => {

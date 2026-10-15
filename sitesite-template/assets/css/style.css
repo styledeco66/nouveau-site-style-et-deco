@@ -1385,15 +1385,7 @@ h1{
 .shot__meta p{ margin:0; color: var(--muted); font-size: 13px; }
 
 /* Abstract “matières” (sans photos) */
-.shot__media--a{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-1-2.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
+.shot__media--a{ --shot-glow: radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%); }
 .shot__media--b{
   background-image:
     linear-gradient(155deg, rgba(6,8,12,.44), rgba(6,8,12,.20)),
@@ -1403,32 +1395,47 @@ h1{
   background-position: center;
   background-blend-mode: multiply, screen, normal;
 }
-.shot__media--c{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 55% 30%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-2.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
-.shot__media--d{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 45% 35%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-3.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
-}
+.shot__media--c{ --shot-glow: radial-gradient(260px 220px at 55% 30%, rgba(215,181,109,.09), transparent 70%); }
+.shot__media--d{ --shot-glow: radial-gradient(260px 220px at 45% 35%, rgba(215,181,109,.09), transparent 70%); }
+.shot__media--e{ --shot-glow: radial-gradient(260px 220px at 48% 30%, rgba(215,181,109,.09), transparent 70%); }
+/* Photos de réalisations : vraies images <img> (indexables), rendu identique aux anciens fonds CSS
+   (même recadrage « cover », même voile sombre 155°, même halo doré en mode « screen »). */
+.shot__media--a,
+.shot__media--c,
+.shot__media--d,
 .shot__media--e{
-  background-image:
-    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11)),
-    radial-gradient(260px 220px at 48% 30%, rgba(215,181,109,.09), transparent 70%),
-    url("../images/real-4.webp");
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: multiply, screen, normal;
+  overflow: hidden;
+  isolation: isolate;
+}
+.shot__media > img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+.shot__media--a::before,
+.shot__media--c::before,
+.shot__media--d::before,
+.shot__media--e::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--shot-glow);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.shot__media--a::after,
+.shot__media--c::after,
+.shot__media--d::after,
+.shot__media--e::after{
+  z-index: 2;
+  background:
+    linear-gradient(180deg, transparent, rgba(0,0,0,.40)),
+    linear-gradient(155deg, rgba(6,8,12,.30), rgba(6,8,12,.11));
 }
 .shot--placeholder{
   border-color: rgba(215,181,109,.28);
@@ -2003,6 +2010,48 @@ textarea{ resize: vertical; }
   }
 }
 
+/* Tablette (721–980 px) : la barre de navigation complète + les boutons d'action dépassaient la largeur
+   (≈ 967 px requis à 768 px). On réutilise le menu compact (bouton « hamburger »), comme sur mobile. */
+@media (min-width: 721px) and (max-width: 980px){
+  .nav,
+  .hide-sm,
+  .header__actions{ display: none; }
+  .mobileMenuToggle{ display: inline-flex; }
+  .mobileMenu{
+    position: fixed;
+    top: var(--mobile-menu-top, 140px); /* ajusté par app.js à la hauteur réelle de l'en-tête */
+    max-height: calc(100vh - var(--mobile-menu-top, 140px) - 10px);
+    max-height: calc(100dvh - var(--mobile-menu-top, 140px) - 10px);
+    overflow-y: auto;
+    left: 10px;
+    right: 10px;
+    z-index: 115;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(11,13,16,.96), rgba(11,13,16,.92));
+    backdrop-filter: blur(12px);
+    box-shadow: 0 18px 42px rgba(0,0,0,.42);
+    padding: 8px;
+  }
+  .mobileMenu.is-open{
+    display: grid;
+    gap: 6px;
+  }
+  .mobileMenu a{
+    padding: 11px 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 620;
+    color: rgba(255,255,255,.9);
+    border: 1px solid transparent;
+    background: rgba(255,255,255,.03);
+  }
+  .mobileMenu a:active{
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.16);
+  }
+}
+
 @media (max-width: 720px){
   .section{
     padding: 44px 0;
@@ -2208,7 +2257,10 @@ textarea{ resize: vertical; }
   }
   .mobileMenu{
     position: fixed;
-    top: 58px;
+    top: var(--mobile-menu-top, 130px); /* ajusté par app.js à la hauteur réelle de l'en-tête */
+    max-height: calc(100vh - var(--mobile-menu-top, 130px) - 10px);
+    max-height: calc(100dvh - var(--mobile-menu-top, 130px) - 10px);
+    overflow-y: auto;
     left: 10px;
     right: 10px;
     z-index: 115;
@@ -2244,8 +2296,15 @@ textarea{ resize: vertical; }
   .pill{
     position: relative;
     z-index: 2;
-    font-size: 11px;
-    padding: 6px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: #f4e6c3;
+    padding: 7px 11px;
+    text-wrap: balance;
+    background: linear-gradient(135deg, rgba(215,181,109,.24), rgba(24,28,34,.92));
+    border-color: rgba(215,181,109,.58);
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
     margin-bottom: 0;
     width: fit-content;
     margin-inline: auto;
@@ -2260,33 +2319,21 @@ textarea{ resize: vertical; }
   }
   .heroMobilePhoto{
     display: block;
-    margin: -6px 0 -154px;
+    margin: 10px 0 -10px;
     width: calc(100% + 24px);
     margin-left: -12px;
     position: relative;
     overflow: hidden;
     transform: none;
     min-height: 0;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 11;
     background-image: url("../images/banniere-2.webp");
     background-size: 120%;
-    background-position: center 18%;
+    background-position: 74% 40%;
     will-change: transform;
     animation: hero-mobile-zoom-a 20s linear infinite;
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      rgba(0,0,0,0) 0%,
-      rgba(0,0,0,1) 12%,
-      rgba(0,0,0,1) 88%,
-      rgba(0,0,0,0) 100%
-    );
-    mask-image: linear-gradient(
-      180deg,
-      rgba(0,0,0,0) 0%,
-      rgba(0,0,0,1) 12%,
-      rgba(0,0,0,1) 88%,
-      rgba(0,0,0,0) 100%
-    );
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 76%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 76%, rgba(0,0,0,0) 100%);
   }
   .heroMobilePhoto::before{
     content: "";
@@ -2295,7 +2342,7 @@ textarea{ resize: vertical; }
     pointer-events: none;
     background-image: url("../images/banniere.webp");
     background-size: 120%;
-    background-position: center 18%;
+    background-position: 74% 40%;
     opacity: 0;
     will-change: transform, opacity;
     animation: hero-mobile-zoom-b 20s linear infinite, hero-mobile-crossfade 20s ease-in-out infinite;
@@ -2305,22 +2352,11 @@ textarea{ resize: vertical; }
     position: absolute;
     inset: 0;
     pointer-events: none;
+    /* Photo lumineuse : simple halo doré discret et léger fondu vers le bas (plus de voile sombre latéral) */
     background:
-      linear-gradient(
-        100deg,
-        rgba(8,10,14,.86) 0%,
-        rgba(8,10,14,.58) 48%,
-        rgba(8,10,14,.48) 100%
-      ),
-      radial-gradient(circle at 66% 28%, rgba(215,181,109,.34), rgba(215,181,109,0) 56%),
-      radial-gradient(circle at 82% 56%, rgba(123,215,255,.16), rgba(123,215,255,0) 62%),
-      linear-gradient(
-        90deg,
-        rgba(11,13,16,0) 56%,
-        rgba(11,13,16,.30) 74%,
-        rgba(11,13,16,.74) 92%,
-        rgba(11,13,16,.94) 100%
-      );
+      linear-gradient(90deg, rgba(8,10,14,.62) 0%, rgba(8,10,14,.36) 30%, rgba(8,10,14,.10) 56%, rgba(8,10,14,0) 72%),
+      linear-gradient(180deg, rgba(8,10,14,0) 70%, rgba(8,10,14,.22) 100%),
+      radial-gradient(circle at 66% 28%, rgba(215,181,109,.14), rgba(215,181,109,0) 56%);
     animation: none;
   }
   .hero h1{
@@ -3070,4 +3106,10 @@ textarea{ resize: vertical; }
   .reviewsDot::before,
   .reviewsNav,
   .reviewsPause{ transition: none; }
+}
+
+/* Très petits écrans (≤ 340 px) : les commandes du carrousel dépassaient d'1 px ; points resserrés */
+@media (max-width: 340px){
+  .reviewsDot{ width: 18px; }
+  .reviewsControls{ padding-right: 6px; }
 }

@@ -74,7 +74,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../assets/css/style.css?v=932e1c1c5e" />
+  <link rel="stylesheet" href="../assets/css/style.css?v=304b7def63" />
   <style>
     .local-page main {
       overflow: clip;
@@ -148,8 +148,12 @@
       padding-block: clamp(52px, 7vw, 78px);
     }
     .local-page .section__head {
+      display: block;
       margin-bottom: 20px;
-      max-width: 900px;
+      max-width: none;
+    }
+    .local-page .section__head h2 + p {
+      margin-top: 14px;
     }
     .local-page .section__head h2 {
       font-size: clamp(1.45rem, 2.4vw, 2.1rem);
@@ -256,6 +260,12 @@
     }
     .local-cards-mix {
       align-items: stretch;
+    }
+    /* 3 prestations : réparties sur toute la largeur (la grille globale prévoit 4 colonnes) */
+    @media (min-width: 981px) {
+      .local-cards-mix {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     .local-cards-mix .local-card {
       min-height: 100%;
@@ -511,7 +521,7 @@
         <img
           class="local-photo"
           src="../assets/images/chantier-st-cyprien.webp"
-          alt="Exemple de rénovation peinture intérieure à Saint-Cyprien"
+          alt="Mur intérieur dont l’enduit est écaillé par endroits, en cours de préparation avant la peinture à Saint-Cyprien"
           loading="lazy"
           width="1600"
           height="1200"
@@ -581,6 +591,6 @@
     </div>
   </footer>
 
-  <script src="../assets/js/app.js?v=dc889d216c"></script>
+  <script src="../assets/js/app.js?v=5612bbaafc"></script>
 </body>
 </html>
