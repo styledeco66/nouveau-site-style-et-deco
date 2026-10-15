@@ -66,7 +66,7 @@ test("formulaire et conversion conservés (même nom, même fonction, téléphon
   assert.match(html, /name="bot-field"/);
   assert.match(html, /href="tel:\+33650756242"/);
   assert.match(html, /Demander un devis à Perpignan/);
-  assert.match(html, /Réponse sous 24 h\. Devis gratuit\./);
+  assert.match(html, /Réponse sous 24 h\. Sans engagement\./);
 });
 
 test("FAQ alignée sur le modèle officiel de /facade-saint-cyprien/ (mêmes classes, aucun style propre)", () => {

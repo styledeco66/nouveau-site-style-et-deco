@@ -24,7 +24,7 @@
     content="Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h." />
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="stylesheet" href="./assets/css/style.css?v=34af869994" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=7a9de67e70" />
   <style>
     /* Page Perpignan : composition éditoriale (titre au-dessus du texte), hero mobile photo + texte, cartes lisibles.
        Réutilise les variables, boutons, cartes et pastilles du site. */
@@ -278,20 +278,54 @@
           <!-- nosemgrep: python.django.security.django-no-csrf-token.django-no-csrf-token -->
           <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/.netlify/functions/lead">
             <input type="hidden" name="form-name" value="lead_perpignan" />
-            <p style="display:none;">
+            <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
+            <p class="hp-field" aria-hidden="true">
               <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
-            <h2 class="form__title">Votre projet à Perpignan</h2>
-            <p class="form__hint">Réponse sous 24 h. Devis gratuit.</p>
+            <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
+            <h2 class="form__title js-form-title" data-title-devis="Demander un devis en 1 minute"
+              data-title-callback="Demande de rappel en moins de 30 min">Demander un devis en 1 minute</h2>
+            <p class="form__hint form__hint--top js-form-intro"
+              data-intro-devis="Réponse sous 24 h. Sans engagement."
+              data-intro-callback="Laissez votre nom et numéro, on vous rappelle rapidement pendant nos horaires d'ouverture.">
+              Réponse sous 24 h. Sans engagement.</p>
+
             <div class="form__grid">
-              <label class="field"><span>Nom</span><input type="text" name="name" required /></label>
-              <label class="field"><span>Téléphone</span><input type="tel" name="phone" required /></label>
-              <label class="field field--full"><span>E-mail</span><input type="email" name="email" autocomplete="email" required /></label>
-              <label class="field field--full"><span>Type de travaux</span><input type="text" name="subject" required /></label>
-              <label class="field field--full"><span>Détails</span><textarea name="details" rows="4" required></textarea></label>
+              <label class="field">
+                <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom">Nom</span>
+                <input type="text" name="name" placeholder="Votre nom" autocomplete="name" required />
+              </label>
+
+              <label class="field">
+                <span>Téléphone</span>
+                <input type="tel" name="phone" placeholder="06…" autocomplete="tel" required />
+              </label>
+
+              <input type="hidden" name="lead_priority" value="STANDARD">
+
+              <label class="field field--full js-devis-only">
+                <span>E-mail</span>
+                <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+              </label>
+
+              <label class="field field--full js-devis-only">
+                <span>Ville / Zone</span>
+                <input type="text" name="city" value="Perpignan" placeholder="Ex : Perpignan, Saint-Cyprien…"
+                  autocomplete="address-level2" required />
+              </label>
+
+              <label class="field field--full js-devis-only">
+                <span>Détails</span>
+                <textarea name="details" rows="4" placeholder="Surface, support, contraintes de délai, rendu souhaité…"
+                  required></textarea>
+              </label>
             </div>
-            <button class="btn btn--primary btn--lg btn--full" type="submit">Recevoir mon devis</button>
+
+            <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
+              data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon devis</button>
             <p class="form__status js-form-status" role="alert" hidden></p>
+            <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
+              complète</button>
           </form>
         </aside>
       </div>
@@ -501,7 +535,7 @@
       </div>
     </div>
   </footer>
-  <script src="./assets/js/lead-form.js?v=50e7677486"></script>
+  <script src="./assets/js/lead-form.js?v=32d5b380bb"></script>
   <script src="./assets/js/app.js?v=5612bbaafc"></script>
 </body>
 </html>
