@@ -511,7 +511,7 @@
     });
 
     window.addEventListener("resize", () => {
-      if (!window.matchMedia("(max-width: 720px)").matches) {
+      if (!window.matchMedia("(max-width: 980px)").matches) {
         closeMenu();
       }
     });

@@ -2010,6 +2010,45 @@ textarea{ resize: vertical; }
   }
 }
 
+/* Tablette (721–980 px) : la barre de navigation complète + les boutons d'action dépassaient la largeur
+   (≈ 967 px requis à 768 px). On réutilise le menu compact (bouton « hamburger »), comme sur mobile. */
+@media (min-width: 721px) and (max-width: 980px){
+  .nav,
+  .hide-sm,
+  .header__actions{ display: none; }
+  .mobileMenuToggle{ display: inline-flex; }
+  .mobileMenu{
+    position: fixed;
+    top: 150px; /* sous l'en-tête (128–145 px de haut à cette largeur) : le bouton reste accessible */
+    left: 10px;
+    right: 10px;
+    z-index: 115;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(11,13,16,.96), rgba(11,13,16,.92));
+    backdrop-filter: blur(12px);
+    box-shadow: 0 18px 42px rgba(0,0,0,.42);
+    padding: 8px;
+  }
+  .mobileMenu.is-open{
+    display: grid;
+    gap: 6px;
+  }
+  .mobileMenu a{
+    padding: 11px 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 620;
+    color: rgba(255,255,255,.9);
+    border: 1px solid transparent;
+    background: rgba(255,255,255,.03);
+  }
+  .mobileMenu a:active{
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.16);
+  }
+}
+
 @media (max-width: 720px){
   .section{
     padding: 44px 0;
@@ -3077,4 +3116,10 @@ textarea{ resize: vertical; }
   .reviewsDot::before,
   .reviewsNav,
   .reviewsPause{ transition: none; }
+}
+
+/* Très petits écrans (≤ 340 px) : les commandes du carrousel dépassaient d'1 px ; points resserrés */
+@media (max-width: 340px){
+  .reviewsDot{ width: 18px; }
+  .reviewsControls{ padding-right: 6px; }
 }

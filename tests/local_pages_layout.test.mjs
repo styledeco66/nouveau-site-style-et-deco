@@ -31,3 +31,13 @@ test("pages locales : structure Hn et textes inchangés (1 h1, mêmes h2)", () =
     assert.ok((html.match(/<h2\b/g) || []).length >= 6, p);
   }
 });
+
+test("tablette 721–980 px : menu compact (plus de barre complète qui déborde) et menu ouvert sous l'en-tête", () => {
+  const css = readFileSync(fileURLToPath(new URL("../sitesite-template/assets/css/style.css", import.meta.url)), "utf8");
+  const block = css.match(/@media \(min-width: 721px\) and \(max-width: 980px\)\{([\s\S]*?)\n\}\n/)[1];
+  assert.match(block, /\.header__actions\{ display: none; \}/);
+  assert.match(block, /\.mobileMenuToggle\{ display: inline-flex; \}/);
+  assert.match(block, /top: 150px/);
+  const js = readFileSync(fileURLToPath(new URL("../sitesite-template/assets/js/app.js", import.meta.url)), "utf8");
+  assert.match(js, /\(max-width: 980px\)/);
+});
