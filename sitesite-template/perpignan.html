@@ -25,6 +25,69 @@
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="stylesheet" href="./assets/css/style.css?v=34af869994" />
+  <style>
+    /* Page Perpignan : composition éditoriale (titre au-dessus du texte), hero mobile photo + texte, cartes lisibles.
+       Réutilise les variables, boutons, cartes et pastilles du site. */
+    .pg main { overflow: clip; }
+    .pg .section__head { display: block; max-width: none; margin-bottom: 22px; text-align: left; }
+    .pg .section__head h2 { max-width: 26ch; margin: 0 0 12px; font-size: clamp(1.45rem, 2.6vw, 2.1rem); line-height: 1.18; letter-spacing: -0.01em; text-wrap: balance; text-align: left; }
+    .pg .section__head p { max-width: 68ch; margin: 0; text-align: left; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+    .pg .section__head p + p { margin-top: 12px; }
+    .pg .section__head h2 + p { margin-top: 0; }
+    .pg .section { padding-block: clamp(46px, 6vw, 72px); }
+    .pg-lead-links a, .pg .section__head a, .pg .card a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Hero : sur ordinateur, fond photographique d'ambiance + formulaire à droite (rendu existant) */
+    .pg .hero--pg .hero__bgLayer--a { background-image: url("./assets/images/ambiance-salon-contemporain-large-1151.webp"); background-position: right center; animation: hero-zoom-a 24s linear infinite; }
+    .pg .hero--pg .hero__bgLayer--b { display: none; }
+    .pg .hero--pg .pill { display: inline-flex; margin: 0 0 18px; }
+    .pg-photo { display: none; }
+
+    /* Prestations et méthode : cartes lisibles, titre doré discret */
+    .pg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .pg-cards .card { padding: 24px 22px 26px; }
+    .pg-cards .card h3 { margin: 0 0 12px; font-size: 1.2rem; line-height: 1.25; }
+    .pg-cards .card h3::before { content: ""; display: block; width: 34px; height: 2px; margin-bottom: 14px; background: linear-gradient(90deg, var(--accent), rgba(215, 181, 109, 0)); }
+    .pg-cards .card p { margin: 0; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+
+    /* Secteurs desservis : quatre blocs, communes en pastilles */
+    .pg-zones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .pg-zone { padding: 22px 22px 24px; }
+    .pg-zone h3 { margin: 0 0 8px; font-size: 1.15rem; line-height: 1.25; }
+    .pg-zone > p { margin: 0 0 14px; color: rgba(255, 255, 255, .72); line-height: 1.65; font-size: 15px; }
+    .pg-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .pg-chips li { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--stroke); background: rgba(255, 255, 255, .045); color: rgba(255, 255, 255, .86); font-size: 14px; line-height: 1.3; }
+
+    .pg .before-after-img { display: block; width: 100%; height: auto; border-radius: 12px; margin-bottom: 1rem; }
+    .pg-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .pg .faq details p { line-height: 1.7; }
+
+    @media (max-width: 980px) {
+      .pg-cards, .pg-zones, .pg-duo { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .pg .section { padding-block: 40px; }
+      .pg .section__head h2 { max-width: none; font-size: clamp(1.4rem, 6.6vw, 1.75rem); }
+      .pg .section__head p { font-size: 1rem; }
+
+      /* Hero mobile : photographie lumineuse en haut, puis pastille, titre, texte et boutons sur fond anthracite */
+      .pg .hero.hero--pg { padding: 14px 0 6px; }
+      .pg .hero--pg .hero__bgBlend { display: none; }
+      .pg .hero--pg .hero__grid { padding: 0; gap: 20px; border-radius: 0; background: none; border: 0; box-shadow: none; }
+      .pg-photo { display: block; margin: 0 0 18px; }
+      .pg-photo img { display: block; width: 100%; height: auto; border-radius: 18px; border: 1px solid rgba(255, 255, 255, .14); box-shadow: var(--shadow); }
+      .pg-photo figcaption { margin-top: 8px; padding-inline: 4px; font-size: 12px; color: var(--muted2); }
+      .pg .hero--pg .pill { margin: 0 0 14px; width: fit-content; max-width: 100%; font-size: 12px; font-weight: 600; color: #f4e6c3; padding: 7px 13px; background: linear-gradient(135deg, rgba(215, 181, 109, .24), rgba(24, 28, 34, .92)); border-color: rgba(215, 181, 109, .58); box-shadow: 0 6px 18px rgba(0, 0, 0, .35); text-align: left; }
+      .pg .hero.hero--pg h1 { margin: 0 0 12px; font-size: clamp(1.9rem, 8.6vw, 2.35rem); line-height: 1.1; letter-spacing: -0.02em; text-shadow: none; text-wrap: balance; }
+      .pg .hero--pg .hero__locality { display: none; }
+      .pg .hero.hero--pg .lead { margin: 0; max-width: 34ch; font-size: 1.02rem; line-height: 1.6; color: rgba(255, 255, 255, .82); }
+      .pg .hero--pg .hero__cta { margin-top: 20px; display: grid; gap: 10px; }
+      .pg .hero--pg .hero__cta .btn { width: 100%; min-width: 0; min-height: 52px; font-size: 16px; }
+      .pg-cards .card, .pg-zone { padding: 20px 18px 22px; }
+      .pg-chips li { font-size: 13.5px; padding: 6px 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .pg .hero--pg .hero__bgLayer--a { animation: none; } }
+  </style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -125,7 +188,7 @@
   </script>
 </head>
 
-<body>
+<body class="pg">
   <div id="top" aria-hidden="true"></div>
   <header class="header">
     <div class="container header__inner">
@@ -164,15 +227,23 @@
   </nav>
 
   <main>
-    <section class="hero" aria-label="Introduction">
+    <section class="hero hero--pg" aria-label="Introduction">
       <div class="hero__bgBlend" aria-hidden="true">
         <span class="hero__bgLayer hero__bgLayer--a"></span>
         <span class="hero__bgLayer hero__bgLayer--b"></span>
       </div>
       <div class="container hero__grid">
         <div class="hero__content">
-          <p class="pill" style="margin-bottom: 2rem; display: inline-block;">Peintre en bâtiment • Perpignan & Alentours</p>
-          <h1>Artisan Peintre en bâtiment à Perpignan</h1>
+          <figure class="pg-photo">
+            <img src="./assets/images/ambiance-salon-contemporain-960.webp"
+              srcset="./assets/images/ambiance-salon-contemporain-640.webp 640w, ./assets/images/ambiance-salon-contemporain-960.webp 960w, ./assets/images/ambiance-salon-contemporain-1151.webp 1151w"
+              sizes="(min-width: 721px) 1px, calc(100vw - 40px)"
+              alt="Illustration d'un intérieur contemporain lumineux : salon et salle à manger ouverts, mur décoratif anthracite avec niches, grande baie vitrée donnant sur les toits et les montagnes"
+              width="1151" height="863" fetchpriority="high" decoding="async" />
+            <figcaption>Illustration d'ambiance, non issue d'un chantier réalisé.</figcaption>
+          </figure>
+          <p class="pill">Peintre en bâtiment • Perpignan &amp; Alentours</p>
+          <h1>Artisan peintre à Perpignan</h1>
           <p class="hero__locality"><span class="accent">Perpignan (66000)</span> &amp; <span class="accent">Pyrénées-Orientales</span></p>
           <p class="lead">
             Travaux de rénovation ou de neuf. Style &amp; Déco intervient à Perpignan et dans la plaine du Roussillon pour des finitions impeccables.
@@ -213,13 +284,13 @@
           <h2>Chantier : peinture de plafond à Perpignan</h2>
           <p>Exemple d'une réalisation avec protection complète du chantier et finition soignée.</p>
         </div>
-        <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+        <div class="pg-duo">
           <article class="card">
              <img src="./assets/images/peinture-plafond-perpignan-avant-960.webp"
                srcset="./assets/images/peinture-plafond-perpignan-avant-640.webp 640w, ./assets/images/peinture-plafond-perpignan-avant-960.webp 960w, ./assets/images/peinture-plafond-perpignan-avant-1280.webp 1280w"
                sizes="(min-width: 760px) 540px, calc(100vw - 40px)"
                alt="Salon-séjour avant la peinture du plafond : murs, portes-fenêtres et sol protégés par des bâches plastiques, bande de masquage jaune en haut des murs"
-               width="1280" height="960" loading="lazy" decoding="async" style="width:100%; height:auto; border-radius:8px; margin-bottom:1rem;" />
+               width="1280" height="960" loading="lazy" decoding="async" class="before-after-img" />
              <h3>Avant / Protection</h3>
              <p>Une étape cruciale pour garantir la propreté de votre intérieur.</p>
           </article>
@@ -228,7 +299,7 @@
                srcset="./assets/images/peinture-plafond-perpignan-apres-640.webp 640w, ./assets/images/peinture-plafond-perpignan-apres-960.webp 960w, ./assets/images/peinture-plafond-perpignan-apres-1280.webp 1280w"
                sizes="(min-width: 760px) 540px, calc(100vw - 40px)"
                alt="Pièce de vie après la peinture du plafond : plafond blanc uniforme avec spots encastrés, murs blancs et sol en carrelage gris foncé"
-               width="1280" height="960" loading="lazy" decoding="async" style="width:100%; height:auto; border-radius:8px; margin-bottom:1rem;" />
+               width="1280" height="960" loading="lazy" decoding="async" class="before-after-img" />
              <h3>Après / Finition</h3>
              <p>Un plafond net, uniforme et durable.</p>
           </article>
@@ -259,7 +330,7 @@
           <h2>Nos prestations de peinture à Perpignan</h2>
           <p>Trois familles de chantiers couvertes avec le même niveau d'exigence.</p>
         </div>
-        <div class="cards">
+        <div class="pg-cards">
           <article class="card">
             <h3>Peinture intérieure à Perpignan</h3>
             <p>
@@ -299,37 +370,40 @@
             déplacement sont précisés dans le devis.
           </p>
         </div>
-        <div class="cards">
-          <article class="card">
-            <h3>Perpignan centre & quartiers</h3>
-            <p>
-              Centre-ville historique, Saint-Jacques, Saint-Mathieu, La Réal, Saint-Assiscle, Moulin à
-              Vent, Las Cobas, Mailloles, Vernet, Haut-Vernet, Bas-Vernet, Clodion, Champ de Mars,
-              Saint-Gaudérique, Catalunya.
-            </p>
+        <div class="pg-zones">
+          <article class="card pg-zone">
+            <h3>Perpignan centre &amp; quartiers</h3>
+            <ul class="pg-chips">
+              <li>Centre-ville historique</li><li>Saint-Jacques</li><li>Saint-Mathieu</li><li>La Réal</li><li>Saint-Assiscle</li>
+              <li>Moulin à Vent</li><li>Las Cobas</li><li>Mailloles</li><li>Vernet</li><li>Haut-Vernet</li><li>Bas-Vernet</li>
+              <li>Clodion</li><li>Champ de Mars</li><li>Saint-Gaudérique</li><li>Catalunya</li>
+            </ul>
           </article>
-          <article class="card">
+          <article class="card pg-zone">
             <h3>Communes limitrophes</h3>
-            <p>
-              Cabestany, Canet-en-Roussillon, Saint-Estève, Le Soler, Bompas, Rivesaltes, Toulouges,
-              Saleilles, Pollestres, Pézilla-la-Rivière, Baixas, Villeneuve-de-la-Raho.
-            </p>
+            <ul class="pg-chips">
+              <li>Cabestany</li><li>Canet-en-Roussillon</li><li>Saint-Estève</li><li>Le Soler</li><li>Bompas</li><li>Rivesaltes</li>
+              <li>Toulouges</li><li>Saleilles</li><li>Pollestres</li><li>Pézilla-la-Rivière</li><li>Baixas</li><li>Villeneuve-de-la-Raho</li>
+            </ul>
           </article>
-          <article class="card">
+          <article class="card pg-zone">
             <h3>Villages des Albères &amp; Côte Vermeille</h3>
             <p>
-              Peintre en bâtiment à <strong>Saint-Génis-des-Fontaines</strong>, <strong>Sorède</strong>,
-              Argelès-sur-Mer, Laroque-des-Albères, Villelongue-dels-Monts, Saint-André et Palau-del-Vidre :
-              maisons anciennes, mas et villas du piémont des Albères, avec un savoir-faire adapté aux
-              enduits chaulés et aux façades exposées au vent marin.
+              Peintre en bâtiment à <strong>Saint-Génis-des-Fontaines</strong> et <strong>Sorède</strong> : maisons anciennes, mas
+              et villas du piémont des Albères, avec un savoir-faire adapté aux enduits chaulés et aux façades
+              exposées au vent marin.
             </p>
+            <ul class="pg-chips">
+              <li>Saint-Génis-des-Fontaines</li><li>Sorède</li><li>Argelès-sur-Mer</li><li>Laroque-des-Albères</li>
+              <li>Villelongue-dels-Monts</li><li>Saint-André</li><li>Palau-del-Vidre</li>
+            </ul>
           </article>
-          <article class="card">
+          <article class="card pg-zone">
             <h3>Plaine du Roussillon &amp; littoral</h3>
-            <p>
-              Saint-Cyprien, Elne, Latour-Bas-Elne, Théza, Alénya, Corneilla-del-Vercol et le littoral
-              des Pyrénées-Orientales.
-            </p>
+            <ul class="pg-chips">
+              <li>Saint-Cyprien</li><li>Elne</li><li>Latour-Bas-Elne</li><li>Théza</li><li>Alénya</li><li>Corneilla-del-Vercol</li>
+              <li>Littoral des Pyrénées-Orientales</li>
+            </ul>
           </article>
         </div>
       </div>
@@ -356,7 +430,7 @@
         <div class="section__head">
           <h2>Délais d'intervention et déroulé d'un chantier à Perpignan</h2>
         </div>
-        <div class="cards">
+        <div class="pg-cards">
           <article class="card">
             <h3>1. Devis sous 24 h</h3>
             <p>
