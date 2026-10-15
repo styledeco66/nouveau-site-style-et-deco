@@ -105,3 +105,13 @@ test("visionneuse : dialog natif, boutons étiquetés, script versionné", () =>
   assert.match(html, /assets\/js\/gallery\.js\?v=[0-9a-f]{10}/);
   assert.ok(existsSync(join(SITE, "assets/js/gallery.js")));
 });
+
+test("galerie sans annonce superflue ; page Façades renvoie vers la fiche de Perpignan (et dit bien Perpignan)", () => {
+  assert.ok(!text(read(GAL)).includes("prochains chantiers"));
+  assert.ok(!read(GAL).includes("rx-note"));
+  const f = read("facade-saint-cyprien/index.html");
+  const m = f.match(/<p class="local-example">([\s\S]*?)<\/p>/)[1];
+  assert.match(m, /réalisé à Perpignan/);
+  assert.match(m, /href="\.\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir notre chantier de ravalement de façade à Perpignan<\/a>/);
+  assert.ok(existsSync(join(SITE, "realisations/ravalement-facade-immeuble-perpignan/index.html")));
+});
