@@ -2354,8 +2354,8 @@ textarea{ resize: vertical; }
     pointer-events: none;
     /* Photo lumineuse : simple halo doré discret et léger fondu vers le bas (plus de voile sombre latéral) */
     background:
-      radial-gradient(ellipse 88% 62% at 0% 100%, rgba(8,10,14,.74) 0%, rgba(8,10,14,.42) 48%, rgba(8,10,14,0) 100%),
-      linear-gradient(180deg, rgba(8,10,14,0) 62%, rgba(8,10,14,.30) 100%),
+      linear-gradient(90deg, rgba(8,10,14,.62) 0%, rgba(8,10,14,.36) 30%, rgba(8,10,14,.10) 56%, rgba(8,10,14,0) 72%),
+      linear-gradient(180deg, rgba(8,10,14,0) 70%, rgba(8,10,14,.22) 100%),
       radial-gradient(circle at 66% 28%, rgba(215,181,109,.14), rgba(215,181,109,0) 56%);
     animation: none;
   }
