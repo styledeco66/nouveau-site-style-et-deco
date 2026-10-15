@@ -2019,7 +2019,10 @@ textarea{ resize: vertical; }
   .mobileMenuToggle{ display: inline-flex; }
   .mobileMenu{
     position: fixed;
-    top: 150px; /* sous l'en-tête (128–145 px de haut à cette largeur) : le bouton reste accessible */
+    top: var(--mobile-menu-top, 140px); /* ajusté par app.js à la hauteur réelle de l'en-tête */
+    max-height: calc(100vh - var(--mobile-menu-top, 140px) - 10px);
+    max-height: calc(100dvh - var(--mobile-menu-top, 140px) - 10px);
+    overflow-y: auto;
     left: 10px;
     right: 10px;
     z-index: 115;
@@ -2254,7 +2257,10 @@ textarea{ resize: vertical; }
   }
   .mobileMenu{
     position: fixed;
-    top: 58px;
+    top: var(--mobile-menu-top, 130px); /* ajusté par app.js à la hauteur réelle de l'en-tête */
+    max-height: calc(100vh - var(--mobile-menu-top, 130px) - 10px);
+    max-height: calc(100dvh - var(--mobile-menu-top, 130px) - 10px);
+    overflow-y: auto;
     left: 10px;
     right: 10px;
     z-index: 115;

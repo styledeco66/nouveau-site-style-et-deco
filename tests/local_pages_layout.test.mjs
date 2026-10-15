@@ -37,7 +37,17 @@ test("tablette 721–980 px : menu compact (plus de barre complète qui déborde
   const block = css.match(/@media \(min-width: 721px\) and \(max-width: 980px\)\{([\s\S]*?)\n\}\n/)[1];
   assert.match(block, /\.header__actions\{ display: none; \}/);
   assert.match(block, /\.mobileMenuToggle\{ display: inline-flex; \}/);
-  assert.match(block, /top: 150px/);
+  assert.match(block, /top: var\(--mobile-menu-top, 140px\)/);
+  assert.ok(!/top: 58px/.test(css), "plus de position fixe sous l'en-tête");
   const js = readFileSync(fileURLToPath(new URL("../sitesite-template/assets/js/app.js", import.meta.url)), "utf8");
   assert.match(js, /\(max-width: 980px\)/);
+});
+
+test("menu mobile : position calculée sur la hauteur réelle de l'en-tête, Échap et clic sur lien conservés", () => {
+  const js = readFileSync(fileURLToPath(new URL("../sitesite-template/assets/js/app.js", import.meta.url)), "utf8");
+  assert.match(js, /--mobile-menu-top/);
+  assert.match(js, /header\.getBoundingClientRect\(\)\.bottom/);
+  assert.match(js, /orientationchange/);
+  assert.match(js, /event\.key === "Escape"/);
+  assert.match(js, /link\.addEventListener\("click", closeMenu\)/);
 });
