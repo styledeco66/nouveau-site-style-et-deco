@@ -78,7 +78,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../assets/css/style.css?v=19e4b54c98" />
+  <link rel="stylesheet" href="../assets/css/style.css?v=e1e7bb0c1b" />
   <style>
     .local-page main {
       overflow: clip;
@@ -367,17 +367,26 @@
     }
 
     @media (max-width: 720px) {
-      .local-page-hero {
-        padding: 64px 0 48px;
-        background-image: url("../assets/images/banniere-facade-900.webp");
+      /* Mobile : la photographie occupe toute la partie haute, nette et lumineuse ; le titre et le texte
+         se posent en dessous sur fond anthracite (aucun voile sur la photo, seulement un fondu bas). */
+      .local-page .section.local-page-hero {
+        --hero-photo-h: clamp(220px, 64vw, 340px);
+        padding: calc(var(--hero-photo-h) - 30px) 0 40px;
+        background-image: none;
+        background-color: #0b0d10;
       }
 
-      /* Texte sur toute la largeur : voile plus uniforme pour garder le contraste */
       .section.local-page-hero::before {
-        background: linear-gradient(180deg,
-            rgba(6, 8, 12, .72) 0%,
-            rgba(6, 8, 12, .60) 55%,
-            rgba(6, 8, 12, .54) 100%);
+        inset: 0 0 auto 0;
+        height: var(--hero-photo-h);
+        background:
+          linear-gradient(180deg, rgba(11, 13, 16, 0) 58%, rgba(11, 13, 16, .70) 84%, #0b0d10 100%),
+          url("../assets/images/banniere-facade-900.webp") center 42% / cover no-repeat;
+      }
+
+      .local-page-hero h1,
+      .local-page-hero .lead {
+        text-shadow: none;
       }
 
       .local-page-hero h1 {
