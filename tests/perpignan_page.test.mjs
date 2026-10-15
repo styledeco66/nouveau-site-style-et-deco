@@ -37,6 +37,30 @@ test("secteurs : toutes les communes d'origine restent dans le HTML, aucune ajou
   assert.ok(plain.toLowerCase().includes("littoral des pyrénées-orientales"));
 });
 
+test("contenu éditorial : meta/OG/WebPage harmonisés, FAQPage identique au visible, aucune mention non confirmée", () => {
+  const DESC = "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h.";
+  assert.equal((html.match(new RegExp(DESC.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length, 4);
+  const faq = JSON.parse([...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).find((j) => j.includes('"FAQPage"')));
+  const visible = plain.replace(/&amp;/g, "&");
+  for (const q of faq.mainEntity) {
+    assert.ok(visible.includes(q.name), q.name);
+    assert.ok(visible.includes(q.acceptedAnswer.text.replace(/\s+/g, " ")), q.name);
+  }
+  assert.ok(faq.mainEntity.some((q) => q.name === "Intervenez-vous après un dégât des eaux ?"));
+  assert.ok(!/béton ciré|patine|chaulé|pliolite|siloxane|hydrofuge|microporeux|créneaux d'urgence|jusqu'à 36/i.test(plain), "mentions non confirmées retirées");
+  assert.equal((html.match(/<details class="pg-zone"/g) || []).length, 4);
+  for (const label of ["Peinture intérieure", "Peinture extérieure et façades", "Murs, plafonds et enduits", "Parquets et revêtements de sol"]) assert.ok(plain.includes(label), label);
+});
+
+test("maillage : fiche de chantier, galerie, Façades, Saint-Cyprien ; illustration du Hero séparée des photos de chantier", () => {
+  assert.match(html, /href="\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir ce chantier de façade à Perpignan<\/a>/);
+  assert.match(html, /href="\.\/realisations\/">Toutes nos réalisations<\/a>/);
+  assert.match(html, /href="\.\/facade-saint-cyprien\/"/);
+  assert.match(html, /href="\.\/peintre-saint-cyprien\/"/);
+  const real = html.slice(html.indexOf('aria-label="Réalisations à Perpignan"'), html.indexOf('aria-label="Zones d\'intervention"'));
+  assert.ok(!real.includes("ambiance-salon"));
+});
+
 test("formulaire et conversion conservés (même nom, même fonction, téléphone, boutons)", () => {
   assert.match(html, /name="lead_perpignan" method="POST" action="\/\.netlify\/functions\/lead"/);
   assert.match(html, /name="bot-field"/);
