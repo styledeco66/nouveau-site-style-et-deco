@@ -50,8 +50,6 @@
       const layer = deps.dataLayer || (window.dataLayer = window.dataLayer || []);
       layer.push(payload);
     };
-    // Instant d'affichage du formulaire : indice anti-robot (soumission anormalement rapide), jamais bloquant seul.
-    const startedAt = Date.now();
     let sending = false;
 
     form.addEventListener("submit", async (event) => {
@@ -70,7 +68,7 @@
       // Conservé entre deux tentatives : Resend dédoublonne si la première a en fait abouti.
       form.dataset.submissionId = form.dataset.submissionId || newSubmissionId();
       const fields = readForm(form);
-      const delivered = await deliver(fetchImpl, { ...fields, submission_id: form.dataset.submissionId, form_started: startedAt });
+      const delivered = await deliver(fetchImpl, { ...fields, submission_id: form.dataset.submissionId });
 
       if (delivered) {
         const priority = fields.lead_priority === "RAPPEL_30_MIN" ? "RAPPEL_30_MIN" : "STANDARD";

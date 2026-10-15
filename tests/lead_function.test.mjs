@@ -457,95 +457,123 @@ test("lead_perpignan : le rappel 30 min fonctionne comme sur l'accueil (nom et t
   assert.equal(body.reply_to, undefined);
 });
 
-// ---------------------------------------------------------------- antispam
+// ---------------------------------------------------------------- antispam : blocages techniques + quarantaine
 const SPAM_TEXT = "Bonjour, nous sommes une agence web. Création de site et SEO pour votre entreprise : référencement première page Google, audit gratuit sur https://seo-boost.example";
-const startedLongAgo = () => NOW().getTime() - 45_000;
+const ENV_Q = { ...ENV, LEAD_QUARANTINE_EMAIL: "tri+verif@example.test" };
+const QUARANTINE_PREFIX = "[À VÉRIFIER] ";
 
-test("antispam : un vrai client (devis) n'est ni bloqué ni marqué", async () => {
-  const { response, fetchImpl } = await run(jsonRequest(validDevis({ form_started: startedLongAgo() })));
+test("antispam : un vrai client (devis) n'est ni mis en quarantaine ni marqué", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis()), { env: ENV_Q });
   assert.equal(response.status, 200);
   assert.equal(fetchImpl.calls.length, 1);
-  assert.ok(!fetchImpl.calls[0].body.subject.startsWith("[À vérifier]"));
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.ok(!fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
   assert.ok(!fetchImpl.calls[0].body.text.includes("Contrôle antispam"));
 });
 
-test("antispam : une demande de rappel 30 min légitime passe, même sans date de départ du formulaire", async () => {
-  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", "bot-field": "" }));
+test("antispam : une demande de rappel 30 min légitime va à la boîte principale", async () => {
+  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", "bot-field": "" }), { env: ENV_Q });
   assert.equal(response.status, 200);
-  assert.equal(fetchImpl.calls.length, 1);
-  assert.ok(!fetchImpl.calls[0].body.subject.startsWith("[À vérifier]"));
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.equal(fetchImpl.calls[0].body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
 });
 
-test("antispam : honeypot rempli (formulaire ou appel direct) → refus générique, aucun e-mail, aucun détail divulgué", async () => {
+test("blocage technique : honeypot rempli (formulaire ou appel direct) → refus générique, aucun e-mail, aucun détail divulgué", async () => {
   for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
-    const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, "bot-field": "x", form_started: startedLongAgo() })));
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, "bot-field": "x" })), { env: ENV_Q });
     assert.equal(response.status, 400);
     assert.deepEqual(await response.json(), { ok: false, error: "invalid_request" });
     assert.equal(fetchImpl.calls.length, 0);
   }
 });
 
-test("antispam : message publicitaire manifeste → refus générique, aucun e-mail Resend", async () => {
-  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris", form_started: startedLongAgo() })));
-  assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), { ok: false, error: "invalid_request" });
-  assert.equal(fetchImpl.calls.length, 0);
-});
-
-test("antispam : appel direct à la function avec un texte publicitaire → bloqué sans passer par le formulaire", async () => {
-  const body = new URLSearchParams({ "form-name": "lead_contact", name: "Paul", phone: "0612345678", email: "paul@example.test", city: "Lyon", details: SPAM_TEXT, lead_priority: "STANDARD" }).toString();
-  const request = new Request("https://styleetdeco.fr/.netlify/functions/lead", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: ORIGIN }, body });
-  const { response, fetchImpl } = await run(request);
-  assert.equal(response.status, 400);
-  assert.equal(fetchImpl.calls.length, 0);
-});
-
-test("antispam : message incertain → transmis mais marqué « à vérifier » (jamais supprimé)", async () => {
-  const uncertain = "Hello, we can help increase your website traffic and ranking with our services. Free audit available for painters.";
-  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: uncertain, form_started: startedLongAgo() })));
-  assert.equal(response.status, 200);
-  assert.equal(fetchImpl.calls.length, 1);
-  assert.ok(fetchImpl.calls[0].body.subject.startsWith("[À vérifier] "));
-  assert.ok(fetchImpl.calls[0].body.text.includes("Contrôle antispam : à vérifier"));
-});
-
-test("antispam : les demandes « à vérifier » vont vers LEAD_QUARANTINE_EMAIL si elle est définie", async () => {
-  const uncertain = "Hello, we can help increase your website traffic and ranking with our services. Free audit available for painters.";
-  const env = { ...ENV, LEAD_QUARANTINE_EMAIL: "tri@example.test" };
-  const { fetchImpl } = await run(jsonRequest(validDevis({ details: uncertain, form_started: startedLongAgo() })), { env });
-  assert.deepEqual(fetchImpl.calls[0].body.to, ["tri@example.test"]);
-  const normal = await run(jsonRequest(validDevis({ form_started: startedLongAgo() })), { env });
-  assert.deepEqual(normal.fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
-});
-
-test("antispam : un client avec un lien pertinent ou un mot inhabituel n'est pas bloqué", async () => {
-  const withLink = validDevis({ details: "Peinture du salon et d'un mur d'entrée, photos ici : https://exemple.test/photos/123 et plan https://exemple.test/plan.pdf", form_started: startedLongAgo() });
-  const r1 = await run(jsonRequest(withLink));
-  assert.equal(r1.response.status, 200);
-  assert.ok(!r1.fetchImpl.calls[0].body.subject.startsWith("[À vérifier]"));
-  const odd = validDevis({ details: "Je veux un site web... pardon, un mur façon tadelakt dans la salle de bain, 12 m², avec SEO ? Non, simplement une peinture lessivable.", form_started: startedLongAgo() });
-  const r2 = await run(jsonRequest(odd));
-  assert.equal(r2.response.status, 200);
-});
-
-test("antispam : syndics, agences et demandes urgentes restent acceptés", async () => {
-  for (const details of ["Syndic de copropriété : ravalement de façade et reprise de balcons, devis pour l'assemblée générale.", "Agence immobilière : remise en état d'un appartement avant location, urgent, 45 m²."]) {
-    const { response } = await run(jsonRequest(validDevis({ details, form_started: startedLongAgo() })));
-    assert.equal(response.status, 200);
+test("blocage technique : données invalides → refus, aucun e-mail", async () => {
+  for (const bad of [{ phone: "abc" }, { email: "pas-un-email" }, { name: "" }, { "form-name": "autre" }]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis(bad)), { env: ENV_Q });
+    assert.equal(response.status, 400);
+    assert.equal(fetchImpl.calls.length, 0);
   }
 });
 
-test("antispam : remplissage automatique (formulaire rempli en quelques secondes) toléré, mais comptabilisé comme indice faible", async () => {
-  const { response, fetchImpl } = await run(jsonRequest(validDevis({ form_started: NOW().getTime() - 1500 })));
+test("quarantaine : un message publicitaire manifeste n'est JAMAIS refusé ni supprimé, mais envoyé à l'adresse de quarantaine", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris" })), { env: ENV_Q });
+  assert.equal(response.status, 200, "le visiteur voit un succès normal : aucun critère divulgué");
+  assert.deepEqual(await response.json(), { ok: true });
+  assert.equal(fetchImpl.calls.length, 1);
+  const body = fetchImpl.calls[0].body;
+  assert.deepEqual(body.to, ["tri+verif@example.test"]);
+  assert.ok(body.subject.startsWith(QUARANTINE_PREFIX));
+  assert.ok(body.text.includes("Contrôle antispam : QUARANTAINE"));
+  assert.ok(body.text.includes("seo-boost.example"), "contenu intact : rien n'est altéré ni perdu");
+});
+
+test("quarantaine : appel direct à la function avec un texte publicitaire → même traitement (quarantaine, pas de perte)", async () => {
+  const body = new URLSearchParams({ "form-name": "lead_contact", name: "Paul", phone: "0612345678", email: "paul@example.test", city: "Lyon", details: SPAM_TEXT, lead_priority: "STANDARD" }).toString();
+  const request = new Request("https://styleetdeco.fr/.netlify/functions/lead", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: ORIGIN }, body });
+  const { response, fetchImpl } = await run(request, { env: ENV_Q });
+  assert.equal(response.status, 303);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["tri+verif@example.test"]);
+});
+
+test("quarantaine : sans LEAD_QUARANTINE_EMAIL, la demande suspecte n'est pas perdue (boîte principale, sujet préfixé)", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris" })), { env: ENV });
   assert.equal(response.status, 200);
-  assert.ok(!fetchImpl.calls[0].body.subject.startsWith("[À vérifier]"), "rapidité seule : jamais bloquante ni marquante");
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.ok(fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
+});
+
+test("quarantaine : la quarantaine vaut aussi pour une demande de rappel publicitaire, sans détails ni e-mail", async () => {
+  const { fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Agence SEO Pro", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", details: SPAM_TEXT }), { env: ENV_Q });
+  assert.equal(fetchImpl.calls.length, 1);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["tri+verif@example.test"]);
+});
+
+test("légitimité : anglais, autre alphabet, remplissage rapide ou sans script ne suffisent JAMAIS à déclencher la quarantaine", async () => {
+  const cases = [
+    "Hello, I would like a quote to paint my apartment in Perpignan: two bedrooms, walls and ceilings, about 70 square meters. Could you please call me?",
+    "Здравствуйте, мне нужна покраска стен в квартире в Перпиньяне, около 60 квадратных метров. Пожалуйста, позвоните мне.",
+    "مرحبا، أحتاج إلى طلاء جدران شقتي في بربينيان، حوالي ٦٠ مترا مربعا. شكرا لكم.",
+    "Hola, necesito pintar la fachada de mi casa en Perpiñán. Gracias.",
+  ];
+  for (const details of cases) {
+    for (const extra of [{}, { form_started: NOW().getTime() - 800 }, { form_started: undefined }]) {
+      const { response, fetchImpl } = await run(jsonRequest(validDevis({ details, name: "Client", ...extra })), { env: ENV_Q });
+      assert.equal(response.status, 200);
+      assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"], details.slice(0, 30));
+      assert.ok(!fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
+    }
+  }
+});
+
+test("légitimité : lien pertinent, mot inhabituel, syndics, agences et demandes urgentes restent en boîte principale", async () => {
+  const texts = [
+    "Peinture du salon et d'un mur d'entrée, photos ici : https://exemple.test/photos/123 et plan https://exemple.test/plan.pdf",
+    "Je veux un site web... pardon, un mur façon tadelakt dans la salle de bain, 12 m², avec SEO ? Non, simplement une peinture lessivable.",
+    "Syndic de copropriété : ravalement de façade et reprise de balcons, devis pour l'assemblée générale.",
+    "Agence immobilière : remise en état d'un appartement avant location, urgent, 45 m².",
+    "Dégât des eaux au plafond de la cuisine, besoin d'un rappel rapide pour reprendre l'enduit et repeindre.",
+  ];
+  for (const details of texts) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ details })), { env: ENV_Q });
+    assert.equal(response.status, 200);
+    assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"], details.slice(0, 30));
+  }
+});
+
+test("légitimité : une demande n'est jamais perdue — tout message valide produit exactement un e-mail (principal ou quarantaine)", async () => {
+  const messages = ["Peinture salon 25 m²", SPAM_TEXT, "Hello we can help increase your website traffic and ranking", "Lorem ipsum dolor sit amet", "x".repeat(40), "Рекламное предложение: создание сайтов и SEO"];
+  for (const details of messages) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ details })), { env: ENV_Q });
+    assert.equal(response.status, 200, details.slice(0, 20));
+    assert.equal(fetchImpl.calls.length, 1, details.slice(0, 20));
+  }
 });
 
 test("antispam : plusieurs soumissions identiques rapprochées → un seul e-mail (idempotence) et limite de débit native déclarée", async () => {
   const fetchImpl = makeFetch();
   const keys = new Set();
   for (let i = 0; i < 3; i += 1) {
-    const { response } = await run(jsonRequest(validDevis({ submission_id: undefined, form_started: startedLongAgo() })), { fetchImpl });
+    const { response } = await run(jsonRequest(validDevis({ submission_id: undefined })), { fetchImpl });
     assert.equal(response.status, 200);
     keys.add(fetchImpl.calls[i].init.headers["Idempotency-Key"]);
   }
@@ -558,18 +586,18 @@ test("antispam : les journaux ne contiennent ni données personnelles ni texte d
   const original = { log: console.log, error: console.error, warn: console.warn };
   console.log = console.error = console.warn = (...args) => captured.push(args.join(" "));
   try {
-    await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean Spammeur", form_started: startedLongAgo() })));
-    await run(jsonRequest(validDevis({ "bot-field": "x" })));
+    await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean Spammeur" })), { env: ENV_Q });
+    await run(jsonRequest(validDevis({ "bot-field": "x" })), { env: ENV_Q });
   } finally {
     Object.assign(console, original);
   }
   const output = captured.join("\n");
   assert.ok(captured.length >= 2);
-  for (const leaked of ["Jean Spammeur", "seo-boost", "agence web", "06 12 34 56 78", "marie.durand@example.test"]) assert.ok(!output.includes(leaked), leaked);
+  for (const leaked of ["Jean Spammeur", "seo-boost", "agence web", "06 12 34 56 78", "marie.durand@example.test", "tri+verif"]) assert.ok(!output.includes(leaked), leaked);
 });
 
 test("les données d'un client légitime ne sont pas altérées par les contrôles", async () => {
-  const { fetchImpl } = await run(jsonRequest(validDevis({ details: "Salon 25 m²\nPlafond + murs", form_started: startedLongAgo() })));
+  const { fetchImpl } = await run(jsonRequest(validDevis({ details: "Salon 25 m²\nPlafond + murs" })), { env: ENV_Q });
   const text = fetchImpl.calls[0].body.text;
   assert.ok(text.includes("Détails : Salon 25 m²\nPlafond + murs"));
   assert.ok(text.includes("Nom : Marie Durand"));

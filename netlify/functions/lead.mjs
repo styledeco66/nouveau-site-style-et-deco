@@ -4,7 +4,7 @@ import { assessLead } from "../lib/lead-spam.mjs";
 
 // Netlify Function : valide une demande de contact/devis/rappel et la relaie par e-mail via Resend.
 // Variables d'environnement : RESEND_API_KEY, LEAD_TO_EMAIL, LEAD_FROM_EMAIL, LEAD_ALLOWED_ORIGINS (optionnelle),
-// LEAD_QUARANTINE_EMAIL (optionnelle : destinataire des demandes « à vérifier » ; à défaut LEAD_TO_EMAIL).
+// LEAD_QUARANTINE_EMAIL (optionnelle : destinataire de la quarantaine, ex. adresse+verif@gmail.com ; à défaut LEAD_TO_EMAIL).
 // Voir docs/lead-delivery.md.
 
 const RESEND_URL = "https://api.resend.com/emails";
@@ -20,7 +20,7 @@ const ERROR_MESSAGE =
 const SUBJECT_DEVIS = "📩 DEMANDE DE DEVIS - Style & Deco";
 const SUBJECT_CALLBACK = "🚨 RAPPEL 30 MIN - Style & Deco";
 const SUBJECT_DEVIS_PERPIGNAN = "📩 DEMANDE DE DEVIS - Perpignan";
-const REVIEW_PREFIX = "[À vérifier] ";
+const REVIEW_PREFIX = "[À VÉRIFIER] ";
 const PRIORITY_CALLBACK = "RAPPEL_30_MIN";
 
 const FORMS = new Set(["lead_hero", "lead_contact", "lead_perpignan"]);
@@ -143,7 +143,7 @@ const emailRows = (lead, receivedAt, review) =>
     ["Type de travaux", lead.subject],
     ["Détails", lead.details],
     ["Reçu le", receivedAt],
-    ["Contrôle antispam", review ? `à vérifier (indices : ${review.reasons.join(", ")})` : ""],
+    ["Contrôle antispam", review ? `QUARANTAINE — à vérifier (indices : ${review.reasons.join(", ")})` : ""],
   ].filter(([, value]) => value);
 
 const buildEmail = (lead, receivedAt, env, review) => {
@@ -155,7 +155,7 @@ const buildEmail = (lead, receivedAt, env, review) => {
         `<tr><th align="left" valign="top">${escapeHtml(label)}</th><td style="white-space:pre-wrap">${escapeHtml(value)}</td></tr>`
     )
     .join("")}</table>`;
-  // Demande « à vérifier » : jamais supprimée ; vers LEAD_QUARANTINE_EMAIL si définie, sinon vers le destinataire habituel.
+  // Quarantaine : jamais supprimée ; vers LEAD_QUARANTINE_EMAIL si définie, sinon vers le destinataire habituel (préfixe seul).
   const recipients = review && String(env.LEAD_QUARANTINE_EMAIL || "").trim() ? env.LEAD_QUARANTINE_EMAIL : env.LEAD_TO_EMAIL;
   const to = String(recipients)
     .split(",")
@@ -254,14 +254,11 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   const { lead, invalid } = validateLead(raw);
   if (invalid) return fail(400, "invalid_request");
 
-  // Détection des sollicitations non désirées : plusieurs indices concordants (voir netlify/lib/lead-spam.mjs).
-  const assessment = assessLead(lead, { startedAt: raw.form_started, now: now().getTime() });
-  if (assessment.level === "block") {
-    console.warn(`lead: demande écartée (score ${assessment.score}, indices: ${assessment.reasons.join(",")})`);
-    return fail(400, "invalid_request");
-  }
+  // Analyse du contenu (voir netlify/lib/lead-spam.mjs) : elle ne refuse JAMAIS une demande. Une demande suspecte part en
+  // quarantaine (e-mail séparé, voir LEAD_QUARANTINE_EMAIL) ; les seuls refus sont le honeypot et les validations invalides.
+  const assessment = assessLead(lead);
   const review = assessment.level === "review" ? assessment : null;
-  if (review) console.warn(`lead: demande à vérifier (score ${assessment.score}, indices: ${assessment.reasons.join(",")})`);
+  if (review) console.warn(`lead: demande mise en quarantaine (score ${review.score}, indices: ${review.reasons.join(",")})`);
 
   if (!env.RESEND_API_KEY || !env.LEAD_TO_EMAIL || !env.LEAD_FROM_EMAIL) {
     console.error("lead: configuration d'envoi incomplète");

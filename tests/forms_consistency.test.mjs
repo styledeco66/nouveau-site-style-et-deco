@@ -53,5 +53,5 @@ test("les trois formulaires ont le même honeypot invisible : hors écran, aria-
 test("tous les formulaires s'envoient à la même function, avec le même script (aucune implémentation indépendante)", () => {
   for (const f of [hero, contact, perpignan]) assert.match(f, /method="POST" action="\/\.netlify\/functions\/lead"/);
   for (const page of ["index.html", "perpignan.html"]) assert.match(read(page), /assets\/js\/lead-form\.js\?v=[0-9a-f]{10}|assets\/js\/app\.js/);
-  assert.ok(read("assets/js/lead-form.js").includes("form_started"));
+  assert.ok(!read("assets/js/lead-form.js").includes("form_started"), "aucun critère de vitesse");
 });
