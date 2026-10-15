@@ -68,3 +68,16 @@ test("formulaire et conversion conservés (même nom, même fonction, téléphon
   assert.match(html, /Demander un devis à Perpignan/);
   assert.match(html, /Réponse sous 24 h\. Devis gratuit\./);
 });
+
+test("FAQ alignée sur le modèle officiel de /facade-saint-cyprien/ (mêmes classes, aucun style propre)", () => {
+  const fac = readFileSync(join(SITE, "facade-saint-cyprien/index.html"), "utf8");
+  const shape = (h) => {
+    const sec = h.slice(h.search(/<section class="section" id="faq-/), h.indexOf("</section>", h.search(/<section class="section" id="faq-/)));
+    return { classes: [...new Set([...sec.matchAll(/class="([^"]+)"/g)].map((m) => m[1]))].filter((c) => c !== "container").sort(), items: (sec.match(/<details class="faq__item">/g) || []).length, bare: (sec.match(/<details>/g) || []).length };
+  };
+  const a = shape(fac), b = shape(html);
+  assert.deepEqual(b.classes, a.classes);
+  assert.equal(b.bare, 0);
+  assert.equal(b.items, 6);
+  assert.ok(!/\.faq__item|\.faq details|\.faq summary/.test(html.slice(0, html.indexOf("</style>"))), "aucun style de carte de FAQ propre à la page");
+});

@@ -60,8 +60,10 @@
 
     .pg .before-after-img { display: block; width: 100%; height: auto; border-radius: 12px; margin-bottom: 1rem; }
     .pg-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-    .pg .faq details p { line-height: 1.7; }
     .pg .hero--pg .lead--second { margin-top: 10px; }
+    /* FAQ : mêmes valeurs que le modèle officiel (/facade-saint-cyprien/, règles .local-page .section) */
+    .pg #faq-perpignan .section__head h2 { max-width: none; }
+    .pg #faq-perpignan .faq p { max-width: 900px; color: rgba(255, 255, 255, .76); line-height: 1.55; }
     .pg-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pg-real { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(22px, 4vw, 52px); align-items: center; }
     .pg-real h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 2.6vw, 2.1rem); line-height: 1.18; letter-spacing: -0.01em; text-wrap: balance; }
@@ -449,33 +451,33 @@
       </div>
     </section>
 
-    <section class="section section--alt" id="faq-perpignan" aria-label="FAQ Perpignan">
+    <section class="section" id="faq-perpignan" aria-label="FAQ Perpignan">
       <div class="container">
         <div class="section__head">
           <h2>FAQ — Peintre en bâtiment à Perpignan</h2>
         </div>
         <div class="faq">
-          <details>
+          <details class="faq__item">
             <summary>Intervenez-vous dans tout Perpignan ou seulement dans certains quartiers ?</summary>
             <p>Nous intervenons à Perpignan et dans plusieurs communes alentour, selon la nature et l'organisation des travaux. Les modalités de déplacement sont précisées dans le devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Combien coûte un chantier de peinture à Perpignan ?</summary>
             <p>Le tarif dépend de la surface, de l'état des supports, de la préparation nécessaire et de la finition choisie. Nous établissons un devis détaillé sous 24 h.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Quel délai pour démarrer un chantier ?</summary>
             <p>Le démarrage est prévu sous 1 à 3 semaines après validation du devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Intervenez-vous après un dégât des eaux ?</summary>
             <p>Oui, nous réalisons des travaux de remise en état des murs et plafonds après un dégât des eaux, lorsque l'origine du sinistre a été traitée et que les supports sont suffisamment secs. Selon leur état, notre intervention peut comprendre les réparations, les enduits, une impression isolante adaptée et les peintures de finition.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Travaillez-vous avec les syndics et les agences immobilières de Perpignan ?</summary>
             <p>Oui, nous étudions aussi les demandes des copropriétés, des agences de location et des bailleurs (parties communes, remises en état, ravalements). Décrivez-nous votre besoin pour recevoir un devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Êtes-vous assuré pour les chantiers de façade ?</summary>
             <p>Oui. L'entreprise est assurée à titre professionnel, notamment par une assurance décennale, pour les activités déclarées à son contrat. L'attestation d'assurance est remise sur demande.</p>
           </details>
