@@ -3113,3 +3113,202 @@ textarea{ resize: vertical; }
   .reviewsDot{ width: 18px; }
   .reviewsControls{ padding-right: 6px; }
 }
+
+/* =========================
+   Réalisations (lot 3B) : galerie /realisations/ et fiches de chantier
+   Réutilise les variables, boutons et pastilles du site ; aucune police ni bibliothèque en plus.
+========================= */
+.rx main{ overflow: clip; }
+.rx-hero{ padding: 44px 0 20px; }
+.rx-crumbs{ margin: 0 0 16px; font-size: 13px; color: var(--muted2); }
+.rx-crumbs ol{ list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rx-crumbs li + li::before{ content: "/"; margin-right: 6px; color: var(--muted2); }
+.rx-crumbs a{ color: var(--muted); }
+.rx-crumbs a:hover,
+.rx-crumbs a:focus-visible{ color: var(--accent); }
+.rx-hero h1{
+  margin: 0 0 14px;
+  max-width: 900px;
+  font-size: clamp(1.9rem, 3.8vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.rx-lead{
+  margin: 0;
+  max-width: 64ch;
+  color: rgba(255,255,255,.82);
+  font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+  line-height: 1.65;
+}
+.rx-facts{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0 0;
+}
+.rx-facts div{
+  padding: 12px 16px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 14px 14px 0;
+  background: rgba(255,255,255,.035);
+}
+.rx-facts dt{ font-size: 13px; color: var(--muted2); }
+.rx-facts dd{ margin: 3px 0 0; font-weight: 650; line-height: 1.35; }
+
+/* Photographies : lumineuses, jamais recouvertes ; la légende se lit en dessous, sur fond sombre */
+.rx-photo{ margin: 0; }
+.rx-photo img{
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius2);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow);
+}
+.rx-photo figcaption{ margin-top: 10px; padding-inline: 4px; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.rx-zoom{
+  display: block;
+  border-radius: var(--radius2);
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.rx-zoom img{ transition: transform .5s ease-out, filter .5s ease-out; }
+.rx-zoom:hover img{ transform: scale(1.02); filter: brightness(1.04); }
+.rx-zoom:focus-visible{ outline: 2px solid rgba(215,181,109,.92); outline-offset: 3px; }
+.rx-cover{ padding: 8px 0 0; }
+
+.rx-chapters{ display: grid; gap: clamp(44px, 6vw, 76px); padding-block: clamp(36px, 5vw, 60px) 12px; }
+.rx-chapter{
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(22px, 4vw, 52px);
+  align-items: start;
+}
+.rx-chapter:nth-child(even) .rx-chapter__text{ order: 2; }
+.rx-chapter__text h2{
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 2.3vw, 1.9rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.rx-chapter__text h2::before{
+  content: "";
+  display: block;
+  width: 38px;
+  height: 2px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, var(--accent), rgba(215,181,109,0));
+}
+.rx-chapter__text p{ margin: 0 0 12px; max-width: 58ch; color: rgba(255,255,255,.78); line-height: 1.7; }
+.rx-chapter__media{ display: grid; gap: 16px; }
+.rx-chapter__media--pair{ grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.rx-chapter__media--narrow{ max-width: 520px; }
+
+.rx-outro{ padding-block: 40px 20px; }
+.rx-outro__inner{
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: clamp(22px, 4vw, 52px);
+  align-items: center;
+}
+.rx-outro h2{ margin: 0 0 14px; font-size: clamp(1.35rem, 2.3vw, 1.9rem); line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+.rx-outro p{ margin: 0 0 12px; max-width: 58ch; color: rgba(255,255,255,.78); line-height: 1.7; }
+.rx-cta{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.rx-cta .btn{ min-height: 48px; }
+.rx-links{ margin-top: 16px; font-size: 14.5px; color: var(--muted); }
+.rx-links a{ color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Galerie principale : une carte par chantier (la première, mise en avant, occupe toute la largeur) */
+.rx-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; padding-top: 10px; }
+.rx-card{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius2);
+  border: 1px solid rgba(255,255,255,.14);
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+  box-shadow: 0 18px 44px rgba(0,0,0,.30);
+  transition: transform .3s ease-out, border-color .3s ease-out, box-shadow .3s ease-out;
+}
+.rx-card:hover,
+.rx-card:focus-within{ transform: translateY(-3px); border-color: rgba(215,181,109,.5); box-shadow: 0 24px 54px rgba(0,0,0,.36); }
+.rx-card__media img{ display: block; width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.rx-card__body{ display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px 22px 24px; }
+.rx-card h2{ margin: 0; font-size: clamp(1.3rem, 2.2vw, 1.75rem); line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+.rx-card h2 a{ color: inherit; }
+.rx-card h2 a::after{ content: ""; position: absolute; inset: 0; z-index: 1; }
+.rx-card h2 a:focus-visible{ outline: none; }
+.rx-card:has(h2 a:focus-visible){ outline: 2px solid rgba(215,181,109,.92); outline-offset: 3px; }
+.rx-card p{ margin: 0; color: var(--muted); line-height: 1.65; }
+.rx-tags{ display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.rx-note{ margin: 22px 0 0; max-width: 64ch; color: var(--muted2); font-size: 14.5px; }
+
+/* Visionneuse (dialog natif, ouverte par assets/js/gallery.js ; sans JavaScript, les liens ouvrent l'image) */
+.rx-lightbox{
+  width: min(96vw, 1360px);
+  max-width: none;
+  max-height: 96vh;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  overflow: visible;
+}
+.rx-lightbox::backdrop{ background: rgba(6,8,11,.9); backdrop-filter: blur(6px); }
+.rx-lightbox__figure{ margin: 0; display: grid; justify-items: center; gap: 12px; }
+.rx-lightbox__img{ display: block; max-width: 100%; max-height: 78vh; width: auto; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
+.rx-lightbox__caption{ max-width: 70ch; text-align: center; font-size: 14.5px; line-height: 1.5; color: var(--muted); padding-inline: 12px; }
+.rx-lightbox__bar{ display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
+.rx-lightbox__btn{
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(215,181,109,.4);
+  background: rgba(20,24,30,.86);
+  color: rgba(255,255,255,.92);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .25s ease, background .25s ease;
+}
+.rx-lightbox__btn:hover{ border-color: rgba(215,181,109,.85); background: rgba(34,40,48,.94); }
+.rx-lightbox__btn:focus-visible{ outline: 2px solid rgba(215,181,109,.92); outline-offset: 2px; }
+
+@media (max-width: 900px){
+  .rx-chapter,
+  .rx-outro__inner{ grid-template-columns: minmax(0, 1fr); }
+  .rx-chapter:nth-child(even) .rx-chapter__text{ order: 0; }
+  .rx-chapter__media--narrow{ max-width: none; }
+}
+@media (min-width: 901px){
+  .rx-card--feature{ flex-direction: row; grid-column: 1 / -1; }
+  .rx-card--feature .rx-card__media{ flex: 1.45 1 0; min-width: 0; }
+  .rx-card--feature .rx-card__body{ flex: 1 1 0; justify-content: center; padding: 34px; }
+}
+@media (max-width: 720px){
+  .rx-hero{ padding: 28px 0 14px; }
+  .rx-facts{ grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .rx-cta .btn{ width: 100%; }
+  .rx-card__body{ padding: 18px 16px 20px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .rx-zoom img,
+  .rx-card,
+  .rx-lightbox__btn{ transition: none; }
+  .rx-zoom:hover img{ transform: none; }
+  .rx-card:hover,
+  .rx-card:focus-within{ transform: none; }
+}
+
+.gallery__more{ margin: 22px 0 0; text-align: center; }
+.rx-photo--small{ max-width: 460px; }
+.rx .section__head{ display: block; }
+.rx .section__head p{ margin-top: 12px; }

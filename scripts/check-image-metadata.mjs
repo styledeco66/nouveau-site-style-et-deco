@@ -2,7 +2,7 @@
 // Vérifie qu'aucune image publiée ne contient de métadonnées sensibles (GPS, adresse, etc.).
 // Aucune valeur n'est affichée : seulement la présence de blocs de métadonnées.
 // Usage : node scripts/check-image-metadata.mjs [dossier]   (code de sortie 1 si GPS trouvé)
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -57,11 +57,13 @@ function chunks(buf, kind) {
   return names;
 }
 
+const walk = (d) => readdirSync(d).sort().flatMap((n) => (statSync(join(d, n)).isDirectory() ? walk(join(d, n)) : [join(d, n)]));
 let bad = 0;
-for (const f of readdirSync(dir).sort()) {
+for (const full of walk(dir)) {
+  const f = full.slice(dir.length + 1);
   const ext = extname(f).toLowerCase();
   if (![".jpg", ".jpeg", ".webp", ".png", ".avif"].includes(ext)) continue;
-  const buf = readFileSync(join(dir, f));
+  const buf = readFileSync(full);
   let status;
   if (ext === ".jpg" || ext === ".jpeg") {
     const r = inspectJpeg(buf);
@@ -78,7 +80,7 @@ for (const f of readdirSync(dir).sort()) {
     status = `métadonnées PNG:${meta.length ? meta.join(",") : "non"}`;
     if (meta.includes("eXIf")) bad++;
   } else status = "format non analysé";
-  console.log(`${f.padEnd(52)} ${buf.length.toString().padStart(8)} o  ${status}`);
+  console.log(`${f.padEnd(70)} ${buf.length.toString().padStart(8)} o  ${status}`);
 }
 if (bad) { console.error(`\n${bad} fichier(s) avec métadonnées de localisation.`); process.exit(1); }
 console.log("\nAucune coordonnée GPS détectée.");

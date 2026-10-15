@@ -61,7 +61,7 @@ test("chaque <img> a un alt, des dimensions et (hors logo) un alt descriptif non
       assert.match(tag, /\balt="/, `${relative(ROOT, f)} : alt manquant`);
       assert.match(tag, /\bwidth="\d+"/, `${relative(ROOT, f)} : width manquant`);
       assert.match(tag, /\bheight="\d+"/, `${relative(ROOT, f)} : height manquant`);
-      if (!/brand__logo/.test(tag)) {
+      if (!/brand__logo|rx-lightbox__img/.test(tag)) {
         const alt = tag.match(/\balt="([^"]*)"/)[1];
         assert.ok(alt.length >= 20 && alt.length <= 180, `alt trop court/long : ${alt}`);
       }

@@ -54,6 +54,54 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://styleetdeco.fr/realisations/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp</image:loc>
+      <image:title>Immeuble résidentiel de Perpignan après ravalement de façade</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp</image:loc>
+      <image:title>Immeuble résidentiel de Perpignan après ravalement de façade</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/etat-initial-720.webp</image:loc>
+      <image:title>Immeuble avant travaux de ravalement de façade</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/balcon-degrade-460.webp</image:loc>
+      <image:title>Rive de balcon dégradée avant réparation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/echafaudage-soubassement-1400.webp</image:loc>
+      <image:title>Échafaudage et partie basse de façade pendant le chantier</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/armatures-balcon-1200.webp</image:loc>
+      <image:title>Balcon en cours de reprise avec armature métallique apparente</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/balcon-repare-1200.webp</image:loc>
+      <image:title>Rive de balcon après reprise du support</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/peinture-en-cours-1400.webp</image:loc>
+      <image:title>Façade en cours de peinture</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-balcons-1600.webp</image:loc>
+      <image:title>Balcons de l'immeuble après ravalement</image:title>
+    </image:image>
+  </url>
+  <url>
     <loc>https://styleetdeco.fr/legal/mentions-legales.html</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>yearly</changefreq>
