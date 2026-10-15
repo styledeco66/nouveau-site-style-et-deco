@@ -94,15 +94,32 @@
       background-repeat: no-repeat;
     }
 
-    .local-page-hero::before {
+    /* Sélecteur renforcé : la règle globale « .section::before » (filet de 1 px) neutralisait ce voile */
+    .section.local-page-hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg,
+      width: auto;
+      height: auto;
+      transform: none;
+      opacity: 1;
+      /* Voile sombre concentré derrière le texte (gauche), photo préservée à droite */
+      background:
+        linear-gradient(90deg,
           rgba(6, 8, 12, .90) 0%,
-          rgba(6, 8, 12, .72) 60%,
-          rgba(6, 8, 12, .55) 100%);
+          rgba(6, 8, 12, .84) 38%,
+          rgba(6, 8, 12, .68) 70%,
+          rgba(6, 8, 12, .30) 100%),
+        linear-gradient(180deg,
+          rgba(6, 8, 12, .30) 0%,
+          rgba(6, 8, 12, 0) 35%,
+          rgba(6, 8, 12, .34) 100%);
       z-index: 0;
+    }
+
+    .local-page-hero h1,
+    .local-page-hero .lead {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 2px 18px rgba(0, 0, 0, .40);
     }
 
     .local-page-hero .container {
@@ -127,7 +144,7 @@
     .local-page-hero .lead {
       font-size: clamp(1.02rem, 1.5vw, 1.2rem);
       line-height: 1.6;
-      color: rgba(255, 255, 255, .85);
+      color: rgba(255, 255, 255, .94);
     }
 
     .local-page-cta {
@@ -229,8 +246,9 @@
     }
 
     .local-page .section__head {
+      display: block;
       margin-bottom: 20px;
-      max-width: 900px;
+      max-width: none;
     }
 
     .local-page .section__head h2 {
@@ -238,6 +256,10 @@
       line-height: 1.2;
       letter-spacing: -0.01em;
       text-wrap: balance;
+    }
+
+    .local-page .section__head h2 + p {
+      margin-top: 14px;
     }
 
     .local-page .section__head p,
@@ -348,6 +370,14 @@
       .local-page-hero {
         padding: 64px 0 48px;
         background-image: url("../assets/images/banniere-facade-900.webp");
+      }
+
+      /* Texte sur toute la largeur : voile plus uniforme pour garder le contraste */
+      .section.local-page-hero::before {
+        background: linear-gradient(180deg,
+            rgba(6, 8, 12, .88) 0%,
+            rgba(6, 8, 12, .80) 55%,
+            rgba(6, 8, 12, .86) 100%);
       }
 
       .local-page-hero h1 {
