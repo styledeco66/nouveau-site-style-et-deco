@@ -23,14 +23,16 @@ Si une variable obligatoire manque, la function répond 500 et le visiteur voit 
 ### Origine sur les Deploy Previews Netlify
 
 `LEAD_ALLOWED_ORIGINS` reste la seule source de vérité en production et en branch deploy : aucun domaine en dehors de
-cette liste explicite n'est jamais accepté, quel que soit le contexte. Sur un **Deploy Preview** Netlify uniquement
-(quand la variable système `CONTEXT` fournie par Netlify vaut exactement `deploy-preview`), la function autorise en
-plus, et uniquement, l'origine correspondant à `DEPLOY_PRIME_URL` — la variable système Netlify contenant l'URL
-canonique de ce preview précis (ex. `https://deploy-preview-42--styleetdeco.netlify.app`). Ces deux variables sont
-fournies automatiquement par Netlify à chaque déploiement de preview : **il n'est plus nécessaire de modifier
-`LEAD_ALLOWED_ORIGINS` à la main à chaque pull request**. Hors du contexte `deploy-preview` (production, branch
-deploy, ou `CONTEXT` absent), `DEPLOY_PRIME_URL` est ignorée même si elle est présente, et aucune origine n'est ajoutée
-à la liste explicite. Aucun autre domaine Netlify (`*.netlify.app` générique) n'est jamais accepté par wildcard.
+cette liste explicite n'est jamais accepté, quel que soit le contexte. Sur un **Deploy Preview** Netlify uniquement, la function
+autorise en plus, et uniquement, l'adresse de CE preview (ex. `https://deploy-preview-42--styleetdeco.netlify.app`) :
+le contexte « deploy-preview » est lu dans le contexte d'exécution que Netlify fournit à la function (`context.deploy.context`),
+à défaut dans la variable `CONTEXT` ; l'adresse est `DEPLOY_PRIME_URL` si elle est présente, sinon l'origine de la requête elle-même,
+acceptée seulement si elle a la forme exacte `https://deploy-preview-<n>--<site>.netlify.app`. **Il n'est pas nécessaire de modifier
+`LEAD_ALLOWED_ORIGINS` à chaque pull request** (une ancienne valeur propre à un preview, ex. `deploy-preview-4`, est inutile et peut être supprimée
+du contexte « Deploy Previews »). Hors du contexte `deploy-preview` (production, branch deploy, contexte inconnu), aucune origine n'est ajoutée.
+Aucun autre domaine Netlify (`*.netlify.app` générique) n'est jamais accepté par wildcard.
+*Incident du 16/10/2026 : les variables `CONTEXT` / `DEPLOY_PRIME_URL` n'étaient pas disponibles à l'exécution de la function ; le preview n°9 était
+refusé (403) et le formulaire affichait l'erreur générique. Corrigé par la lecture de `context.deploy.context`.*
 
 ## Comportement
 

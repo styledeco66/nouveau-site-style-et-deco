@@ -38,29 +38,41 @@ const errorResponse = (status, code, wantsHtml, extraHeaders = {}) => {
 };
 
 // En production (et en branch deploy), seule la liste explicite (LEAD_ALLOWED_ORIGINS ou, à
-// défaut, le domaine canonique) est autorisée. Sur un Deploy Preview Netlify uniquement
-// (CONTEXT === "deploy-preview"), `DEPLOY_PRIME_URL` est fournie automatiquement par Netlify et
-// vaut l'adresse canonique de CE preview (ex. https://deploy-preview-12--site.netlify.app) :
-// elle change à chaque PR sans intervention manuelle, contrairement à LEAD_ALLOWED_ORIGINS.
-// Elle est ajoutée telle quelle (jamais de wildcard ni de *.netlify.app générique), et jamais
-// hors du contexte deploy-preview, même si la variable est présente (production, branch deploy).
-const parseAllowedOrigins = (env) => {
+// défaut, le domaine canonique) est autorisée.
+//
+// Sur un Deploy Preview Netlify UNIQUEMENT, l'adresse de CE preview (ex. https://deploy-preview-12--site.netlify.app)
+// est ajoutée automatiquement : elle change à chaque PR, contrairement à LEAD_ALLOWED_ORIGINS. Le contexte est lu
+// - dans le contexte d'exécution fourni par Netlify à la function (`context.deploy.context`) : c'est la source fiable,
+//   car les variables d'environnement CONTEXT / DEPLOY_PRIME_URL ne sont pas toujours disponibles à l'exécution ;
+// - ou, à défaut, dans la variable CONTEXT.
+// L'adresse ajoutée est DEPLOY_PRIME_URL si elle est présente, sinon l'origine de la requête elle-même, acceptée
+// uniquement si elle a la forme exacte d'un preview Netlify (https://deploy-preview-<n>--<site>.netlify.app).
+// Jamais de wildcard générique, jamais hors contexte deploy-preview (production, branch deploy).
+const PREVIEW_ORIGIN = /^https:\/\/deploy-preview-\d+--[a-z0-9-]+\.netlify\.app$/;
+
+const isTrustedOrigin = (value) => {
+  try {
+    return new URL(value).origin === value;
+  } catch {
+    return false;
+  }
+};
+
+const parseAllowedOrigins = (env, { deployContext, ownOrigin } = {}) => {
   const configured = String(env.LEAD_ALLOWED_ORIGINS || "")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
   const allowed = configured.length ? configured : DEFAULT_ALLOWED_ORIGINS;
 
-  if (String(env.CONTEXT || "").trim() !== "deploy-preview") return allowed;
+  const context = String(env.CONTEXT || deployContext || "").trim();
+  if (context !== "deploy-preview") return allowed;
+
   const previewUrl = String(env.DEPLOY_PRIME_URL || "").trim();
-  if (!previewUrl || allowed.includes(previewUrl)) return allowed;
-  if (!previewUrl.startsWith("https://")) return allowed;
-  try {
-    if (new URL(previewUrl).origin !== previewUrl) return allowed;
-  } catch {
-    return allowed;
-  }
-  return [...allowed, previewUrl];
+  const candidate = previewUrl || (ownOrigin && PREVIEW_ORIGIN.test(ownOrigin) ? ownOrigin : "");
+  if (!candidate || allowed.includes(candidate)) return allowed;
+  if (!candidate.startsWith("https://") || !isTrustedOrigin(candidate)) return allowed;
+  return [...allowed, candidate];
 };
 
 const requestOrigin = (request) => {
@@ -224,7 +236,7 @@ const parseBody = (text, contentType) => {
   return data;
 };
 
-export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = () => new Date() } = {}) => {
+export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = () => new Date(), deploy = {} } = {}) => {
   const contentType = (request.headers.get("content-type") || "").toLowerCase();
   const isForm = contentType.startsWith("application/x-www-form-urlencoded");
   const fail = (status, code, headers) => errorResponse(status, code, isForm, headers);
@@ -232,7 +244,15 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   if (request.method !== "POST") return fail(405, "method_not_allowed", { Allow: "POST" });
 
   const origin = requestOrigin(request);
-  if (!origin || !parseAllowedOrigins(env).includes(origin)) return fail(403, "forbidden_origin");
+  let ownOrigin = "";
+  try {
+    ownOrigin = new URL(request.url).origin;
+  } catch {
+    ownOrigin = "";
+  }
+  if (!origin || !parseAllowedOrigins(env, { deployContext: deploy && deploy.context, ownOrigin }).includes(origin)) {
+    return fail(403, "forbidden_origin");
+  }
 
   if (!isForm && !contentType.startsWith("application/json")) return fail(415, "unsupported_media_type");
 
@@ -287,4 +307,4 @@ export const config = {
   },
 };
 
-export default (request) => handleLead(request, { env: process.env });
+export default (request, context) => handleLead(request, { env: process.env, deploy: context && context.deploy });

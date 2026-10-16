@@ -270,6 +270,34 @@ test("origine : sur un Deploy Preview Netlify (CONTEXT=deploy-preview), DEPLOY_P
   assert.equal(stillForeign.response.status, 403);
 });
 
+test("origine : sur un Deploy Preview, le contexte fourni par Netlify à la function suffit (sans CONTEXT ni DEPLOY_PRIME_URL)", async () => {
+  // Cas réel constaté : variables CONTEXT / DEPLOY_PRIME_URL absentes à l'exécution ; LEAD_ALLOWED_ORIGINS du contexte preview obsolète.
+  const previewUrl = "https://deploy-preview-9--iridescent-twilight-cce7df.netlify.app";
+  const env = { ...ENV, LEAD_ALLOWED_ORIGINS: "https://deploy-preview-4--iridescent-twilight-cce7df.netlify.app" };
+  const previewRequest = (origin) =>
+    new Request(`${previewUrl}/.netlify/functions/lead`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin },
+      body: JSON.stringify(validDevis()),
+    });
+  const ok = await handleLead(previewRequest(previewUrl), { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+  assert.equal(ok.status, 200);
+  // Un autre site, ou un autre preview, reste refusé même en deploy-preview.
+  for (const origin of ["https://evil.example", "https://deploy-preview-3--autre.netlify.app", "https://styleetdeco.fr"]) {
+    const refused = await handleLead(previewRequest(origin), { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+    assert.equal(refused.status, 403, origin);
+  }
+  // Hors contexte deploy-preview (production, branch deploy, contexte inconnu) : l'adresse du preview n'est jamais acceptée.
+  for (const deploy of [{ context: "production" }, { context: "branch-deploy" }, {}, undefined]) {
+    const refused = await handleLead(previewRequest(previewUrl), { env, fetchImpl: makeFetch(), now: NOW, deploy });
+    assert.equal(refused.status, 403, JSON.stringify(deploy));
+  }
+  // L'origine propre de la requête n'est acceptée que si elle a la forme d'un preview Netlify.
+  const fake = new Request("https://evil.example/.netlify/functions/lead", { method: "POST", headers: { "content-type": "application/json", origin: "https://evil.example" }, body: JSON.stringify(validDevis()) });
+  const spoof = await handleLead(fake, { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+  assert.equal(spoof.status, 403);
+});
+
 test("origine : DEPLOY_PRIME_URL est ignoré hors contexte deploy-preview (production, branch deploy, absent)", async () => {
   const previewUrl = "https://deploy-preview-42--styledeco.netlify.app";
 
