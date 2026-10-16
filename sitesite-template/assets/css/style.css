@@ -1383,7 +1383,7 @@ h1{
   padding: 16px;
 }
 .shot__meta h3{ margin: 0 0 6px; font-size: 16px; }
-.shot__meta p{ margin:0; color: var(--muted); font-size: 13px; }
+.shot__meta p{ margin:0; color: var(--muted); font-size: 14px; }
 
 /* Abstract “matières” (sans photos) */
 .shot__media--a{ --shot-glow: radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%); }
@@ -1756,7 +1756,7 @@ h1{
   box-shadow: 0 0 0 4px rgba(215,181,109,.14);
 }
 .field span{
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted2);
 }
 input, select, textarea{
@@ -1795,7 +1795,7 @@ button{ font-family: inherit; font-size: inherit; }
 .form__hint{
   margin: 10px 0 0;
   color: var(--muted2);
-  font-size: 13px;
+  font-size: 14px;
   text-align:center;
 }
 .form__hint--top{
@@ -2020,6 +2020,8 @@ button{ font-family: inherit; font-size: inherit; }
    dépassent la largeur (le logo était écrasé entre 981 et 1100 px). On réutilise le menu compact
    (bouton « hamburger »), comme sur mobile. */
 @media (min-width: 721px) and (max-width: 1099px){
+  .brand__logo{ width: 142px; } /* en-tête plus compact sur tablette */
+  .header__inner{ padding: 8px 0; }
   .nav,
   .hide-sm,
   .header__actions{ display: none; }
@@ -2114,7 +2116,7 @@ button{ font-family: inherit; font-size: inherit; }
   }
   .process__reassurance{
     margin-top: 10px;
-    font-size: 13px;
+    font-size: 14px;
   }
   .reveal-item.reveal-cinematic{
     transform: translateY(10px) scale(.99);
@@ -2164,7 +2166,7 @@ button{ font-family: inherit; font-size: inherit; }
     color: rgba(255,255,255,.78);
   }
   #services .list--checks li{
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.35;
     margin: 6px 0;
   }
@@ -2251,7 +2253,7 @@ button{ font-family: inherit; font-size: inherit; }
     display: none;
   }
   .brand__logo{
-    width: clamp(132px, 46vw, 192px);
+    width: clamp(118px, 34vw, 140px); /* en-tête compact (≈ 95–110 px) ; même logo, mêmes proportions */
     height: auto;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,.42));
   }
@@ -2315,7 +2317,7 @@ button{ font-family: inherit; font-size: inherit; }
   .pill{
     position: relative;
     z-index: 2;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0;
     color: #f4e6c3;
@@ -2451,11 +2453,11 @@ button{ font-family: inherit; font-size: inherit; }
     padding: 10px 12px;
   }
   .typeCards{ grid-template-columns: 1fr; }
-  html{ scroll-padding-top: 150px; }
+  html{ scroll-padding-top: 118px; }
   #rappel30,
-  .callback30{ scroll-margin-top: 182px; }
-  #contact{ scroll-margin-top: 228px; }
-  #contact-details{ scroll-margin-top: 170px; }
+  .callback30{ scroll-margin-top: 150px; }
+  #contact{ scroll-margin-top: 196px; }
+  #contact-details{ scroll-margin-top: 138px; }
   #contact.hero__visual + #rappel30{ margin-top: 36px; }
   .logos{ grid-template-columns: repeat(2, 1fr); }
   .form__grid{ grid-template-columns: 1fr; }
