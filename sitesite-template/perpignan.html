@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Artisan Peintre en Bâtiment à Perpignan (66000) | Style &amp; Déco</title>
   <meta name="description"
-    content="Besoin d'un artisan peintre en bâtiment à Perpignan ? Style &amp; Déco réalise vos travaux de peinture intérieure, décoration et façade avec des finitions premium. Devis gratuit sous 24 h." />
+    content="Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h." />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity -->
   <link rel="canonical" href="https://styleetdeco.fr/perpignan.html" />
@@ -15,16 +15,92 @@
   <meta property="og:site_name" content="Style &amp; Déco" />
   <meta property="og:title" content="Artisan Peintre en Bâtiment à Perpignan | Style &amp; Déco" />
   <meta property="og:description"
-    content="Votre artisan peintre local à Perpignan pour des finitions soignées. Devis gratuit et intervention rapide." />
+    content="Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h." />
   <meta property="og:url" content="https://styleetdeco.fr/perpignan.html" />
   <meta property="og:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Artisan Peintre en Bâtiment à Perpignan | Style &amp; Déco" />
   <meta name="twitter:description"
-    content="Votre artisan peintre local à Perpignan pour des finitions soignées. Devis gratuit et intervention rapide." />
+    content="Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h." />
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="stylesheet" href="./assets/css/style.css?v=34af869994" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=7a9de67e70" />
+  <style>
+    /* Page Perpignan : composition éditoriale (titre au-dessus du texte), hero mobile photo + texte, cartes lisibles.
+       Réutilise les variables, boutons, cartes et pastilles du site. */
+    .pg main { overflow: clip; }
+    .pg .section__head { display: block; max-width: none; margin-bottom: 22px; text-align: left; }
+    .pg .section__head h2 { max-width: 26ch; margin: 0 0 12px; font-size: clamp(1.45rem, 2.6vw, 2.1rem); line-height: 1.18; letter-spacing: -0.01em; text-wrap: balance; text-align: left; }
+    .pg .section__head p { max-width: 68ch; margin: 0; text-align: left; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+    .pg .section__head p + p { margin-top: 12px; }
+    .pg .section__head h2 + p { margin-top: 0; }
+    .pg .section { padding-block: clamp(46px, 6vw, 72px); }
+    .pg-lead-links a, .pg .section__head a, .pg .card a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Hero : sur ordinateur, fond photographique d'ambiance + formulaire à droite (rendu existant) */
+    .pg .hero--pg .hero__bgLayer--a { background-image: url("./assets/images/ambiance-salon-contemporain-large-1151.webp"); background-position: right center; animation: hero-zoom-a 24s linear infinite; }
+    .pg .hero--pg .hero__bgLayer--b { display: none; }
+    .pg .hero--pg .pill { display: inline-flex; margin: 0 0 18px; }
+    .pg-photo { display: none; }
+
+    /* Prestations et méthode : cartes lisibles, titre doré discret */
+    .pg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .pg-cards .card { padding: 24px 22px 26px; }
+    .pg-cards .card h3 { margin: 0 0 12px; font-size: 1.2rem; line-height: 1.25; }
+    .pg-cards .card h3::before { content: ""; display: block; width: 34px; height: 2px; margin-bottom: 14px; background: linear-gradient(90deg, var(--accent), rgba(215, 181, 109, 0)); }
+    .pg-cards .card p { margin: 0; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+
+    /* Secteurs desservis : quatre blocs, communes en pastilles */
+    .pg-zones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+    .pg-zone { padding: 22px 22px 24px; }
+    .pg-zone h3 { margin: 0 0 8px; font-size: 1.15rem; line-height: 1.25; }
+    .pg-zone > p { margin: 0 0 14px; color: rgba(255, 255, 255, .72); line-height: 1.65; font-size: 15px; }
+    .pg-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .pg-chips li { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--stroke); background: rgba(255, 255, 255, .045); color: rgba(255, 255, 255, .86); font-size: 14px; line-height: 1.3; }
+
+    .pg .before-after-img { display: block; width: 100%; height: auto; border-radius: 12px; margin-bottom: 1rem; }
+    .pg-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .pg .hero--pg .lead--second { margin-top: 10px; }
+    /* FAQ : mêmes valeurs que le modèle officiel (/facade-saint-cyprien/, règles .local-page .section) */
+    .pg #faq-perpignan .section__head h2 { max-width: none; }
+    .pg #faq-perpignan .faq p { max-width: 900px; color: rgba(255, 255, 255, .76); line-height: 1.55; }
+    .pg-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pg-real { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(22px, 4vw, 52px); align-items: center; }
+    .pg-real h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 2.6vw, 2.1rem); line-height: 1.18; letter-spacing: -0.01em; text-wrap: balance; }
+    .pg-real p { margin: 0 0 12px; max-width: 58ch; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+    .pg-real__cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .pg-real__cta .btn { min-height: 48px; }
+    .pg-zone summary { cursor: pointer; font-weight: 720; font-size: 1.05rem; line-height: 1.3; padding: 2px 0; }
+    .pg-zone summary:focus-visible { outline: 2px solid rgba(215, 181, 109, .92); outline-offset: 4px; border-radius: 6px; }
+    .pg-zone[open] summary { margin-bottom: 14px; }
+
+    @media (max-width: 980px) {
+      .pg-cards, .pg-cards--4, .pg-zones, .pg-duo, .pg-real { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .pg .section { padding-block: 40px; }
+      .pg .section__head h2 { max-width: none; font-size: clamp(1.4rem, 6.6vw, 1.75rem); }
+      .pg .section__head p { font-size: 1rem; }
+
+      /* Hero mobile : photographie lumineuse en haut, puis pastille, titre, texte et boutons sur fond anthracite */
+      .pg .hero.hero--pg { padding: 14px 0 6px; }
+      .pg .hero--pg .hero__bgBlend { display: none; }
+      .pg .hero--pg .hero__grid { padding: 0; gap: 20px; border-radius: 0; background: none; border: 0; box-shadow: none; }
+      .pg-photo { display: block; margin: 0 0 18px; }
+      .pg-photo img { display: block; width: 100%; height: auto; border-radius: 18px; border: 1px solid rgba(255, 255, 255, .14); box-shadow: var(--shadow); }
+      .pg-photo figcaption { margin-top: 8px; padding-inline: 4px; font-size: 12px; color: var(--muted2); }
+      .pg .hero--pg .pill { margin: 0 0 14px; width: fit-content; max-width: 100%; font-size: 12px; font-weight: 600; color: #f4e6c3; padding: 7px 13px; background: linear-gradient(135deg, rgba(215, 181, 109, .24), rgba(24, 28, 34, .92)); border-color: rgba(215, 181, 109, .58); box-shadow: 0 6px 18px rgba(0, 0, 0, .35); text-align: left; }
+      .pg .hero.hero--pg h1 { margin: 0 0 12px; font-size: clamp(1.9rem, 8.6vw, 2.35rem); line-height: 1.1; letter-spacing: -0.02em; text-shadow: none; text-wrap: balance; }
+      .pg .hero--pg .hero__locality { display: none; }
+      .pg .hero.hero--pg .lead { margin: 0; max-width: 34ch; font-size: 1.02rem; line-height: 1.6; color: rgba(255, 255, 255, .82); }
+      .pg .hero--pg .hero__cta { margin-top: 20px; display: grid; gap: 10px; }
+      .pg .hero--pg .hero__cta .btn { width: 100%; min-width: 0; min-height: 52px; font-size: 16px; }
+      .pg-cards .card, .pg-zone { padding: 20px 18px 22px; }
+      .pg-real__cta .btn { width: 100%; }
+      .pg-chips li { font-size: 13.5px; padding: 6px 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .pg .hero--pg .hero__bgLayer--a { animation: none; } }
+  </style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -34,7 +110,7 @@
         "@id": "https://styleetdeco.fr/perpignan.html#webpage",
         "url": "https://styleetdeco.fr/perpignan.html",
         "name": "Artisan Peintre en Bâtiment à Perpignan (66000) | Style & Déco",
-        "description": "Besoin d'un artisan peintre en bâtiment à Perpignan ? Style & Déco réalise vos travaux de peinture intérieure, décoration et façade avec des finitions premium. Devis gratuit sous 24 h.",
+        "description": "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h.",
         "inLanguage": "fr-FR",
         "isPartOf": {
           "@id": "https://styleetdeco.fr/#website"
@@ -85,7 +161,7 @@
         "name": "Intervenez-vous dans tout Perpignan ou seulement dans certains quartiers ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Nous intervenons dans l'ensemble des quartiers de Perpignan (centre, Vernet, Moulin à Vent, Saint-Assiscle, Las Cobas, Mailloles…) ainsi que dans les communes de l'agglomération. Les éventuels frais de déplacement sont précisés dans le devis."
+          "text": "Nous intervenons à Perpignan et dans plusieurs communes alentour, selon la nature et l'organisation des travaux. Les modalités de déplacement sont précisées dans le devis."
         }
       },
       {
@@ -93,7 +169,7 @@
         "name": "Combien coûte un chantier de peinture à Perpignan ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Le tarif dépend du support, de la surface, de l'état des murs et plafonds, de la préparation nécessaire et de la finition souhaitée. Un devis précis est systématiquement établi sous 24 h."
+          "text": "Le tarif dépend de la surface, de l'état des supports, de la préparation nécessaire et de la finition choisie. Nous établissons un devis détaillé sous 24 h."
         }
       },
       {
@@ -101,7 +177,15 @@
         "name": "Quel délai pour démarrer un chantier ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Sous 1 à 3 semaines après validation du devis. Pour les remises en état avant vente, location ou état des lieux, nous pouvons proposer des créneaux d'urgence selon le planning."
+          "text": "Le démarrage est prévu sous 1 à 3 semaines après validation du devis."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Intervenez-vous après un dégât des eaux ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Oui, nous réalisons des travaux de remise en état des murs et plafonds après un dégât des eaux, lorsque l'origine du sinistre a été traitée et que les supports sont suffisamment secs. Selon leur état, notre intervention peut comprendre les réparations, les enduits, une impression isolante adaptée et les peintures de finition."
         }
       },
       {
@@ -125,7 +209,7 @@
   </script>
 </head>
 
-<body>
+<body class="pg">
   <div id="top" aria-hidden="true"></div>
   <header class="header">
     <div class="container header__inner">
@@ -164,19 +248,26 @@
   </nav>
 
   <main>
-    <section class="hero" aria-label="Introduction">
+    <section class="hero hero--pg" aria-label="Introduction">
       <div class="hero__bgBlend" aria-hidden="true">
         <span class="hero__bgLayer hero__bgLayer--a"></span>
         <span class="hero__bgLayer hero__bgLayer--b"></span>
       </div>
       <div class="container hero__grid">
         <div class="hero__content">
-          <p class="pill" style="margin-bottom: 2rem; display: inline-block;">Peintre en bâtiment • Perpignan & Alentours</p>
-          <h1>Artisan Peintre en bâtiment à Perpignan</h1>
+          <figure class="pg-photo">
+            <img src="./assets/images/ambiance-salon-contemporain-960.webp"
+              srcset="./assets/images/ambiance-salon-contemporain-640.webp 640w, ./assets/images/ambiance-salon-contemporain-960.webp 960w, ./assets/images/ambiance-salon-contemporain-1151.webp 1151w"
+              sizes="(min-width: 721px) 1px, calc(100vw - 40px)"
+              alt="Illustration d'un intérieur contemporain lumineux : salon et salle à manger ouverts, mur décoratif anthracite avec niches, grande baie vitrée donnant sur les toits et les montagnes"
+              width="1151" height="863" fetchpriority="high" decoding="async" />
+            <figcaption>Illustration d'ambiance, non issue d'un chantier réalisé.</figcaption>
+          </figure>
+          <p class="pill">Peintre en bâtiment • Perpignan &amp; Alentours</p>
+          <h1>Artisan peintre à Perpignan</h1>
           <p class="hero__locality"><span class="accent">Perpignan (66000)</span> &amp; <span class="accent">Pyrénées-Orientales</span></p>
-          <p class="lead">
-            Travaux de rénovation ou de neuf. Style &amp; Déco intervient à Perpignan et dans la plaine du Roussillon pour des finitions impeccables.
-          </p>
+          <p class="lead">Basés à Saint-Cyprien, nous intervenons à Perpignan pour vos travaux de peinture intérieure et extérieure, la rénovation des murs et plafonds et les travaux de finition.</p>
+          <p class="lead lead--second">Nous accordons une attention particulière à la préparation des supports et à la qualité du résultat.</p>
           <div class="hero__cta">
             <a class="btn btn--primary btn--lg" href="#contact">Demander un devis à Perpignan</a>
             <a class="btn btn--ghost btn--lg" href="tel:+33650756242">06 50 75 62 42</a>
@@ -187,20 +278,54 @@
           <!-- nosemgrep: python.django.security.django-no-csrf-token.django-no-csrf-token -->
           <form class="form form--hero js-lead-form" name="lead_perpignan" method="POST" action="/.netlify/functions/lead">
             <input type="hidden" name="form-name" value="lead_perpignan" />
-            <p style="display:none;">
+            <input type="hidden" name="subject" value="📩 DEMANDE DE DEVIS - Style & Deco" />
+            <p class="hp-field" aria-hidden="true">
               <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
-            <h2 class="form__title">Votre projet à Perpignan</h2>
-            <p class="form__hint">Réponse sous 24 h. Devis gratuit.</p>
+            <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
+            <h2 class="form__title js-form-title" data-title-devis="Demander un devis en 1 minute"
+              data-title-callback="Demande de rappel en moins de 30 min">Demander un devis en 1 minute</h2>
+            <p class="form__hint form__hint--top js-form-intro"
+              data-intro-devis="Réponse sous 24 h. Sans engagement."
+              data-intro-callback="Laissez votre nom et numéro, on vous rappelle rapidement pendant nos horaires d'ouverture.">
+              Réponse sous 24 h. Sans engagement.</p>
+
             <div class="form__grid">
-              <label class="field"><span>Nom</span><input type="text" name="name" required /></label>
-              <label class="field"><span>Téléphone</span><input type="tel" name="phone" required /></label>
-              <label class="field field--full"><span>E-mail</span><input type="email" name="email" autocomplete="email" required /></label>
-              <label class="field field--full"><span>Type de travaux</span><input type="text" name="subject" required /></label>
-              <label class="field field--full"><span>Détails</span><textarea name="details" rows="4" required></textarea></label>
+              <label class="field">
+                <span class="js-name-label" data-label-devis="Nom" data-label-callback="Nom">Nom</span>
+                <input type="text" name="name" placeholder="Votre nom" autocomplete="name" required />
+              </label>
+
+              <label class="field">
+                <span>Téléphone</span>
+                <input type="tel" name="phone" placeholder="06…" autocomplete="tel" required />
+              </label>
+
+              <input type="hidden" name="lead_priority" value="STANDARD">
+
+              <label class="field field--full js-devis-only">
+                <span>E-mail</span>
+                <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
+              </label>
+
+              <label class="field field--full js-devis-only">
+                <span>Ville / Zone</span>
+                <input type="text" name="city" value="Perpignan" placeholder="Ex : Perpignan, Saint-Cyprien…"
+                  autocomplete="address-level2" required />
+              </label>
+
+              <label class="field field--full js-devis-only">
+                <span>Détails</span>
+                <textarea name="details" rows="4" placeholder="Surface, support, contraintes de délai, rendu souhaité…"
+                  required></textarea>
+              </label>
             </div>
-            <button class="btn btn--primary btn--lg btn--full" type="submit">Recevoir mon devis</button>
+
+            <button class="btn btn--primary btn--lg btn--full js-form-submit" type="submit"
+              data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon devis</button>
             <p class="form__status js-form-status" role="alert" hidden></p>
+            <button class="form__modeSwitch js-mode-switch is-hidden" type="button">Je préfère une demande de devis
+              complète</button>
           </form>
         </aside>
       </div>
@@ -213,13 +338,13 @@
           <h2>Chantier : peinture de plafond à Perpignan</h2>
           <p>Exemple d'une réalisation avec protection complète du chantier et finition soignée.</p>
         </div>
-        <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+        <div class="pg-duo">
           <article class="card">
              <img src="./assets/images/peinture-plafond-perpignan-avant-960.webp"
                srcset="./assets/images/peinture-plafond-perpignan-avant-640.webp 640w, ./assets/images/peinture-plafond-perpignan-avant-960.webp 960w, ./assets/images/peinture-plafond-perpignan-avant-1280.webp 1280w"
                sizes="(min-width: 760px) 540px, calc(100vw - 40px)"
                alt="Salon-séjour avant la peinture du plafond : murs, portes-fenêtres et sol protégés par des bâches plastiques, bande de masquage jaune en haut des murs"
-               width="1280" height="960" loading="lazy" decoding="async" style="width:100%; height:auto; border-radius:8px; margin-bottom:1rem;" />
+               width="1280" height="960" loading="lazy" decoding="async" class="before-after-img" />
              <h3>Avant / Protection</h3>
              <p>Une étape cruciale pour garantir la propreté de votre intérieur.</p>
           </article>
@@ -228,7 +353,7 @@
                srcset="./assets/images/peinture-plafond-perpignan-apres-640.webp 640w, ./assets/images/peinture-plafond-perpignan-apres-960.webp 960w, ./assets/images/peinture-plafond-perpignan-apres-1280.webp 1280w"
                sizes="(min-width: 760px) 540px, calc(100vw - 40px)"
                alt="Pièce de vie après la peinture du plafond : plafond blanc uniforme avec spots encastrés, murs blancs et sol en carrelage gris foncé"
-               width="1280" height="960" loading="lazy" decoding="async" style="width:100%; height:auto; border-radius:8px; margin-bottom:1rem;" />
+               width="1280" height="960" loading="lazy" decoding="async" class="before-after-img" />
              <h3>Après / Finition</h3>
              <p>Un plafond net, uniforme et durable.</p>
           </article>
@@ -239,16 +364,10 @@
     <section class="section" aria-label="Présentation locale">
       <div class="container">
         <div class="section__head">
-          <h2>Votre artisan peintre en bâtiment à Perpignan</h2>
-          <p>
-            Style &amp; Déco est une entreprise artisanale de peinture en bâtiment basée à <a href="./peintre-saint-cyprien/">Saint-Cyprien</a> et
-            intervenant à <strong>Perpignan</strong> et dans la plaine du Roussillon. Particuliers
-            et professionnels nous confient leurs travaux de rénovation, de neuf et de remise en état :
-            peinture intérieure, peinture extérieure, ravalement de façade, joints placo, traitement des
-            supports humides et finitions décoratives. Chaque chantier suit la même méthode : diagnostic du
-            support, protection complète, application des produits adaptés, finition contrôlée et nettoyage en
-            fin de journée.
-          </p>
+          <h2>Une préparation soignée, des finitions maîtrisées</h2>
+          <p>Style &amp; Déco accompagne les particuliers et les professionnels dans leurs projets de peinture et de rénovation à Perpignan et dans les Pyrénées-Orientales.</p>
+          <p>Nous intervenons sur les murs, les plafonds, les façades et les revêtements de sol, en adaptant notre méthode à l'état des supports et aux finitions recherchées.</p>
+          <p>Protections, réparations, enduits, impression et peinture : chaque intervention fait l'objet d'une préparation attentive pour obtenir un résultat régulier et soigné.</p>
         </div>
       </div>
     </section>
@@ -257,80 +376,77 @@
       <div class="container">
         <div class="section__head">
           <h2>Nos prestations de peinture à Perpignan</h2>
-          <p>Trois familles de chantiers couvertes avec le même niveau d'exigence.</p>
+          <p>Quatre familles de chantiers, avec le même niveau d'exigence.</p>
         </div>
-        <div class="cards">
+        <div class="pg-cards pg-cards--4">
           <article class="card">
-            <h3>Peinture intérieure à Perpignan</h3>
-            <p>
-              Appartements en centre-ville, villas en périphérie, locaux commerciaux : préparation des
-              supports, enduits de rebouchage et de lissage, mise en peinture des murs et plafonds avec
-              finitions mates, satinées ou velours selon l'usage.
-            </p>
+            <h3>Peinture intérieure</h3>
+            <p>Rénovation et mise en peinture des murs, plafonds et boiseries. Préparation des surfaces, impression et finitions mates, velours ou satinées, selon les supports et l'utilisation des pièces.</p>
           </article>
           <article class="card">
-            <h3>Peinture extérieure & façade</h3>
-            <p>
-              Ravalement complet, traitement des fissures, application de peintures pliolite, siloxane
-              ou hydropliolite adaptées à l'exposition au vent marin et aux UV méditerranéens.
-              L'entreprise est assurée, notamment en décennale, pour les activités déclarées à son contrat.
-              Voir aussi le <a href="./facade-saint-cyprien/">ravalement de façade à Saint-Cyprien</a>.
-            </p>
+            <h3>Peinture extérieure et façades</h3>
+            <p>Ravalement de façade, nettoyage des supports, traitement des fissures et réparations localisées avant l'application de peintures extérieures adaptées à la nature des surfaces et à leur exposition. Voir aussi notre page <a href="./facade-saint-cyprien/">ravalement de façade à Saint-Cyprien</a>.</p>
           </article>
           <article class="card">
-            <h3>Décoration & finitions</h3>
-            <p>
-              Bétons cirés, peintures à effet, papier peint, patines, ton sur ton sur boiseries. Un
-              accompagnement sur le choix des coloris et des finitions adaptées à votre intérieur.
-            </p>
+            <h3>Murs, plafonds et enduits</h3>
+            <p>Reprises des bandes à joints, rebouchage, ratissage et application mécanisée des enduits à l'airless. Ponçage et impression des supports pour préparer des finitions régulières.</p>
+          </article>
+          <article class="card">
+            <h3>Parquets et revêtements de sol</h3>
+            <p>Préparation et ragréage des supports selon les besoins, puis pose de parquets, revêtements souples et lames ou dalles LVT. Une attention particulière est portée aux découpes et aux finitions.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="section" aria-label="Quartiers desservis">
+    <section class="section" aria-label="Réalisations à Perpignan">
+      <div class="container pg-real">
+        <div class="pg-real__text">
+          <h2>Découvrez nos réalisations à Perpignan</h2>
+          <p>De la rénovation d'un plafond au ravalement complet d'une façade, nos réalisations illustrent différentes étapes de notre travail : protection des lieux, préparation des supports, réparations et finitions.</p>
+          <p>Ravalement d'un immeuble à Perpignan : nettoyage haute pression, réparation des balcons, protection des armatures et application d'une peinture de façade D2.</p>
+          <div class="pg-real__cta">
+            <a class="btn btn--primary btn--lg" href="./realisations/ravalement-facade-immeuble-perpignan/">Découvrir ce chantier de façade à Perpignan</a>
+            <a class="btn btn--ghost btn--lg" href="./realisations/">Toutes nos réalisations</a>
+          </div>
+        </div>
+        <figure class="rx-photo pg-real__photo">
+          <a href="./realisations/ravalement-facade-immeuble-perpignan/">
+            <img src="./assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-960.webp"
+              srcset="./assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-960.webp 960w, ./assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp 1600w"
+              sizes="(max-width: 900px) calc(100vw - 40px), 540px"
+              alt="Immeuble résidentiel de trois niveaux à Perpignan après ravalement : façades beige clair, bande grise percée de deux hublots et balcons à garde-corps blancs"
+              width="1600" height="1200" loading="lazy" decoding="async" />
+          </a>
+          <figcaption>Immeuble à Perpignan après ravalement de façade.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Zones d'intervention">
       <div class="container">
         <div class="section__head">
-          <h2>Quartiers et communes desservis autour de Perpignan</h2>
-          <p>
-            Style &amp; Déco intervient comme peintre en bâtiment à Perpignan, dans l'agglomération,
-            les communes limitrophes et les villages des Albères — notamment
-            <strong>Saint-Génis-des-Fontaines</strong> et <strong>Sorède</strong>. Les éventuels frais de
-            déplacement sont précisés dans le devis.
-          </p>
+          <h2>Perpignan et les communes alentour</h2>
+          <p>Implantés à <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>, nous intervenons à Perpignan et dans différentes communes des Pyrénées-Orientales, selon la nature et l'organisation des travaux.</p>
+          <p>Les modalités de déplacement sont précisées dans le devis.</p>
         </div>
-        <div class="cards">
-          <article class="card">
-            <h3>Perpignan centre & quartiers</h3>
-            <p>
-              Centre-ville historique, Saint-Jacques, Saint-Mathieu, La Réal, Saint-Assiscle, Moulin à
-              Vent, Las Cobas, Mailloles, Vernet, Haut-Vernet, Bas-Vernet, Clodion, Champ de Mars,
-              Saint-Gaudérique, Catalunya.
-            </p>
-          </article>
-          <article class="card">
-            <h3>Communes limitrophes</h3>
-            <p>
-              Cabestany, Canet-en-Roussillon, Saint-Estève, Le Soler, Bompas, Rivesaltes, Toulouges,
-              Saleilles, Pollestres, Pézilla-la-Rivière, Baixas, Villeneuve-de-la-Raho.
-            </p>
-          </article>
-          <article class="card">
-            <h3>Villages des Albères &amp; Côte Vermeille</h3>
-            <p>
-              Peintre en bâtiment à <strong>Saint-Génis-des-Fontaines</strong>, <strong>Sorède</strong>,
-              Argelès-sur-Mer, Laroque-des-Albères, Villelongue-dels-Monts, Saint-André et Palau-del-Vidre :
-              maisons anciennes, mas et villas du piémont des Albères, avec un savoir-faire adapté aux
-              enduits chaulés et aux façades exposées au vent marin.
-            </p>
-          </article>
-          <article class="card">
-            <h3>Plaine du Roussillon &amp; littoral</h3>
-            <p>
-              Saint-Cyprien, Elne, Latour-Bas-Elne, Théza, Alénya, Corneilla-del-Vercol et le littoral
-              des Pyrénées-Orientales.
-            </p>
-          </article>
+        <div class="pg-zones">
+          <details class="pg-zone" open>
+            <summary>Perpignan : centre et quartiers</summary>
+            <ul class="pg-chips"><li>Centre-ville historique</li><li>Saint-Jacques</li><li>Saint-Mathieu</li><li>La Réal</li><li>Saint-Assiscle</li><li>Moulin à Vent</li><li>Las Cobas</li><li>Mailloles</li><li>Vernet</li><li>Haut-Vernet</li><li>Bas-Vernet</li><li>Clodion</li><li>Champ de Mars</li><li>Saint-Gaudérique</li><li>Catalunya</li></ul>
+          </details>
+          <details class="pg-zone">
+            <summary>Communes limitrophes</summary>
+            <ul class="pg-chips"><li>Cabestany</li><li>Canet-en-Roussillon</li><li>Saint-Estève</li><li>Le Soler</li><li>Bompas</li><li>Rivesaltes</li><li>Toulouges</li><li>Saleilles</li><li>Pollestres</li><li>Pézilla-la-Rivière</li><li>Baixas</li><li>Villeneuve-de-la-Raho</li></ul>
+          </details>
+          <details class="pg-zone">
+            <summary>Albères et Côte Vermeille</summary>
+            <ul class="pg-chips"><li>Saint-Génis-des-Fontaines</li><li>Sorède</li><li>Argelès-sur-Mer</li><li>Laroque-des-Albères</li><li>Villelongue-dels-Monts</li><li>Saint-André</li><li>Palau-del-Vidre</li></ul>
+          </details>
+          <details class="pg-zone">
+            <summary>Plaine du Roussillon et littoral</summary>
+            <ul class="pg-chips"><li>Saint-Cyprien</li><li>Elne</li><li>Latour-Bas-Elne</li><li>Théza</li><li>Alénya</li><li>Corneilla-del-Vercol</li><li>Littoral des Pyrénées-Orientales</li></ul>
+          </details>
         </div>
       </div>
     </section>
@@ -338,15 +454,11 @@
     <section class="section section--alt" aria-label="Climat méditerranéen">
       <div class="container">
         <div class="section__head">
-          <h2>Pourquoi le climat méditerranéen impose des peintures adaptées</h2>
-          <p>
-            À Perpignan, le bâti subit la tramontane, l'air salin venu du littoral, des étés très
-            chauds (jusqu'à 36 °C) et des hivers doux mais humides. Une peinture de façade standard
-            peut cloquer, fariner et perdre ses pigments en quelques années dans ces conditions. Nous sélectionnons
-            des produits microporeux, hydrofuges et anti-UV, capables de laisser respirer le support
-            tout en bloquant les infiltrations. Pour les intérieurs, nous privilégions des peintures
-            lessivables résistantes à la chaleur, en particulier dans les pièces exposées plein sud.
-          </p>
+          <h2>Des peintures adaptées aux supports et au climat méditerranéen</h2>
+          <p>À Perpignan et dans les Pyrénées-Orientales, les façades sont exposées au soleil, aux variations de température, à la tramontane et parfois à l'humidité.</p>
+          <p>Avant la mise en peinture, nous examinons l'état des supports, les éventuelles fissures et les travaux préparatoires nécessaires.</p>
+          <p>Le choix du système de peinture dépend de la nature du matériau, de son état et de son exposition.</p>
+          <p>La préparation et la réparation des supports restent essentielles pour obtenir une finition extérieure adaptée.</p>
         </div>
       </div>
     </section>
@@ -354,76 +466,54 @@
     <section class="section" aria-label="Méthode & délais">
       <div class="container">
         <div class="section__head">
-          <h2>Délais d'intervention et déroulé d'un chantier à Perpignan</h2>
+          <h2>Comment se déroule votre chantier ?</h2>
         </div>
-        <div class="cards">
+        <div class="pg-cards">
           <article class="card">
-            <h3>1. Devis sous 24 h</h3>
-            <p>
-              Visite technique sur site ou échange détaillé par téléphone. Devis chiffré envoyé sous
-              24 h, sans engagement.
-            </p>
+            <h3>1. Échange et devis</h3>
+            <p>Nous étudions votre projet et les travaux nécessaires pour établir un devis détaillé sous 24 heures.</p>
           </article>
           <article class="card">
             <h3>2. Planification</h3>
-            <p>
-              Démarrage du chantier sous 1 à 3 semaines après validation du devis. Créneaux d'urgence
-              possibles pour les remises en état avant vente ou location.
-            </p>
+            <p>Après validation du devis, nous organisons l'intervention avec un démarrage prévu sous 1 à 3 semaines.</p>
           </article>
           <article class="card">
-            <h3>3. Réalisation & réception</h3>
-            <p>
-              Chantier propre, finitions contrôlées en lumière du jour, réception en votre présence,
-              avec les garanties légales applicables aux travaux.
-            </p>
+            <h3>3. Réalisation et finitions</h3>
+            <p>Protection des lieux, préparation des supports, application des produits adaptés, contrôle des finitions et nettoyage du chantier.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="section section--alt" id="faq-perpignan" aria-label="FAQ Perpignan">
+    <section class="section" id="faq-perpignan" aria-label="FAQ Perpignan">
       <div class="container">
         <div class="section__head">
           <h2>FAQ — Peintre en bâtiment à Perpignan</h2>
         </div>
         <div class="faq">
-          <details>
+          <details class="faq__item">
             <summary>Intervenez-vous dans tout Perpignan ou seulement dans certains quartiers ?</summary>
-            <p>
-              Nous intervenons dans l'ensemble des quartiers de Perpignan (centre, Vernet, Moulin à
-              Vent, Saint-Assiscle, Las Cobas, Mailloles…) ainsi que dans les communes de
-              l'agglomération. Les éventuels frais de déplacement sont précisés dans le devis.
-            </p>
+            <p>Nous intervenons à Perpignan et dans plusieurs communes alentour, selon la nature et l'organisation des travaux. Les modalités de déplacement sont précisées dans le devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Combien coûte un chantier de peinture à Perpignan ?</summary>
-            <p>
-              Le tarif dépend du support, de la surface, de l'état des murs et plafonds, de la préparation
-              nécessaire et de la finition souhaitée. Un devis précis est systématiquement établi sous 24 h.
-            </p>
+            <p>Le tarif dépend de la surface, de l'état des supports, de la préparation nécessaire et de la finition choisie. Nous établissons un devis détaillé sous 24 h.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Quel délai pour démarrer un chantier ?</summary>
-            <p>
-              Sous 1 à 3 semaines après validation du devis. Pour les remises en état
-              avant vente, location ou état des lieux, nous pouvons proposer des créneaux d'urgence
-              selon le planning.
-            </p>
+            <p>Le démarrage est prévu sous 1 à 3 semaines après validation du devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
+            <summary>Intervenez-vous après un dégât des eaux ?</summary>
+            <p>Oui, nous réalisons des travaux de remise en état des murs et plafonds après un dégât des eaux, lorsque l'origine du sinistre a été traitée et que les supports sont suffisamment secs. Selon leur état, notre intervention peut comprendre les réparations, les enduits, une impression isolante adaptée et les peintures de finition.</p>
+          </details>
+          <details class="faq__item">
             <summary>Travaillez-vous avec les syndics et les agences immobilières de Perpignan ?</summary>
-            <p>
-              Oui, nous étudions aussi les demandes des copropriétés, des agences de location et des bailleurs
-              (parties communes, remises en état, ravalements). Décrivez-nous votre besoin pour recevoir un devis.
-            </p>
+            <p>Oui, nous étudions aussi les demandes des copropriétés, des agences de location et des bailleurs (parties communes, remises en état, ravalements). Décrivez-nous votre besoin pour recevoir un devis.</p>
           </details>
-          <details>
+          <details class="faq__item">
             <summary>Êtes-vous assuré pour les chantiers de façade ?</summary>
-            <p>
-              Oui. L'entreprise est assurée à titre professionnel, notamment par une assurance décennale, pour les
-              activités déclarées à son contrat. L'attestation d'assurance est remise sur demande.
-            </p>
+            <p>Oui. L'entreprise est assurée à titre professionnel, notamment par une assurance décennale, pour les activités déclarées à son contrat. L'attestation d'assurance est remise sur demande.</p>
           </details>
         </div>
       </div>

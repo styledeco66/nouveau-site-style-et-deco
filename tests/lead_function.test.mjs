@@ -202,20 +202,20 @@ test("formulaire inconnu rejeté", async () => {
   assert.equal(fetchImpl.calls.length, 0);
 });
 
-test("lead_perpignan : subject = type de travaux saisi, requis, repris dans le sujet et le corps", async () => {
-  const payload = { ...validDevis({ "form-name": "lead_perpignan", subject: "Ravalement façade" }), city: undefined, lead_priority: undefined };
+test("lead_perpignan : mêmes champs et mêmes règles que l'accueil (ville requise, sujet fixé par le serveur)", async () => {
+  const payload = validDevis({ "form-name": "lead_perpignan", city: "Perpignan", subject: "texte du client, ignoré" });
   const { response, fetchImpl } = await run(jsonRequest(payload));
   assert.equal(response.status, 200);
-  assert.ok(fetchImpl.calls[0].body.text.includes("Ravalement façade"));
-  assert.ok(fetchImpl.calls[0].body.subject.includes("Perpignan"));
-  assert.equal(fetchImpl.calls[0].body.reply_to, "marie.durand@example.test");
-
-  const missing = await run(jsonRequest({ ...payload, subject: "" }));
-  assert.equal(missing.response.status, 400);
-
-  const noEmail = await run(jsonRequest({ ...payload, email: "" }));
-  assert.equal(noEmail.response.status, 400);
-  assert.equal(noEmail.fetchImpl.calls.length, 0);
+  const body = fetchImpl.calls[0].body;
+  assert.equal(body.subject, "📩 DEMANDE DE DEVIS - Perpignan");
+  assert.ok(!body.text.includes("texte du client"));
+  assert.ok(body.text.includes("Ville / Zone : Perpignan"));
+  assert.equal(body.reply_to, "marie.durand@example.test");
+  for (const missing of [{ city: "" }, { email: "" }, { details: "" }, { name: "" }]) {
+    const r = await run(jsonRequest({ ...payload, ...missing }));
+    assert.equal(r.response.status, 400, JSON.stringify(missing));
+    assert.equal(r.fetchImpl.calls.length, 0);
+  }
 });
 
 test("honeypot rempli : rien n'est envoyé et la réponse n'est pas un succès", async () => {
@@ -268,6 +268,34 @@ test("origine : sur un Deploy Preview Netlify (CONTEXT=deploy-preview), DEPLOY_P
   // La liste explicite de production n'est pas affaiblie : un domaine hors liste reste refusé même avec DEPLOY_PRIME_URL défini.
   const stillForeign = await run(jsonRequest(validDevis(), { origin: "https://evil.example" }), { env });
   assert.equal(stillForeign.response.status, 403);
+});
+
+test("origine : sur un Deploy Preview, le contexte fourni par Netlify à la function suffit (sans CONTEXT ni DEPLOY_PRIME_URL)", async () => {
+  // Cas réel constaté : variables CONTEXT / DEPLOY_PRIME_URL absentes à l'exécution ; LEAD_ALLOWED_ORIGINS du contexte preview obsolète.
+  const previewUrl = "https://deploy-preview-9--iridescent-twilight-cce7df.netlify.app";
+  const env = { ...ENV, LEAD_ALLOWED_ORIGINS: "https://deploy-preview-4--iridescent-twilight-cce7df.netlify.app" };
+  const previewRequest = (origin) =>
+    new Request(`${previewUrl}/.netlify/functions/lead`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin },
+      body: JSON.stringify(validDevis()),
+    });
+  const ok = await handleLead(previewRequest(previewUrl), { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+  assert.equal(ok.status, 200);
+  // Un autre site, ou un autre preview, reste refusé même en deploy-preview.
+  for (const origin of ["https://evil.example", "https://deploy-preview-3--autre.netlify.app", "https://styleetdeco.fr"]) {
+    const refused = await handleLead(previewRequest(origin), { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+    assert.equal(refused.status, 403, origin);
+  }
+  // Hors contexte deploy-preview (production, branch deploy, contexte inconnu) : l'adresse du preview n'est jamais acceptée.
+  for (const deploy of [{ context: "production" }, { context: "branch-deploy" }, {}, undefined]) {
+    const refused = await handleLead(previewRequest(previewUrl), { env, fetchImpl: makeFetch(), now: NOW, deploy });
+    assert.equal(refused.status, 403, JSON.stringify(deploy));
+  }
+  // L'origine propre de la requête n'est acceptée que si elle a la forme d'un preview Netlify.
+  const fake = new Request("https://evil.example/.netlify/functions/lead", { method: "POST", headers: { "content-type": "application/json", origin: "https://evil.example" }, body: JSON.stringify(validDevis()) });
+  const spoof = await handleLead(fake, { env, fetchImpl: makeFetch(), now: NOW, deploy: { context: "deploy-preview" } });
+  assert.equal(spoof.status, 403);
 });
 
 test("origine : DEPLOY_PRIME_URL est ignoré hors contexte deploy-preview (production, branch deploy, absent)", async () => {
@@ -448,23 +476,159 @@ test("devis : une valeur e-mail JSON non textuelle est refusée", async () => {
   }
 });
 
-test("lead_perpignan n'est jamais un rappel urgent, même avec un lead_priority forgé ; l'e-mail reste obligatoire", async () => {
-  const forged = { ...validDevis({ "form-name": "lead_perpignan", subject: "Ravalement façade", lead_priority: "RAPPEL_30_MIN" }), city: undefined };
+test("lead_perpignan : le rappel 30 min fonctionne comme sur l'accueil (nom et téléphone suffisent, e-mail ignoré)", async () => {
+  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_perpignan", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", email: "ignore@example.test" }));
+  assert.equal(response.status, 200);
+  const body = fetchImpl.calls[0].body;
+  assert.equal(body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
+  assert.ok(!body.text.includes("ignore@example.test"));
+  assert.equal(body.reply_to, undefined);
+});
 
-  const withEmail = await run(jsonRequest(forged));
-  assert.equal(withEmail.response.status, 200);
-  const body = withEmail.fetchImpl.calls[0].body;
-  assert.equal(body.subject, "📩 DEMANDE DE DEVIS - Perpignan - Ravalement façade");
-  assert.ok(!body.subject.includes("RAPPEL"));
-  assert.ok(body.text.includes("Priorité : STANDARD"));
-  assert.ok(!body.text.includes("RAPPEL_30_MIN"));
-  assert.equal(body.reply_to, "marie.durand@example.test");
+// ---------------------------------------------------------------- antispam : blocages techniques + quarantaine
+const SPAM_TEXT = "Bonjour, nous sommes une agence web. Création de site et SEO pour votre entreprise : référencement première page Google, audit gratuit sur https://seo-boost.example";
+const ENV_Q = { ...ENV, LEAD_QUARANTINE_EMAIL: "tri+verif@example.test" };
+const QUARANTINE_PREFIX = "[À VÉRIFIER] ";
 
-  for (const email of [undefined, "", "   ", "pas-un-email"]) {
-    const { response, fetchImpl } = await run(jsonRequest({ ...forged, email }));
-    assert.equal(response.status, 400, `e-mail ${JSON.stringify(email)} refusé malgré lead_priority forgé`);
+test("antispam : un vrai client (devis) n'est ni mis en quarantaine ni marqué", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis()), { env: ENV_Q });
+  assert.equal(response.status, 200);
+  assert.equal(fetchImpl.calls.length, 1);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.ok(!fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
+  assert.ok(!fetchImpl.calls[0].body.text.includes("Contrôle antispam"));
+});
+
+test("antispam : une demande de rappel 30 min légitime va à la boîte principale", async () => {
+  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", "bot-field": "" }), { env: ENV_Q });
+  assert.equal(response.status, 200);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.equal(fetchImpl.calls[0].body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
+});
+
+test("blocage technique : honeypot rempli (formulaire ou appel direct) → refus générique, aucun e-mail, aucun détail divulgué", async () => {
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ "form-name": form, "bot-field": "x" })), { env: ENV_Q });
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), { ok: false, error: "invalid_request" });
     assert.equal(fetchImpl.calls.length, 0);
   }
+});
+
+test("blocage technique : données invalides → refus, aucun e-mail", async () => {
+  for (const bad of [{ phone: "abc" }, { email: "pas-un-email" }, { name: "" }, { "form-name": "autre" }]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis(bad)), { env: ENV_Q });
+    assert.equal(response.status, 400);
+    assert.equal(fetchImpl.calls.length, 0);
+  }
+});
+
+test("quarantaine : un message publicitaire manifeste n'est JAMAIS refusé ni supprimé, mais envoyé à l'adresse de quarantaine", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris" })), { env: ENV_Q });
+  assert.equal(response.status, 200, "le visiteur voit un succès normal : aucun critère divulgué");
+  assert.deepEqual(await response.json(), { ok: true });
+  assert.equal(fetchImpl.calls.length, 1);
+  const body = fetchImpl.calls[0].body;
+  assert.deepEqual(body.to, ["tri+verif@example.test"]);
+  assert.ok(body.subject.startsWith(QUARANTINE_PREFIX));
+  assert.ok(body.text.includes("Contrôle antispam : QUARANTAINE"));
+  assert.ok(body.text.includes("seo-boost.example"), "contenu intact : rien n'est altéré ni perdu");
+});
+
+test("quarantaine : appel direct à la function avec un texte publicitaire → même traitement (quarantaine, pas de perte)", async () => {
+  const body = new URLSearchParams({ "form-name": "lead_contact", name: "Paul", phone: "0612345678", email: "paul@example.test", city: "Lyon", details: SPAM_TEXT, lead_priority: "STANDARD" }).toString();
+  const request = new Request("https://styleetdeco.fr/.netlify/functions/lead", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: ORIGIN }, body });
+  const { response, fetchImpl } = await run(request, { env: ENV_Q });
+  assert.equal(response.status, 303);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["tri+verif@example.test"]);
+});
+
+test("quarantaine : sans LEAD_QUARANTINE_EMAIL, la demande suspecte n'est pas perdue (boîte principale, sujet préfixé)", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris" })), { env: ENV });
+  assert.equal(response.status, 200);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
+  assert.ok(fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
+});
+
+test("quarantaine : la quarantaine vaut aussi pour une demande de rappel publicitaire, sans détails ni e-mail", async () => {
+  const { fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Agence SEO Pro", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", details: SPAM_TEXT }), { env: ENV_Q });
+  assert.equal(fetchImpl.calls.length, 1);
+  assert.deepEqual(fetchImpl.calls[0].body.to, ["tri+verif@example.test"]);
+});
+
+test("légitimité : anglais, autre alphabet, remplissage rapide ou sans script ne suffisent JAMAIS à déclencher la quarantaine", async () => {
+  const cases = [
+    "Hello, I would like a quote to paint my apartment in Perpignan: two bedrooms, walls and ceilings, about 70 square meters. Could you please call me?",
+    "Здравствуйте, мне нужна покраска стен в квартире в Перпиньяне, около 60 квадратных метров. Пожалуйста, позвоните мне.",
+    "مرحبا، أحتاج إلى طلاء جدران شقتي في بربينيان، حوالي ٦٠ مترا مربعا. شكرا لكم.",
+    "Hola, necesito pintar la fachada de mi casa en Perpiñán. Gracias.",
+  ];
+  for (const details of cases) {
+    for (const extra of [{}, { form_started: NOW().getTime() - 800 }, { form_started: undefined }]) {
+      const { response, fetchImpl } = await run(jsonRequest(validDevis({ details, name: "Client", ...extra })), { env: ENV_Q });
+      assert.equal(response.status, 200);
+      assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"], details.slice(0, 30));
+      assert.ok(!fetchImpl.calls[0].body.subject.startsWith(QUARANTINE_PREFIX));
+    }
+  }
+});
+
+test("légitimité : lien pertinent, mot inhabituel, syndics, agences et demandes urgentes restent en boîte principale", async () => {
+  const texts = [
+    "Peinture du salon et d'un mur d'entrée, photos ici : https://exemple.test/photos/123 et plan https://exemple.test/plan.pdf",
+    "Je veux un site web... pardon, un mur façon tadelakt dans la salle de bain, 12 m², avec SEO ? Non, simplement une peinture lessivable.",
+    "Syndic de copropriété : ravalement de façade et reprise de balcons, devis pour l'assemblée générale.",
+    "Agence immobilière : remise en état d'un appartement avant location, urgent, 45 m².",
+    "Dégât des eaux au plafond de la cuisine, besoin d'un rappel rapide pour reprendre l'enduit et repeindre.",
+  ];
+  for (const details of texts) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ details })), { env: ENV_Q });
+    assert.equal(response.status, 200);
+    assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"], details.slice(0, 30));
+  }
+});
+
+test("légitimité : une demande n'est jamais perdue — tout message valide produit exactement un e-mail (principal ou quarantaine)", async () => {
+  const messages = ["Peinture salon 25 m²", SPAM_TEXT, "Hello we can help increase your website traffic and ranking", "Lorem ipsum dolor sit amet", "x".repeat(40), "Рекламное предложение: создание сайтов и SEO"];
+  for (const details of messages) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ details })), { env: ENV_Q });
+    assert.equal(response.status, 200, details.slice(0, 20));
+    assert.equal(fetchImpl.calls.length, 1, details.slice(0, 20));
+  }
+});
+
+test("antispam : plusieurs soumissions identiques rapprochées → un seul e-mail (idempotence) et limite de débit native déclarée", async () => {
+  const fetchImpl = makeFetch();
+  const keys = new Set();
+  for (let i = 0; i < 3; i += 1) {
+    const { response } = await run(jsonRequest(validDevis({ submission_id: undefined })), { fetchImpl });
+    assert.equal(response.status, 200);
+    keys.add(fetchImpl.calls[i].init.headers["Idempotency-Key"]);
+  }
+  assert.equal(keys.size, 1, "même clé : Resend n'enverra qu'un e-mail");
+  assert.equal(config.rateLimit.windowLimit, 10);
+});
+
+test("antispam : les journaux ne contiennent ni données personnelles ni texte du message", async () => {
+  const captured = [];
+  const original = { log: console.log, error: console.error, warn: console.warn };
+  console.log = console.error = console.warn = (...args) => captured.push(args.join(" "));
+  try {
+    await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean Spammeur" })), { env: ENV_Q });
+    await run(jsonRequest(validDevis({ "bot-field": "x" })), { env: ENV_Q });
+  } finally {
+    Object.assign(console, original);
+  }
+  const output = captured.join("\n");
+  assert.ok(captured.length >= 2);
+  for (const leaked of ["Jean Spammeur", "seo-boost", "agence web", "06 12 34 56 78", "marie.durand@example.test", "tri+verif"]) assert.ok(!output.includes(leaked), leaked);
+});
+
+test("les données d'un client légitime ne sont pas altérées par les contrôles", async () => {
+  const { fetchImpl } = await run(jsonRequest(validDevis({ details: "Salon 25 m²\nPlafond + murs" })), { env: ENV_Q });
+  const text = fetchImpl.calls[0].body.text;
+  assert.ok(text.includes("Détails : Salon 25 m²\nPlafond + murs"));
+  assert.ok(text.includes("Nom : Marie Durand"));
 });
 
 test("aucune donnée personnelle ni secret dans les logs", async () => {

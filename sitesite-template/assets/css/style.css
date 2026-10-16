@@ -3312,3 +3312,16 @@ textarea{ resize: vertical; }
 .rx-photo--small{ max-width: 460px; }
 .rx .section__head{ display: block; }
 .rx .section__head p{ margin-top: 12px; }
+
+/* Honeypot antispam : champ invisible pour les visiteurs et masqué aux technologies d'assistance (aria-hidden, hors tabulation),
+   mais présent dans le DOM et rempli par les robots (vérifié côté serveur). Hors écran plutôt que display:none, que certains robots repèrent. */
+.hp-field{
+  position: absolute !important;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -305,8 +305,9 @@ test("engagements confirmés : rappel sous 30 min, devis sous 24 h, démarrage s
   assert.match(home, /Réponse sous 24 h\. Sans engagement\./);
   assert.match(home, /Le démarrage des travaux intervient sous 1 à 3 semaines après validation du devis\./);
   const perpignan = read("perpignan.html");
-  assert.match(perpignan, /Démarrage du chantier sous 1 à 3 semaines après validation du devis\./);
-  assert.match(perpignan, /Sous 1 à 3 semaines après validation du devis\./);
+  assert.match(perpignan, /Après validation du devis, nous organisons l'intervention avec un démarrage prévu sous 1 à 3 semaines\./);
+  assert.match(perpignan, /Le démarrage est prévu sous 1 à 3 semaines après validation du devis\./);
+  assert.doesNotMatch(perpignan, /créneaux d'urgence/);
   assert.match(read("merci.html"), /Je vous recontacte sous 24 h/);
 });
 

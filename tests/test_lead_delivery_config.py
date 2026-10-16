@@ -92,7 +92,7 @@ class LeadFormMarkupTests(unittest.TestCase):
     def test_each_form_keeps_an_invisible_honeypot(self):
         for page in FORMS:
             source = (SITE / page).read_text(encoding="utf-8")
-            self.assertEqual(source.count('<p style="display:none;">'), len(parse(page).forms), page)
+            self.assertEqual(source.count('<p class="hp-field" aria-hidden="true">'), len(parse(page).forms), page)
             for form in parse(page).forms:
                 honeypots = [i for i in form["inputs"] if i.get("name") == "bot-field"]
                 self.assertEqual(len(honeypots), 1)
