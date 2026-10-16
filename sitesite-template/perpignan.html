@@ -24,7 +24,7 @@
     content="Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h." />
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="stylesheet" href="./assets/css/style.css?v=7a9de67e70" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=f165b4f26b" />
   <style>
     /* Page Perpignan : composition éditoriale (titre au-dessus du texte), hero mobile photo + texte, cartes lisibles.
        Réutilise les variables, boutons, cartes et pastilles du site. */
@@ -221,29 +221,27 @@
       </button>
       <nav class="nav" aria-label="Navigation principale">
         <a href="/#services">Services</a>
-        <a href="/#realisations">Réalisations</a>
-        <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
-        <a href="./perpignan.html" aria-current="page">Perpignan</a>
-        <a href="./facade-saint-cyprien/">Façades</a>
-        <a href="/#process">Méthode</a>
-        <a href="/#faq">FAQ</a>
+        <a href="/realisations/">Réalisations</a>
+        <a href="/peintre-saint-cyprien/">Saint-Cyprien</a>
+        <a href="/perpignan.html" aria-current="page">Perpignan</a>
+        <a href="/facade-saint-cyprien/">Façades</a>
+        <a href="#faq-perpignan">FAQ</a>
         <a href="#contact" class="btn btn--ghost">Contact</a>
       </nav>
       <div class="header__actions">
         <a class="btn btn--ghost hide-sm" href="tel:+33650756242">Appeler</a>
-        <a class="btn btn--primary" href="#contact">Devis gratuit</a>
+        <a class="btn btn--primary" href="#contact" data-form-mode-intent="devis">Devis gratuit</a>
       </div>
     </div>
   </header>
 
   <nav class="mobileMenu" id="mobile-menu" aria-label="Navigation mobile" hidden>
     <a href="/#services">Services</a>
-    <a href="/#realisations">Réalisations</a>
-    <a href="./peintre-saint-cyprien/">Saint-Cyprien</a>
-    <a href="./perpignan.html" aria-current="page">Perpignan</a>
-    <a href="./facade-saint-cyprien/">Façades</a>
-    <a href="/#process">Méthode</a>
-    <a href="/#faq">FAQ</a>
+    <a href="/realisations/">Réalisations</a>
+    <a href="/peintre-saint-cyprien/">Saint-Cyprien</a>
+    <a href="/perpignan.html" aria-current="page">Perpignan</a>
+    <a href="/facade-saint-cyprien/">Façades</a>
+    <a href="#faq-perpignan">FAQ</a>
     <a href="#contact">Contact</a>
   </nav>
 
@@ -520,22 +518,25 @@
     </section>
   </main>
 
-  <footer class="footer">
+  <footer class="footer" aria-label="Pied de page">
     <div class="container footer__inner">
       <div class="footer__left">
         <div class="footer__brand">Style &amp; Déco</div>
-        <div class="footer__small">Artisan peintre en bâtiment — Pyrénées-Orientales.</div>
+        <div class="footer__small">Peinture en bâtiment — finitions soignées.</div>
       </div>
       <div class="footer__right">
         <a href="/#services">Services</a>
-        <a href="/#realisations">Réalisations</a>
-        <a href="./peintre-saint-cyprien/">Peintre Saint-Cyprien</a>
-        <a href="./perpignan.html">Peintre Perpignan</a>
-        <a href="./facade-saint-cyprien/">Façades Saint-Cyprien</a>
+        <a href="/realisations/">Réalisations</a>
+        <a href="/peintre-saint-cyprien/">Peintre Saint-Cyprien</a>
+        <a href="/perpignan.html">Peintre Perpignan</a>
+        <a href="/facade-saint-cyprien/">Façades Saint-Cyprien</a>
+        <a href="#contact" data-form-mode-intent="devis">Devis</a>
+        <a href="/legal/mentions-legales.html" aria-label="Mentions légales">Mentions</a>
+        <a href="/legal/politique-confidentialite.html" aria-label="Politique de confidentialité">Confidentialité</a>
       </div>
     </div>
   </footer>
   <script src="./assets/js/lead-form.js?v=50e7677486"></script>
-  <script src="./assets/js/app.js?v=5612bbaafc"></script>
+  <script src="./assets/js/app.js?v=e48378f7f2"></script>
 </body>
 </html>

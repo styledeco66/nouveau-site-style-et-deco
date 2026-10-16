@@ -10,9 +10,48 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/images/favicon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon-180.png" />
-  <link rel="stylesheet" href="../assets/css/style.css?v=7a9de67e70" />
+  <link rel="stylesheet" href="../assets/css/style.css?v=f165b4f26b" />
 </head>
 <body>
+  <header class="header">
+    <div class="container header__inner">
+      <a class="brand" href="/" aria-label="Retour à l'accueil">
+        <img class="brand__logo" src="/assets/images/logo-fin-640.webp" alt="Logo Style &amp; Déco" width="640" height="427" />
+      </a>
+
+      <button class="mobileMenuToggle" type="button" aria-label="Ouvrir le menu" aria-controls="mobile-menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/#services">Services</a>
+        <a href="/realisations/">Réalisations</a>
+        <a href="/peintre-saint-cyprien/">Saint-Cyprien</a>
+        <a href="/perpignan.html">Perpignan</a>
+        <a href="/facade-saint-cyprien/">Façades</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/#contact-details" class="btn btn--ghost">Contact</a>
+      </nav>
+
+      <div class="header__actions">
+        <a class="btn btn--ghost hide-sm" href="tel:+33650756242">Appeler</a>
+        <a class="btn btn--primary" href="/#contact" data-form-mode-intent="devis">Devis gratuit</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="mobileMenu" id="mobile-menu" aria-label="Navigation mobile" hidden>
+    <a href="/#services">Services</a>
+    <a href="/realisations/">Réalisations</a>
+    <a href="/peintre-saint-cyprien/">Saint-Cyprien</a>
+    <a href="/perpignan.html">Perpignan</a>
+    <a href="/facade-saint-cyprien/">Façades</a>
+    <a href="/#faq">FAQ</a>
+    <a href="/#contact-details">Contact</a>
+  </nav>
+
   <main class="section" aria-label="Mentions légales">
     <div class="container" style="max-width: 920px;">
       <h1>Mentions légales</h1>
@@ -59,13 +98,28 @@
         Téléphone : <a href="tel:+33650756242">+33 6 50 75 62 42</a>
       </p>
 
-      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:24px;">
-        <a class="btn btn--ghost" href="/">Accueil</a>
-        <a class="btn btn--ghost" href="/legal/mentions-legales.html">Mentions</a>
-        <a class="btn btn--ghost" href="/legal/politique-confidentialite.html">Confidentialité</a>
-        <a class="btn btn--primary" href="tel:+33650756242">Appeler</a>
-      </div>
     </div>
   </main>
+
+  <footer class="footer" aria-label="Pied de page">
+    <div class="container footer__inner">
+      <div class="footer__left">
+        <div class="footer__brand">Style &amp; Déco</div>
+        <div class="footer__small">Peinture en bâtiment — finitions soignées.</div>
+      </div>
+      <div class="footer__right">
+        <a href="/#services">Services</a>
+        <a href="/realisations/">Réalisations</a>
+        <a href="/peintre-saint-cyprien/">Peintre Saint-Cyprien</a>
+        <a href="/perpignan.html">Peintre Perpignan</a>
+        <a href="/facade-saint-cyprien/">Façades Saint-Cyprien</a>
+        <a href="/#contact" data-form-mode-intent="devis">Devis</a>
+        <a href="/legal/mentions-legales.html" aria-label="Mentions légales">Mentions</a>
+        <a href="/legal/politique-confidentialite.html" aria-label="Politique de confidentialité">Confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/app.js?v=e48378f7f2"></script>
 </body>
 </html>

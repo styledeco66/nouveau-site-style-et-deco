@@ -525,7 +525,7 @@
     });
 
     window.addEventListener("resize", () => {
-      if (!window.matchMedia("(max-width: 980px)").matches) {
+      if (!window.matchMedia("(max-width: 1099px)").matches) {
         closeMenu();
       } else if (menu.classList.contains("is-open")) {
         schedulePlace();

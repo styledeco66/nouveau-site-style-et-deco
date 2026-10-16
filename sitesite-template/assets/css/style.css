@@ -108,6 +108,7 @@ img{ max-width:100%; display:block; }
   display:inline-flex;
   align-items:center;
   min-width: 0;
+  flex: 0 0 auto; /* le logo ne se laisse plus écraser par la navigation */
 }
 .brand__logo{
   display: block;
@@ -848,7 +849,7 @@ h1{
 .callback30__kicker{
   margin: 0 0 4px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .8px;
@@ -891,7 +892,7 @@ h1{
 .reviewsKicker{
   margin: 0 0 6px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .8px;
@@ -1382,7 +1383,7 @@ h1{
   padding: 16px;
 }
 .shot__meta h3{ margin: 0 0 6px; font-size: 16px; }
-.shot__meta p{ margin:0; color: var(--muted); font-size: 13px; }
+.shot__meta p{ margin:0; color: var(--muted); font-size: 14px; }
 
 /* Abstract “matières” (sans photos) */
 .shot__media--a{ --shot-glow: radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%); }
@@ -1511,7 +1512,7 @@ h1{
   border: 1px solid rgba(215,181,109,.32);
   background: rgba(215,181,109,.08);
   color: rgba(255,255,255,.86);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .process__reassurance{
@@ -1755,11 +1756,14 @@ h1{
   box-shadow: 0 0 0 4px rgba(215,181,109,.14);
 }
 .field span{
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted2);
 }
 input, select, textarea{
   width:100%;
+  font-family: inherit;
+  font-size: 16px; /* ≥ 16 px : évite le zoom automatique d'iOS Safari à la saisie */
+  line-height: 1.4;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.25);
@@ -1786,10 +1790,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible{
   background: rgba(10,12,16,.46);
 }
 textarea{ resize: vertical; }
+button{ font-family: inherit; font-size: inherit; }
+.form__grid + .js-form-submit{ margin-top: 16px; }
 .form__hint{
   margin: 10px 0 0;
   color: var(--muted2);
-  font-size: 12px;
+  font-size: 14px;
   text-align:center;
 }
 .form__hint--top{
@@ -2010,9 +2016,12 @@ textarea{ resize: vertical; }
   }
 }
 
-/* Tablette (721–980 px) : la barre de navigation complète + les boutons d'action dépassaient la largeur
-   (≈ 967 px requis à 768 px). On réutilise le menu compact (bouton « hamburger »), comme sur mobile. */
-@media (min-width: 721px) and (max-width: 980px){
+/* Tablette et petits portables (721–1099 px) : la barre de navigation complète + les boutons d'action
+   dépassent la largeur (le logo était écrasé entre 981 et 1100 px). On réutilise le menu compact
+   (bouton « hamburger »), comme sur mobile. */
+@media (min-width: 721px) and (max-width: 1099px){
+  .brand__logo{ width: 142px; } /* en-tête plus compact sur tablette */
+  .header__inner{ padding: 8px 0; }
   .nav,
   .hide-sm,
   .header__actions{ display: none; }
@@ -2050,6 +2059,18 @@ textarea{ resize: vertical; }
     background: rgba(255,255,255,.08);
     border-color: rgba(255,255,255,.16);
   }
+}
+
+/* Ordinateur (≥ 1100 px) : une seule ligne par lien, logo et en-tête de même taille sur toutes les pages. */
+@media (min-width: 1100px){
+  .brand__logo{ width: clamp(168px, 15vw, 208px); }
+  .nav{ gap: 6px; }
+  .nav a,
+  .header__actions .btn{ white-space: nowrap; }
+}
+@media (min-width: 1100px) and (max-width: 1279px){
+  .header__actions .hide-sm{ display: none; }
+  .nav a{ padding: 8px 8px; }
 }
 
 @media (max-width: 720px){
@@ -2095,7 +2116,7 @@ textarea{ resize: vertical; }
   }
   .process__reassurance{
     margin-top: 10px;
-    font-size: 13px;
+    font-size: 14px;
   }
   .reveal-item.reveal-cinematic{
     transform: translateY(10px) scale(.99);
@@ -2130,8 +2151,8 @@ textarea{ resize: vertical; }
   }
   #services .section__head p{
     margin-top: 6px;
-    font-size: 12px;
-    line-height: 1.35;
+    font-size: 14px;
+    line-height: 1.45;
     color: rgba(255,255,255,.70);
   }
   #services .card h3{
@@ -2139,14 +2160,14 @@ textarea{ resize: vertical; }
     margin-bottom: 6px;
   }
   #services .card p{
-    font-size: 12px;
-    line-height: 1.32;
+    font-size: 14px;
+    line-height: 1.42;
     margin-bottom: 7px;
     color: rgba(255,255,255,.78);
   }
   #services .list--checks li{
-    font-size: 11.5px;
-    line-height: 1.28;
+    font-size: 14px;
+    line-height: 1.35;
     margin: 6px 0;
   }
   .section--reviews{
@@ -2232,7 +2253,7 @@ textarea{ resize: vertical; }
     display: none;
   }
   .brand__logo{
-    width: clamp(132px, 46vw, 192px);
+    width: clamp(118px, 34vw, 140px); /* en-tête compact (≈ 95–110 px) ; même logo, mêmes proportions */
     height: auto;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,.42));
   }
@@ -2296,7 +2317,7 @@ textarea{ resize: vertical; }
   .pill{
     position: relative;
     z-index: 2;
-    font-size: 11.5px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0;
     color: #f4e6c3;
@@ -2423,7 +2444,7 @@ textarea{ resize: vertical; }
     gap: 6px;
   }
   .hero__meta span{
-    font-size: 11px;
+    font-size: 12.5px;
     padding: 6px 8px;
   }
   .hero__subLink{ display: none; }
@@ -2432,11 +2453,11 @@ textarea{ resize: vertical; }
     padding: 10px 12px;
   }
   .typeCards{ grid-template-columns: 1fr; }
-  html{ scroll-padding-top: 150px; }
+  html{ scroll-padding-top: 118px; }
   #rappel30,
-  .callback30{ scroll-margin-top: 182px; }
-  #contact{ scroll-margin-top: 228px; }
-  #contact-details{ scroll-margin-top: 170px; }
+  .callback30{ scroll-margin-top: 150px; }
+  #contact{ scroll-margin-top: 196px; }
+  #contact-details{ scroll-margin-top: 138px; }
   #contact.hero__visual + #rappel30{ margin-top: 36px; }
   .logos{ grid-template-columns: repeat(2, 1fr); }
   .form__grid{ grid-template-columns: 1fr; }
