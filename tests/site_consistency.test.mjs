@@ -18,7 +18,7 @@ const PUBLIC_PAGES = {
   "peintre-saint-cyprien/index.html": `${ORIGIN}/peintre-saint-cyprien/`,
   "facade-saint-cyprien/index.html": `${ORIGIN}/facade-saint-cyprien/`,
 };
-const OTHER_PAGES = ["merci.html", "lead-rate-limited.html", "legal/mentions-legales.html", "legal/politique-confidentialite.html"];
+const OTHER_PAGES = ["merci.html", "merci-rappel.html", "lead-rate-limited.html", "legal/mentions-legales.html", "legal/politique-confidentialite.html"];
 
 const read = (file) => readFileSync(path.join(SITE, file), "utf8");
 const decode = (text) =>
@@ -293,22 +293,25 @@ test("les formulaires, la fonction d'envoi, les CSS/JS et les en-têtes ne sont 
 });
 
 test("engagements confirmés : rappel sous 30 min, devis sous 24 h, démarrage sous 1 à 3 semaines, formulés de façon homogène", () => {
-  const pages = [...Object.keys(PUBLIC_PAGES), "merci.html", "lead-rate-limited.html"];
+  const pages = [...Object.keys(PUBLIC_PAGES), "merci.html", "merci-rappel.html", "lead-rate-limited.html"];
   for (const file of pages) {
     const html = read(file);
     assert.doesNotMatch(html, /\b24h\b/, `${file} : écrire « 24 h »`);
     assert.doesNotMatch(html, /24 ?h ouvrées|heures ouvrées|En période normale|selon la période|peut souvent être proposé/, `${file} : ancienne formulation de délai`);
   }
   const home = read("index.html");
-  assert.match(home, /On vous rappelle en moins de 30 minutes/);
+  // Rappel : texte dynamique selon les horaires (assets/js/business-hours.js), repli neutre sans JavaScript.
+  assert.match(home, /data-callback-text="button">Demander un rappel</);
+  assert.doesNotMatch(home, /On vous rappelle en moins de 30/);
   assert.match(home, /pendant nos horaires d'ouverture/);
   assert.match(home, /Réponse sous 24 h\. Sans engagement\./);
-  assert.match(home, /Le démarrage des travaux intervient sous 1 à 3 semaines après validation du devis\./);
+  assert.match(home, /Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning\./);
   const perpignan = read("perpignan.html");
-  assert.match(perpignan, /Après validation du devis, nous organisons l'intervention avec un démarrage prévu sous 1 à 3 semaines\./);
-  assert.match(perpignan, /Le démarrage est prévu sous 1 à 3 semaines après validation du devis\./);
+  assert.match(perpignan, /avec un démarrage généralement sous 1 à 3 semaines, selon notre planning\./);
+  assert.match(perpignan, /Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning\./);
   assert.doesNotMatch(perpignan, /créneaux d'urgence/);
-  assert.match(read("merci.html"), /Je vous recontacte sous 24 h/);
+  assert.match(read("merci.html"), /Nous vous répondons sous 24 h/);
+  assert.match(read("merci-rappel.html"), /Nous vous rappelons/);
 });
 
 test("nombre de chantiers : 104 exactement, sans « plus de » ni ancien chiffre", () => {
@@ -364,7 +367,7 @@ test("horaires de la fiche Google (lundi-vendredi 8 h-18 h, week-end fermé) ide
     { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "08:00:00", closes: "18:00:00" },
   ]);
   assert.match(visibleText(read("index.html")), /Lun - Ven 8h - 18h/);
-  assert.match(visibleText(read("merci.html")), /Du lundi au vendredi, 8h – 18h/);
+  assert.match(visibleText(read("merci.html")), /Du lundi au vendredi, 8 h – 18 h/);
   for (const file of [...Object.keys(PUBLIC_PAGES), ...OTHER_PAGES]) {
     const text = visibleText(read(file));
     assert.doesNotMatch(text, /Lun - Sam|lundi au samedi|8h – 19h|8h - 19h|\b19h\b/i, `${file} : ancien horaire`);

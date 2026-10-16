@@ -16,6 +16,9 @@ commitée** ; les fichiers `.env` / `.env.*` sont ignorés par git.
 | `LEAD_TO_EMAIL`        | oui | Destinataire(s) des demandes ; plusieurs adresses séparées par des virgules. |
 | `LEAD_FROM_EMAIL`      | oui | Expéditeur, sur un domaine vérifié chez Resend (ex. `Nom <adresse@domaine>`). |
 | `LEAD_QUARANTINE_EMAIL` | non | Destinataire des demandes marquées « à vérifier » (voir *Protection antispam*). Défaut : `LEAD_TO_EMAIL`. |
+| `LEAD_CLIENT_CONFIRMATIONS` | non | `on` pour activer l'e-mail de confirmation envoyé au client (devis, et rappel si une adresse est renseignée). **Absente = désactivé.** Voir *Activation progressive*. |
+| `LEAD_SCHEDULED_REMINDERS` | non | `on` pour activer le rappel interne programmé avant l'ouverture. **Absente = désactivé.** |
+| `LEAD_EMAIL_LOGO_MODE` | non | `cid` (défaut : logo intégré à l'e-mail) ou `https` (repli : logo hébergé sur `styleetdeco.fr`). |
 | `LEAD_ALLOWED_ORIGINS` | non | Liste explicite et stricte des origines autorisées **en production et en branch deploy**, séparées par des virgules. Défaut : `https://styleetdeco.fr`. Ne jamais y ajouter une URL de preview : voir ci-dessous. |
 
 Si une variable obligatoire manque, la function répond 500 et le visiteur voit le message d'erreur : jamais de faux succès.
@@ -37,32 +40,28 @@ refusé (403) et le formulaire affichait l'erreur générique. Corrigé par la l
 ## Comportement
 
 - **Parcours nominal** : soumission → `fetch` JSON → succès confirmé par la function (`{"ok":true}` après réponse 2xx de
-  Resend avec identifiant d'e-mail) → redirection vers `/merci.html` (page de succès inchangée).
+  Resend avec identifiant d'e-mail) → redirection vers la page de confirmation **indiquée par la function** : `/merci.html`
+  (devis) ou `/merci-rappel.html?s=<code>` (rappel). Le code `s` (`30` ou la date d'ouverture `AAAAMMJJ`) ne sert qu'à l'affichage du créneau.
 - **Échec** (réseau, refus serveur, Resend en erreur, config manquante, réponse inattendue) : le formulaire reste affiché,
   le bouton est réactivé et le message suivant apparaît sous le bouton :
   « Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42. »
 - **Sans JavaScript** : le formulaire fait un POST classique vers la function ; succès → redirection 303 vers
-  `/merci.html`, échec traité par la function → page HTML minimale avec le même message. Si la limitation native Netlify est atteinte, Netlify réécrit la requête vers `/lead-rate-limited.html`, qui affiche le même message sans exécuter la function.
+  la même page de confirmation (devis ou rappel), échec traité par la function → page HTML minimale avec le même message. Si la limitation native Netlify est atteinte, Netlify réécrit la requête vers `/lead-rate-limited.html`, qui affiche le même message sans exécuter la function.
 - **Honeypot** : champ `bot-field` invisible (hors écran, `aria-hidden`, `tabindex=-1`, `autocomplete=off`), vérifié **côté serveur** : s'il est rempli, la
   demande est refusée (400, réponse générique identique à une erreur de validation) et rien n'est envoyé. Choix délibéré : pas de « faux succès », afin qu'un vrai client
   éventuellement écarté voie le message d'erreur et le numéro de téléphone.
 - **Contrôle d'origine** : l'en-tête `Origin` (à défaut `Referer`) doit correspondre exactement à une origine autorisée ;
   sinon 403.
 - **Validation serveur** : formulaire connu, téléphone (9 à 15 chiffres), longueurs max (nom 100, ville 100, détails 3000,
-  e-mail 254), champs obligatoires selon le mode (devis : nom, téléphone, e-mail, ville, détails ; rappel 30 min : nom et téléphone
-  uniquement — mêmes règles pour les trois formulaires), corps ≤ 20 000 caractères, `application/json` ou
+  e-mail 254), champs obligatoires selon le mode (devis : nom, téléphone, e-mail, ville, détails ; rappel : nom et téléphone ;
+  l'e-mail est facultatif mais doit être valide s'il est renseigné — mêmes règles pour les trois formulaires), corps ≤ 20 000 caractères, `application/json` ou
   `application/x-www-form-urlencoded` uniquement. Le sujet de l'e-mail est toujours fixé côté serveur (« DEMANDE DE DEVIS »,
-  « … - Perpignan » pour la page Perpignan, « RAPPEL 30 MIN »).
-- **Adresse e-mail** : demandée, validée (navigateur : `type="email"` ; serveur : une seule adresse, format usuel,
-  254 caractères max) et obligatoire uniquement pour les demandes de devis (`lead_hero` / `lead_contact` en mode devis,
-  `lead_perpignan` en mode devis). Elle est affichée dans la notification interne et transmise à Resend comme `reply_to`, pour
-  répondre directement au prospect. Aucun e-mail automatique n'est envoyé au prospect (le seul destinataire reste
-  `LEAD_TO_EMAIL`). En mode rappel 30 min, le champ est masqué et désactivé côté navigateur, et la function ignore toute
-  valeur reçue : rien n'est validé, transmis à Resend, affiché ni utilisé en `reply_to`.
-- **Idempotence** : le navigateur génère un `submission_id` par formulaire, conservé entre les tentatives ; la function
-  le transmet à Resend dans l'en-tête `Idempotency-Key` (`lead-<submission_id>`). Une nouvelle tentative après une
-  réponse perdue ne produit pas un second e-mail. Sans `submission_id` valide (ex. envoi sans JavaScript), la clé est
-  une empreinte SHA-256 du contenu + une fenêtre de 10 minutes.
+  « … - Perpignan » pour la page Perpignan, « [RAPPEL CLIENT] Nouveau rappel à effectuer »).
+- **Adresse e-mail** : obligatoire pour une demande de devis, **facultative pour une demande de rappel** (décision du dirigeant) ;
+  validée côté navigateur (`type="email"`) et côté serveur (une seule adresse, format usuel, 254 caractères max). Si elle est
+  renseignée, elle est affichée dans la notification interne, transmise à Resend comme `reply_to`, et sert à la confirmation client
+  (voir *E-mails*). Une adresse absente ne bloque jamais une demande ; une adresse renseignée mais invalide est refusée (400).
+- **Idempotence** : voir *Clés d'idempotence et doublons* ci-dessous.
 - **Minimisation** : seuls les champs de la liste blanche sont transmis ; ni adresse IP, ni User-Agent, ni Referer ne
   sont mis dans l'e-mail ; la function ne journalise ni données personnelles ni secret (uniquement des codes d'erreur) ;
   rien n'est stocké côté site.
@@ -111,14 +110,113 @@ et un vrai client au message atypique peut arriver en quarantaine (d'où le libe
 publiquement restent contactables sans passer par le formulaire. Si le volume persiste, la suite logique (gratuite) serait Cloudflare Turnstile,
 **non installé sans accord**.
 
+## Horaires, jours fériés et fermetures
+
+Source unique : **`sitesite-template/assets/js/business-hours.js`** (bloc `CONFIG` en tête de fichier). Le même fichier est utilisé par le
+navigateur (textes des boutons) et par la function (décision réelle, e-mails, rappel programmé).
+
+- **Horaires** : lundi–vendredi, 8 h – 18 h, heure de Paris (`Europe/Paris`, changements d'heure gérés). Le fuseau du visiteur n'est **jamais** utilisé.
+- **Jours fériés** : calculés automatiquement (1ᵉʳ janvier, lundi de Pâques, 1ᵉʳ mai, 8 mai, Ascension, lundi de Pentecôte, 14 juillet, 15 août,
+  1ᵉʳ novembre, 11 novembre, Noël). **Par défaut l'entreprise est fermée ces jours-là** (`closedOnPublicHolidays: true`).
+  ⚠ À valider : si un jour férié est travaillé (ex. lundi de Pentecôte), l'ajouter à `workedPublicHolidays: ["2027-05-17"]`.
+- **Fermetures exceptionnelles** (congés, pont, indisponibilité) : ajouter une ligne dans `closures`, bornes incluses :
+  ```js
+  closures: [
+    { from: "2026-08-10", to: "2026-08-21", label: "Congés d'été" },
+  ],
+  ```
+  puis lancer `node scripts/asset-versions.mjs` (met à jour l'empreinte du fichier), `node --test tests/*.test.mjs`, et publier. Aucune autre modification.
+  Les rappels annoncés et les e-mails tiennent compte de la fermeture dès la publication ; supprimer la ligne ensuite (ou la laisser : elle est sans effet une fois la date passée).
+- Un rappel n'est **jamais** annoncé un jour fermé : la prochaine ouverture réelle est cherchée jour après jour.
+
+## Rappel intelligent
+
+La demande de rappel reste possible 24 h/24 et 7 j/7 (le bouton n'est jamais désactivé). Le créneau annoncé dépend de l'instant de la demande :
+
+| Instant (heure de Paris) | Bouton | Rappel interne programmé |
+|---|---|---|
+| Jour ouvré, 8 h 00 → 17 h 29 | « Être rappelé sous 30 min » | non (alerte immédiate seule) |
+| Jour ouvré avant 8 h | « Être rappelé dès 8 h » | à 7 h 30 le jour même, si ce n'est pas déjà passé |
+| Lundi–jeudi à partir de 17 h 30 | « Être rappelé demain dès 8 h » | demain 7 h 30 |
+| Vendredi à partir de 17 h 30, week-end | « Être rappelé lundi dès 8 h » | lundi 7 h 30 |
+| Veille d'un jour férié / fermeture | prochain jour d'ouverture réel (ex. « mardi dès 8 h ») | ce jour-là, 7 h 30 |
+
+« Dès 8 h » signifie que les rappels reprennent à l'ouverture, **sans garantie d'un appel à 8 h 00 précises**. Les textes (boutons, pastilles,
+titres, phrase du formulaire, confirmation) viennent tous de `describe()` : aucun texte « 30 min » n'est écrit en dur. Sans JavaScript, le bouton
+affiche « Demander un rappel » (aucune promesse horaire). La page est actualisée au prochain changement de créneau, au retour sur l'onglet et à la reprise du navigateur (jamais à la seconde).
+**Le navigateur n'affiche qu'une estimation : le serveur recalcule le créneau à l'instant de la demande** et c'est ce résultat qui détermine l'e-mail et la page de confirmation.
+
+## E-mails
+
+Modèle unique : `netlify/lib/emails.mjs` (`renderEmail` : logo, couleurs, police, coordonnées, signature ; version HTML + texte brut). Contenus : confirmation devis,
+confirmation rappel, alerte interne de rappel, rappel interne programmé.
+
+| E-mail | Destinataire | Quand |
+|---|---|---|
+| Notification principale (devis / `[RAPPEL CLIENT] Nouveau rappel à effectuer`) | `LEAD_TO_EMAIL` (ou `LEAD_QUARANTINE_EMAIL` si suspect) | toujours, immédiat |
+| Confirmation client (« Votre demande de devis a bien été reçue — Style & Déco » / « Votre demande de rappel — Style & Déco ») | l'adresse du client, `Reply-To` : style.deco66@gmail.com | si activée **et** demande valide **et** non suspecte **et** adresse valide **et** notification principale acceptée |
+| `[RAPPEL À EFFECTUER] Client à contacter dès 8 h` (programmé) | `LEAD_TO_EMAIL` | si activé, rappel hors créneau « 30 min », non suspect ; envoyé à ouverture − 30 min (`scheduled_at`, UTC calculé par le serveur) |
+
+- **Logo** : le PNG officiel (`sitesite-template/assets/images/email/logo-style-deco-email.png`, dérivé de `logo-fin-640.webp`, sans métadonnées) est intégré en image CID
+  nommée `logo-style-deco.png` (jamais « noname »). Les e-mails internes et le rappel programmé n'ont **pas** de pièce jointe. Le module généré `netlify/lib/email-logo.mjs`
+  (base64) se régénère avec `node scripts/build-email-logo.mjs` (vérifié par `--check`). **Un test réel dans Gmail et Apple Mail est nécessaire avant activation** : si le logo
+  apparaît comme pièce jointe visible, passer `LEAD_EMAIL_LOGO_MODE=https` (image sur `https://styleetdeco.fr/assets/images/email/…`).
+- **Contenu transactionnel** : aucune publicité, aucun suivi, aucune inscription à une liste. La confirmation ne recopie aucune donnée saisie (pas de nom ni de texte du visiteur) et ne
+  promet ni devis établi, ni date de chantier. Tout contenu saisi est échappé dans les e-mails HTML internes.
+- **Gmail sur téléphone** : l'e-mail d'alerte contient un bouton et un numéro cliquables (`tel:`). Une notification push dépend des réglages de l'application Gmail (notifications activées,
+  catégorie « Boîte de réception principale » ou libellé important) : un e-mail programmé **n'est pas** une notification push garantie. Pour être alerté de façon fiable, créer un filtre Gmail sur
+  l'objet `[RAPPEL CLIENT]` / `[RAPPEL À EFFECTUER]` → « Marquer comme important » + notifications « Prioritaires » sur le smartphone.
+
+## Clés d'idempotence et doublons
+
+Chaque demande a un identifiant stable (`submission_id` du navigateur, ou empreinte du contenu + fenêtre de 10 min sans JavaScript). Une **clé distincte par opération** :
+
+| Opération | Clé `Idempotency-Key` |
+|---|---|
+| Notification principale | `lead-<id>` (nouvelle tentative avec contenu différent : une seule reprise sous `lead-<id>-b`, la demande n'est jamais perdue) |
+| Confirmation client | `confirm-<devis|rappel>-<empreinte de l'adresse>-<jour de Paris>` → **au plus une confirmation par adresse, par type et par jour** (protège un destinataire contre l'inondation) |
+| Rappel interne programmé | `remind-<id>` ; secours : `remind-fallback-<id>` |
+
+Resend conserve une clé 24 h : même clé + même contenu → même réponse sans nouvel envoi ; même clé + contenu différent → HTTP 409 `invalid_idempotent_request` (interprété selon le tableau).
+Le navigateur renouvelle l'identifiant si la saisie a changé depuis l'échec précédent. Chaque notification porte une **référence** (8 caractères, dérivée de la clé) pour le diagnostic.
+
+## Erreurs
+
+- Échec de la **notification principale** : réponse 502, message d'erreur avec le numéro de téléphone ; aucun envoi secondaire.
+- Après réception de la demande, les envois secondaires sont **indépendants et non bloquants** : un échec de confirmation ou de programmation n'efface rien et n'affiche **pas** d'erreur au visiteur.
+- Échec de **programmation** du rappel : un e-mail de secours immédiat « client à contacter dès l'ouverture » est envoyé ; la notification principale indique déjà le créneau.
+- Journaux : codes seulement (`lead: Resend a répondu HTTP 500 (…) [confirmation client]`), jamais de nom, téléphone, e-mail ni message.
+- **Resend totalement indisponible** : aucune alerte par le même service n'est possible. La demande est perdue côté site et le visiteur est invité à appeler. Surveillance raisonnable : consulter
+  chaque jour le tableau de bord Resend (Emails → statuts) et les journaux de la function Netlify (recherche « lead: ») ; en cas de panne signalée, vérifier https://resend-status.com et rappeler les visiteurs
+  qui ont téléphoné. Aucune base de données n'est ajoutée : si une garantie plus forte est souhaitée (file d'attente persistante), elle ferait l'objet d'un devis de complexité/coût préalable.
+
+## Activation progressive
+
+1. Fusionner : aucun changement visible côté e-mails client tant que les variables ne sont pas définies. Les **textes de rappel dynamiques** et le **champ e-mail facultatif** sont actifs dès la publication.
+2. Netlify (projet `iridescent-twilight-cce7df`, portée Functions, contexte **Production uniquement**) : `LEAD_CLIENT_CONFIRMATIONS=on`, `LEAD_SCHEDULED_REMINDERS=on`, éventuellement `LEAD_EMAIL_LOGO_MODE=https`. Relancer un déploiement.
+3. Tests réels (à demander séparément, un par un, avec une adresse du dirigeant) : un devis, un rappel en journée avec e-mail, un rappel hors horaires (vérifier le rappel programmé dans Resend → Emails → *Scheduled*), contrôle du rendu et du logo dans Gmail et Apple Mail.
+4. Les **Deploy Previews et branch deploys n'envoient jamais** de confirmation ni de rappel programmé, même si les variables y sont définies.
+
+## Vérifications
+
+```sh
+node --test tests/*.test.mjs        # horaires, function (faux Resend), e-mails, formulaires
+python3 -m unittest discover -s tests
+node scripts/build-email-logo.mjs --check
+```
+
+Aucun test n'envoie d'e-mail : Resend est simulé (y compris l'idempotence et les pannes).
+
+## Coûts et limites
+
+Aucun nouveau service ni abonnement : Netlify Functions + Resend. Une demande consomme jusqu'à 3 e-mails Resend (notification, confirmation, rappel programmé). Vérifier les quotas du plan Resend
+actuel (nombre d'e-mails par jour/mois) dans le tableau de bord avant activation : la documentation Resend limite la programmation à 30 jours.
+
 ## Limites connues
 
 - **Limitation de débit native Netlify** : au-delà de 10 demandes par IP et domaine sur 60 secondes, Netlify réécrit la requête vers `/lead-rate-limited.html`. Cette page statique affiche le message d’échec validé, y compris sans JavaScript ; elle évite tout appel à Resend. Netlify peut mettre jusqu’à 10 secondes à appliquer cette protection après le dépassement ; quelques requêtes supplémentaires peuvent donc atteindre Resend. La règle est déclarée dans `netlify/functions/lead.mjs` et s’applique à toutes les offres Netlify.
-- **Idempotence** : dépend de la fenêtre de conservation des clés par Resend (24 h à la date de rédaction, à vérifier
-  dans la documentation Resend). Une même clé avec un contenu différent est refusée par Resend (l'utilisateur voit
-  l'erreur) ; en pratique le `submission_id` ne change pas tant que la page n'est pas rechargée, mais le contenu du
-  formulaire peut être modifié entre deux tentatives : dans ce cas la seconde tentative peut échouer et un
-  rechargement de la page règle le problème.
+- **Idempotence** : dépend de la fenêtre de conservation des clés par Resend (24 h). Si une nouvelle tentative a un contenu différent (l'heure de réception change), la
+  notification principale est renvoyée une fois sous une clé dérivée : la demande n'est jamais perdue, mais le dirigeant peut, dans ce cas précis, recevoir une notification en double.
 - **Pas de copie de sauvegarde** : si Resend est indisponible, la demande est perdue côté site (le visiteur est invité à
   appeler). Netlify Forms conservait les soumissions ; ce n'est plus le cas.
 - **Livrabilité e-mail** : dépend du domaine expéditeur vérifié chez Resend (SPF/DKIM) — à configurer hors de ce dépôt.

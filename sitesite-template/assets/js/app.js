@@ -4,7 +4,7 @@
   const DEFAULT_MODE = "devis";
   const MOBILE_CONTACT_OFFSET = 170;
   const SUBJECT_DEVIS = "📩 DEMANDE DE DEVIS - Style & Deco";
-  const SUBJECT_CALLBACK = "🚨 RAPPEL 30 MIN - Style & Deco";
+  const SUBJECT_CALLBACK = "[RAPPEL CLIENT] Nouveau rappel à effectuer";
 
   const getModeFromStorage = () => {
     const mode = sessionStorage.getItem(FORM_MODE_KEY);
@@ -48,9 +48,36 @@
     });
   };
 
+  // Textes de rappel : une seule source (assets/js/business-hours.js), heure de Paris. Estimation d'affichage seulement :
+  // le créneau réellement retenu est décidé par le serveur au moment de l'envoi.
+  const callbackCopy = () => {
+    const hours = window.StyleDecoHours;
+    if (!hours) return null;
+    try {
+      return hours.describe(hours.callbackSlot(new Date()));
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Champs « réservés au devis » mais conservés à l'envoi (ex. Ville / Zone prérempli sur Perpignan) : masqués et non
+  // obligatoires en mode rappel, jamais désactivés ni vidés ; l'e-mail reste visible, facultatif en mode rappel.
+  const syncOptionalInCallback = (elements, isCallbackMode) => {
+    elements.forEach((el) => {
+      el.querySelectorAll("input, select, textarea").forEach((control) => {
+        if (control.dataset.wasRequired === undefined) {
+          control.dataset.wasRequired = control.required ? "1" : "0";
+        }
+        control.required = !isCallbackMode && control.dataset.wasRequired === "1";
+      });
+    });
+  };
+
   const applyModeToForm = (form, mode) => {
     const isCallbackMode = mode === "callback";
     const devisOnlyBlocks = form.querySelectorAll(".js-devis-only");
+    const devisHiddenBlocks = form.querySelectorAll(".js-devis-required");
+    const emailBlocks = form.querySelectorAll(".js-email-field");
     const callbackOnlyBlocks = form.querySelectorAll(".js-callback-only");
     const callbackBadge = form.querySelector(".js-callback-badge");
     const modeSwitch = form.querySelector(".js-mode-switch");
@@ -65,15 +92,23 @@
     callbackOnlyBlocks.forEach((el) => el.classList.toggle("is-hidden", !isCallbackMode));
     syncRequiredState(devisOnlyBlocks, !isCallbackMode);
     syncRequiredState(callbackOnlyBlocks, isCallbackMode);
+    devisHiddenBlocks.forEach((el) => el.classList.toggle("is-hidden", isCallbackMode));
+    syncOptionalInCallback(devisHiddenBlocks, isCallbackMode);
+    syncOptionalInCallback(emailBlocks, isCallbackMode);
+    emailBlocks.forEach((el) => {
+      const label = el.querySelector(".js-email-label");
+      if (label) label.textContent = isCallbackMode ? label.dataset.labelCallback : label.dataset.labelDevis;
+    });
 
     if (callbackBadge) callbackBadge.classList.toggle("is-hidden", !isCallbackMode);
     if (modeSwitch) modeSwitch.classList.toggle("is-hidden", !isCallbackMode);
 
+    const copy = isCallbackMode ? callbackCopy() : null;
     if (title) {
-      title.textContent = isCallbackMode ? title.dataset.titleCallback : title.dataset.titleDevis;
+      title.textContent = isCallbackMode ? (copy && copy.title) || title.dataset.titleCallback : title.dataset.titleDevis;
     }
     if (intro) {
-      intro.textContent = isCallbackMode ? intro.dataset.introCallback : intro.dataset.introDevis;
+      intro.textContent = isCallbackMode ? (copy && copy.intro) || intro.dataset.introCallback : intro.dataset.introDevis;
     }
     if (submit) {
       submit.textContent = isCallbackMode ? submit.dataset.labelCallback : submit.dataset.labelDevis;
@@ -84,6 +119,43 @@
 
     setPriority(form, isCallbackMode);
     syncSubject(form, isCallbackMode ? "callback" : "devis");
+  };
+
+  // Boutons, pastilles et titres de rappel : [data-callback-text="button|pill|heading"]. Sans JavaScript, le texte de repli
+  // (« Demander un rappel ») reste affiché. Actualisation aux changements de créneau, au retour sur l'onglet et à la reprise
+  // du navigateur — jamais à la seconde.
+  const initCallbackTexts = () => {
+    if (!window.StyleDecoHours) return;
+    let timer = null;
+    const refresh = () => {
+      const copy = callbackCopy();
+      if (copy) {
+        document.querySelectorAll("[data-callback-text]").forEach((el) => {
+          const text = copy[el.getAttribute("data-callback-text")];
+          if (text && el.textContent !== text) el.textContent = text;
+        });
+        document.querySelectorAll(FORM_SELECTOR).forEach((form) => {
+          if (form.classList.contains("form--callback-mode")) applyModeToForm(form, "callback");
+        });
+      }
+      schedule();
+    };
+    const schedule = () => {
+      if (timer) window.clearTimeout(timer);
+      try {
+        const hours = window.StyleDecoHours;
+        const delay = Math.max(1000, hours.nextChange(new Date()).getTime() - Date.now() + 500);
+        timer = window.setTimeout(refresh, Math.min(delay, 2147483000));
+      } catch (error) {
+        timer = null;
+      }
+    };
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refresh();
+    });
+    window.addEventListener("pageshow", refresh);
+    window.addEventListener("focus", refresh);
+    refresh();
   };
 
   const isModeManagedForm = (form) => Boolean(form.querySelector('input[name="lead_priority"]'));
@@ -629,6 +701,7 @@
     });
 
     applyModeToAllForms(DEFAULT_MODE);
+    initCallbackTexts();
     initReviewsCarousel();
     initScrollReveal();
     initHeroParallax();

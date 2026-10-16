@@ -55,7 +55,7 @@ const run = (request, { env = ENV, fetchImpl = makeFetch() } = {}) =>
 test("succès : envoie un e-mail via Resend et répond ok", async () => {
   const { response, fetchImpl } = await run(jsonRequest(validDevis()));
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { ok: true });
+  assert.deepEqual(await response.json(), { ok: true, kind: "devis", next: "/merci.html" });
   assert.equal(fetchImpl.calls.length, 1);
   const { url, init, body } = fetchImpl.calls[0];
   assert.equal(url, "https://api.resend.com/emails");
@@ -78,11 +78,13 @@ test("le sujet est fixé côté serveur : le champ subject du client est ignoré
   assert.ok(!fetchImpl.calls[0].body.text.includes("Bcc:"));
 });
 
+const CALLBACK_SUBJECT = "[RAPPEL CLIENT] Nouveau rappel à effectuer";
+
 test("rappel 30 min : nom et téléphone obligatoires, ville/détails optionnels, sujet prioritaire", async () => {
   const payload = validDevis({ lead_priority: "RAPPEL_30_MIN", email: undefined, city: undefined, details: undefined });
   const { response, fetchImpl } = await run(jsonRequest(payload));
   assert.equal(response.status, 200);
-  assert.equal(fetchImpl.calls[0].body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
+  assert.ok(fetchImpl.calls[0].body.subject.startsWith(CALLBACK_SUBJECT));
 
   for (const field of ["name", "phone"]) {
     const missing = await run(jsonRequest({ ...payload, [field]: "   " }));
@@ -91,28 +93,25 @@ test("rappel 30 min : nom et téléphone obligatoires, ville/détails optionnels
   }
 });
 
-test("rappel 30 min : aucune adresse e-mail demandée, validée, transmise, affichée ni utilisée en reply_to", async () => {
+test("rappel : l'e-mail est FACULTATIF ; s'il est renseigné il doit être valide et sert de reply_to", async () => {
   const withoutEmail = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email: undefined })));
   assert.equal(withoutEmail.response.status, 200);
   assert.ok(!("reply_to" in withoutEmail.fetchImpl.calls[0].body));
   assert.ok(!withoutEmail.fetchImpl.calls[0].body.text.includes("E-mail"));
 
-  for (const email of ["marie.durand@example.test", "pas-un-email", "a".repeat(300)]) {
-    const { response, fetchImpl } = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email })));
-    assert.equal(response.status, 200, `un e-mail (${email.slice(0, 12)}) ne bloque pas un rappel`);
-    const body = fetchImpl.calls[0].body;
-    assert.ok(!("reply_to" in body));
-    assert.ok(!JSON.stringify(body).includes(email), "l'e-mail fourni n'est pas transmis à Resend");
-    assert.deepEqual(body.to, ["destinataire@example.test"]);
-  }
+  const empty = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email: "  " })));
+  assert.equal(empty.response.status, 200, "un e-mail vide ne bloque jamais un rappel");
 
-  const first = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", submission_id: undefined, email: "a@example.test" })));
-  const second = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", submission_id: undefined, email: undefined })));
-  assert.equal(
-    first.fetchImpl.calls[0].init.headers["Idempotency-Key"],
-    second.fetchImpl.calls[0].init.headers["Idempotency-Key"],
-    "l'e-mail ignoré n'entre pas dans l'empreinte d'idempotence"
-  );
+  const withEmail = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN" })));
+  assert.equal(withEmail.response.status, 200);
+  assert.equal(withEmail.fetchImpl.calls[0].body.reply_to, "marie.durand@example.test");
+  assert.ok(withEmail.fetchImpl.calls[0].body.text.includes("marie.durand@example.test"));
+
+  for (const email of ["pas-un-email", "a".repeat(300)]) {
+    const { response, fetchImpl } = await run(jsonRequest(validDevis({ lead_priority: "RAPPEL_30_MIN", email })));
+    assert.equal(response.status, 400, `un e-mail renseigné doit être valide (${email.slice(0, 12)})`);
+    assert.equal(fetchImpl.calls.length, 0);
+  }
 });
 
 test("devis : nom, e-mail, ville et détails obligatoires", async () => {
@@ -476,13 +475,13 @@ test("devis : une valeur e-mail JSON non textuelle est refusée", async () => {
   }
 });
 
-test("lead_perpignan : le rappel 30 min fonctionne comme sur l'accueil (nom et téléphone suffisent, e-mail ignoré)", async () => {
-  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_perpignan", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", email: "ignore@example.test" }));
+test("lead_perpignan : le rappel fonctionne comme sur l'accueil (nom et téléphone suffisent, e-mail facultatif)", async () => {
+  const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_perpignan", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN" }));
   assert.equal(response.status, 200);
   const body = fetchImpl.calls[0].body;
-  assert.equal(body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
-  assert.ok(!body.text.includes("ignore@example.test"));
+  assert.ok(body.subject.startsWith(CALLBACK_SUBJECT));
   assert.equal(body.reply_to, undefined);
+  assert.ok(body.text.includes("Page Perpignan"));
 });
 
 // ---------------------------------------------------------------- antispam : blocages techniques + quarantaine
@@ -503,7 +502,7 @@ test("antispam : une demande de rappel 30 min légitime va à la boîte principa
   const { response, fetchImpl } = await run(jsonRequest({ "form-name": "lead_hero", name: "Marie", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", "bot-field": "" }), { env: ENV_Q });
   assert.equal(response.status, 200);
   assert.deepEqual(fetchImpl.calls[0].body.to, ["destinataire@example.test"]);
-  assert.equal(fetchImpl.calls[0].body.subject, "🚨 RAPPEL 30 MIN - Style & Deco");
+  assert.ok(fetchImpl.calls[0].body.subject.startsWith(CALLBACK_SUBJECT));
 });
 
 test("blocage technique : honeypot rempli (formulaire ou appel direct) → refus générique, aucun e-mail, aucun détail divulgué", async () => {
@@ -526,7 +525,7 @@ test("blocage technique : données invalides → refus, aucun e-mail", async () 
 test("quarantaine : un message publicitaire manifeste n'est JAMAIS refusé ni supprimé, mais envoyé à l'adresse de quarantaine", async () => {
   const { response, fetchImpl } = await run(jsonRequest(validDevis({ details: SPAM_TEXT, name: "Jean", city: "Paris" })), { env: ENV_Q });
   assert.equal(response.status, 200, "le visiteur voit un succès normal : aucun critère divulgué");
-  assert.deepEqual(await response.json(), { ok: true });
+  assert.deepEqual(await response.json(), { ok: true, kind: "devis", next: "/merci.html" });
   assert.equal(fetchImpl.calls.length, 1);
   const body = fetchImpl.calls[0].body;
   assert.deepEqual(body.to, ["tri+verif@example.test"]);

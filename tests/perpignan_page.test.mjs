@@ -38,7 +38,7 @@ test("secteurs : toutes les communes d'origine restent dans le HTML, aucune ajou
 });
 
 test("contenu éditorial : meta/OG/WebPage harmonisés, FAQPage identique au visible, aucune mention non confirmée", () => {
-  const DESC = "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit sous 24 h.";
+  const DESC = "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit, réponse sous 24 h.";
   assert.equal((html.match(new RegExp(DESC.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length, 4);
   const faq = JSON.parse([...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).find((j) => j.includes('"FAQPage"')));
   const visible = plain.replace(/&amp;/g, "&");

@@ -24,6 +24,7 @@ class FormCollector(HTMLParser):
         self.scripts = []
         self._current = None
         self._devis_only = False
+        self._email_field = False
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -34,9 +35,11 @@ class FormCollector(HTMLParser):
             self.scripts.append(attrs["src"])
         elif self._current is not None:
             if tag == "label":
-                self._devis_only = "js-devis-only" in (attrs.get("class") or "").split()
+                classes = (attrs.get("class") or "").split()
+                self._devis_only = "js-devis-only" in classes
+                self._email_field = "js-email-field" in classes
             if tag == "input":
-                self._current["inputs"].append({**attrs, "devis_only": self._devis_only})
+                self._current["inputs"].append({**attrs, "devis_only": self._devis_only, "email_field": self._email_field})
             if "js-form-status" in (attrs.get("class") or "").split():
                 self._current["status"] = attrs
 
@@ -45,6 +48,7 @@ class FormCollector(HTMLParser):
             self._current = None
         elif tag == "label":
             self._devis_only = False
+            self._email_field = False
 
 
 def parse(page):
@@ -67,7 +71,7 @@ class LeadFormMarkupTests(unittest.TestCase):
                 hidden_names = {i.get("name"): i.get("value") for i in form["inputs"] if i.get("type") == "hidden"}
                 self.assertEqual(hidden_names.get("form-name"), attrs.get("name"))
 
-    def test_quote_forms_require_an_email_that_the_callback_mode_hides(self):
+    def test_quote_forms_require_an_email_that_stays_optional_in_callback_mode(self):
         for page, expected in FORMS.items():
             for form in parse(page).forms:
                 name = form["attrs"].get("name")
@@ -77,9 +81,9 @@ class LeadFormMarkupTests(unittest.TestCase):
                 self.assertEqual(email.get("type"), "email", name)
                 self.assertIn("required", email, name)
                 self.assertEqual(email.get("autocomplete"), "email", name)
-                if name in {"lead_hero", "lead_contact"}:
-                    # Bloc réservé au devis : désactivé (donc non envoyé) en mode rappel.
-                    self.assertTrue(email["devis_only"], name)
+                # Visible dans les deux modes : obligatoire en devis, FACULTATIF en rappel (géré par app.js).
+                self.assertFalse(email["devis_only"], name)
+                self.assertTrue(email["email_field"], name)
 
     def test_callback_mode_does_not_ask_for_an_optional_name(self):
         source = (SITE / "index.html").read_text(encoding="utf-8")
@@ -152,14 +156,16 @@ class LeadDeliveryConfigTests(unittest.TestCase):
         self.assertIn("Resend", policy)
         self.assertNotIn("Netlify Forms", policy)
 
-    def test_privacy_policy_and_docs_state_email_is_for_quotes_only(self):
+    def test_privacy_policy_and_docs_state_email_is_required_for_quotes_and_optional_for_callbacks(self):
         policy = (SITE / "legal" / "politique-confidentialite.html").read_text(encoding="utf-8")
-        self.assertIn("<code>email</code>", policy)
-        self.assertIn("demandes de devis", policy)
-        self.assertIn("aucun e-mail automatique", policy.lower())
+        self.assertIn("adresse e-mail (obligatoire)", policy)
+        self.assertIn("adresse e-mail est facultative", policy)
+        self.assertIn("message de confirmation", policy)
+        self.assertIn("sans publicité et sans inscription à une liste d’envoi", policy)
+        self.assertIn("ne déclenchent aucune confirmation automatique", policy)
         doc = (ROOT / "docs" / "lead-delivery.md").read_text(encoding="utf-8")
         self.assertIn("reply_to", doc)
-        self.assertIn("rappel 30 min : nom et téléphone", doc)
+        self.assertIn("e-mail est facultatif", doc)
 
     def test_rate_limit_rewrite_page_shows_the_exact_error_without_javascript(self):
         page = (SITE / "lead-rate-limited.html").read_text(encoding="utf-8")
