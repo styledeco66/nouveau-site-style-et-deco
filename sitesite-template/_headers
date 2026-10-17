@@ -16,3 +16,7 @@
 
 /
   Cache-Control: public, max-age=0, must-revalidate
+
+# Logo des e-mails : chargé par les messageries (hors de notre domaine) → doit pouvoir être intégré par un autre site.
+/assets/images/email/*
+  Cross-Origin-Resource-Policy: cross-origin
