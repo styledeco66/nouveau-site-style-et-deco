@@ -110,7 +110,7 @@ const renderB = (o) => {
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${COLORS.outer};font-size:1px;line-height:1px">${escapeHtml(o.preheader || o.title)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.outer}" style="background:${COLORS.outer}"><tr><td align="center" style="padding:14px 8px 24px">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px">
-<tr><td class="sd-pad" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:22px 32px 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td valign="middle">${logoHtml}</td>${metaCell}</tr></table></td></tr>
+<tr><td class="sd-pad" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:22px 32px 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td valign="middle" width="150">${logoHtml}</td>${metaCell}</tr></table></td></tr>
 <tr><td height="1" bgcolor="${COLORS.line}" style="background:${COLORS.line};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
 <tr><td bgcolor="${COLORS.card}" style="background:${COLORS.card}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="4" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};width:4px;font-size:1px;line-height:1px">&nbsp;</td><td class="sd-tp" style="padding:24px 28px 22px"><h1 class="sd-h1" style="margin:0;${t(25, 600, COLORS.white, "line-height:1.3;letter-spacing:-.2px")}">${escapeHtml(o.title)}</h1></td></tr></table></td></tr>
 <tr><td class="sd-pad" bgcolor="${COLORS.card}" style="background:${COLORS.card};padding:8px 32px 28px">
