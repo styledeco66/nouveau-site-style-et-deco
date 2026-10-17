@@ -6,6 +6,7 @@ import {
   SUBJECT_CONFIRM_CALLBACK,
   SUBJECT_CONFIRM_DEVIS,
   callbackAlert,
+  devisAlert,
   callbackConfirmation,
   devisConfirmation,
   reminderEmail,
@@ -156,9 +157,6 @@ const validateLead = (raw) => {
   return { lead };
 };
 
-const escapeHtml = (value) =>
-  value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
-
 const emailSubject = (lead, slot) => {
   if (lead.priority === PRIORITY_CALLBACK) {
     // Hors créneau « sous 30 min », le sujet indique la prochaine ouverture (le contenu reste identique).
@@ -167,21 +165,6 @@ const emailSubject = (lead, slot) => {
   if (lead.form === "lead_perpignan") return SUBJECT_DEVIS_PERPIGNAN;
   return SUBJECT_DEVIS;
 };
-
-const emailRows = (lead, receivedAt, review, extra = []) =>
-  [
-    ["Formulaire", lead.form],
-    ["Priorité", lead.priority],
-    ["Nom", lead.name],
-    ["Téléphone", lead.phone],
-    ["E-mail", lead.email],
-    ["Ville / Zone", lead.city],
-    ["Type de travaux", lead.subject],
-    ["Détails", lead.details],
-    ["Reçu le", receivedAt],
-    ...extra,
-    ["Contrôle antispam", review ? `QUARANTAINE — à vérifier (indices : ${review.reasons.join(", ")})` : ""],
-  ].filter(([, value]) => value);
 
 // Identifiant de suivi stable (affiché dans les e-mails et utile au diagnostic) : dérivé de la clé de la demande.
 const trackingReference = (key) => createHash("sha256").update(key).digest("hex").slice(0, 8).toUpperCase();
@@ -212,14 +195,10 @@ const buildEmail = (lead, receivedAt, env, review, { slot, reference } = {}) => 
     email.text = `NOUVELLE DEMANDE DE RAPPEL\n\n${alert.text.replace(/^Nouvelle demande de rappel\n\n/, "")}`;
     email.html = alert.html;
   } else {
-    const rows = emailRows(lead, receivedAt, review, reference ? [["Référence", reference]] : []);
-    email.text = rows.map(([label, value]) => `${label} : ${value}`).join("\n");
-    email.html = `<table cellpadding="6" style="border-collapse:collapse;font-family:sans-serif">${rows
-      .map(
-        ([label, value]) =>
-          `<tr><th align="left" valign="top">${escapeHtml(label)}</th><td style="white-space:pre-wrap">${escapeHtml(value)}</td></tr>`
-      )
-      .join("")}</table>`;
+    // Demande de devis : notification premium (design B), une seule par demande ; le message du client est reproduit intégralement.
+    const alert = devisAlert({ lead, receivedAt: new Date(receivedAt), reference, origin: ORIGIN_LABELS[lead.form], formCode: lead.form, reviewReasons: review ? review.reasons : null });
+    email.text = alert.text;
+    email.html = alert.html;
   }
   // Répondre au prospect depuis la boîte de réception.
   if (lead.email) email.reply_to = lead.email;
