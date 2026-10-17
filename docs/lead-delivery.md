@@ -152,7 +152,7 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé. L'enga
 
 | E-mail | Destinataire | Quand |
 |---|---|---|
-| Notification principale (devis / `[RAPPEL CLIENT] Nouveau rappel à effectuer`) | `LEAD_TO_EMAIL` (ou `LEAD_QUARANTINE_EMAIL` si suspect) | toujours, immédiat |
+| Notification principale (devis : design B « Signature artisan premium », objets `📩 DEMANDE DE DEVIS - …` inchangés / `[RAPPEL CLIENT] Nouveau rappel à effectuer`) | `LEAD_TO_EMAIL` (ou `LEAD_QUARANTINE_EMAIL` si suspect) | toujours, immédiat |
 | Confirmation client (« Votre demande de devis a bien été reçue — Style & Déco » / « Votre demande de rappel — Style & Déco ») | l'adresse du client, `Reply-To` : style.deco66@gmail.com | si activée **et** demande valide **et** non suspecte **et** adresse valide **et** notification principale acceptée |
 | `[RAPPEL À EFFECTUER] Client à contacter dès 8 h` (programmé) | `LEAD_TO_EMAIL` | si activé, rappel hors créneau « 30 min », non suspect ; envoyé à ouverture − 30 min (`scheduled_at`, UTC calculé par le serveur) |
 
@@ -167,6 +167,10 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé. L'enga
 - **Gmail sur téléphone** : l'e-mail d'alerte contient un bouton et un numéro cliquables (`tel:`). Une notification push dépend des réglages de l'application Gmail (notifications activées,
   catégorie « Boîte de réception principale » ou libellé important) : un e-mail programmé **n'est pas** une notification push garantie. Pour être alerté de façon fiable, créer un filtre Gmail sur
   l'objet `[RAPPEL CLIENT]` / `[RAPPEL À EFFECTUER]` → « Marquer comme important » + notifications « Prioritaires » sur le smartphone.
+
+### Notification interne d'une demande de devis
+
+Une seule notification par demande (elle remplace l'ancien tableau HTML), au même destinataire (`LEAD_TO_EMAIL`, ou `LEAD_QUARANTINE_EMAIL` si suspecte), avec le même objet et le même `Reply-To` (le client). Design B : logo officiel HTTPS en en-tête, titre « Nouvelle demande de devis », nom du client en grand et commune, téléphone (28 px, cliquable) et e-mail cliquable, boutons dorés « Appeler le client » et « Répondre par e-mail », section « Description des travaux » avec le **message intégral** (retours à la ligne conservés, jamais tronqué), puis « Informations de suivi » (origine lisible, date et heure Europe/Paris, référence). Seules les données réellement transmises par le formulaire sont affichées. Pour une demande suspecte, un bandeau « Demande suspecte placée en quarantaine : à vérifier avant de répondre (indices : …) » s'affiche en tête, le préfixe `[À VÉRIFIER]` et l'adresse de quarantaine sont conservés et aucune confirmation n'est envoyée au prospect. Le texte brut garde les libellés historiques (Formulaire, Priorité, Nom, Téléphone, E-mail, Ville / Zone, Détails, Reçu le, Référence, Contrôle antispam). Toutes les valeurs saisies sont échappées dans le HTML.
 
 ## Clés d'idempotence, conflits Resend et doublons
 

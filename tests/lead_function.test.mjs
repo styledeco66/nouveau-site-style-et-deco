@@ -68,7 +68,10 @@ test("succès : envoie un e-mail via Resend et répond ok", async () => {
   assert.equal(body.reply_to, "marie.durand@example.test");
   for (const value of ["Marie Durand", "06 12 34 56 78", "marie.durand@example.test", "Perpignan", "Peinture salon 25 m²", "lead_contact"]) {
     assert.ok(body.text.includes(value), `text contient ${value}`);
-    assert.ok(body.html.includes(value.replace("²", "²")), `html contient ${value}`);
+  }
+  // HTML (design B) : le code technique du formulaire n'apparaît que dans le texte ; le HTML affiche son libellé lisible.
+  for (const value of ["Marie Durand", "06 12 34 56 78", "marie.durand@example.test", "Perpignan", "Peinture salon 25 m²", "Accueil (formulaire de contact)"]) {
+    assert.ok(body.html.includes(value), `html contient ${value}`);
   }
 });
 
@@ -446,8 +449,8 @@ test("minimisation : champs hors liste blanche non transmis, pas d'IP ni d'User-
 test("le contenu HTML de l'e-mail est échappé", async () => {
   const { fetchImpl } = await run(jsonRequest(validDevis({ details: '<img src=x onerror="alert(1)"> & "quotes"' })));
   const { html, text } = fetchImpl.calls[0].body;
-  assert.ok(!html.includes("<img"));
-  assert.ok(html.includes("&lt;img"));
+  assert.ok(!html.includes("<img src=x"));
+  assert.ok(html.includes("&lt;img src=x"));
   assert.ok(html.includes("&amp;"));
   assert.ok(text.includes("<img src=x"));
 });

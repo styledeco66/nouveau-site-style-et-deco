@@ -66,7 +66,7 @@ const parisDay = (instant) => parisDateTime(instant).replace(/ à \d{2} h \d{2}$
 const telHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
 
 // Espace insécable avant « h » dans les heures (« 8 h » ne se coupe jamais en fin de ligne), HTML uniquement.
-const nb = (value) => escapeHtml(String(value ?? "").replace(/(\d) h(?=[\s.,;:)]|$)/g, "$1\u00a0h"));
+const nb = (value) => escapeHtml(String(value ?? "").replace(/(\d) h (\d{2})(?!\d)/g, "$1\u00a0h\u00a0$2").replace(/(\d) h(?=[\s.,;:)]|$)/g, "$1\u00a0h"));
 
 // Style de texte en ligne : couleurs explicites partout (certaines messageries recolorent : la lisibilité prime).
 const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
@@ -97,9 +97,26 @@ const renderB = (o) => {
   const phoneHtml = o.phone
     ? `<p style="margin:0 0 18px;${t(28, 600, COLORS.white, "line-height:1.2;letter-spacing:.2px")}"><a href="${escapeHtml(o.phone.href)}" style="${t(28, 600, COLORS.white, "text-decoration:none")}">${escapeHtml(o.phone.value)}</a></p>`
     : "";
-  const buttonHtml = o.button
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px"><tr><td align="center" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};border-radius:8px"><a href="${escapeHtml(o.button.href)}" style="display:block;padding:17px 20px;${t(18, 600, COLORS.onGold, "text-decoration:none;border-radius:8px")}">${escapeHtml(o.button.label)}</a></td></tr></table>`
+  // Boutons pleine largeur : le premier est doré (action principale), les suivants sont cernés d'un filet doré.
+  const buttons = o.buttons || (o.button ? [o.button] : []);
+  const buttonHtml = buttons
+    .map((b, k) =>
+      k === 0
+        ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 ${buttons.length > 1 ? 12 : 22}px"><tr><td align="center" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};border-radius:8px"><a href="${escapeHtml(b.href)}" style="display:block;padding:17px 20px;${t(18, 600, COLORS.onGold, "text-decoration:none;border-radius:8px")}">${escapeHtml(b.label)}</a></td></tr></table>`
+        : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 ${k === buttons.length - 1 ? 22 : 12}px"><tr><td align="center" bgcolor="${COLORS.card}" style="background:${COLORS.card};border:1px solid ${COLORS.gold};border-radius:8px"><a href="${escapeHtml(b.href)}" style="display:block;padding:15px 20px;${t(17, 600, COLORS.gold, "text-decoration:none;border-radius:8px")}">${escapeHtml(b.label)}</a></td></tr></table>`
+    )
+    .join("");
+  const emailHtml = o.email
+    ? `<p style="margin:0 0 20px;${t(18, 600, COLORS.gold, "line-height:1.35;overflow-wrap:anywhere;word-break:break-word")}"><a href="${escapeHtml(o.email.href)}" style="${t(18, 600, COLORS.gold, "text-decoration:underline")}">${escapeHtml(o.email.value)}</a></p>`
     : "";
+  const bannerHtml = o.banner
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.panel}" style="margin:6px 0 18px;background:${COLORS.panel}"><tr><td width="3" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};width:3px;font-size:1px;line-height:1px">&nbsp;</td><td style="padding:12px 16px;${t(15, 600, COLORS.gold, "line-height:1.5")}">${nb(o.banner)}</td></tr></table>`
+    : "";
+  // Description des travaux : message intégral du client, retours à la ligne conservés (<br> : fiable aussi dans Outlook), jamais tronqué.
+  const sectionHtml = o.section
+    ? `<p style="margin:6px 0 8px;${t(14, 400, COLORS.muted)}">${escapeHtml(o.section.title)}</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.panel}" style="margin:0 0 24px;background:${COLORS.panel}"><tr><td width="3" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};width:3px;font-size:1px;line-height:1px">&nbsp;</td><td style="padding:16px 18px;${t(16, 400, COLORS.text, "line-height:1.65;overflow-wrap:anywhere;word-break:break-word")}">${escapeHtml(o.section.text).replace(/\n/g, "<br>")}</td></tr></table>`
+    : "";
+  const factsTitleHtml = o.factsTitle && shown.length ? `<p style="margin:2px 0 4px;${t(14, 400, COLORS.muted)}">${escapeHtml(o.factsTitle)}</p>` : "";
   const leadHtml = o.lead
     ? `<p style="margin:0 0 2px;${t(14, 400, COLORS.muted)}">${escapeHtml(o.lead.label)}</p><p style="margin:0 0 ${o.lead.sub ? 2 : 14}px;${t(26, 600, COLORS.white, "line-height:1.25")}">${escapeHtml(o.lead.value)}</p>${o.lead.sub ? `<p style="margin:0 0 14px;${t(16, 400, COLORS.muted)}">${escapeHtml(o.lead.sub)}</p>` : ""}`
     : "";
@@ -114,15 +131,18 @@ const renderB = (o) => {
 <tr><td height="1" bgcolor="${COLORS.line}" style="background:${COLORS.line};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
 <tr><td bgcolor="${COLORS.card}" style="background:${COLORS.card}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="4" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};width:4px;font-size:1px;line-height:1px">&nbsp;</td><td class="sd-tp" style="padding:24px 28px 22px"><h1 class="sd-h1" style="margin:0;${t(25, 600, COLORS.white, "line-height:1.3;letter-spacing:-.2px")}">${escapeHtml(o.title)}</h1></td></tr></table></td></tr>
 <tr><td class="sd-pad" bgcolor="${COLORS.card}" style="background:${COLORS.card};padding:8px 32px 28px">
-${leadHtml}${phoneHtml}${buttonHtml}${callout}${factsHtml}
+${bannerHtml}${leadHtml}${phoneHtml}${emailHtml}${buttonHtml}${callout}${sectionHtml}${factsTitleHtml}${factsHtml}
 </td></tr>
 </table></td></tr></table></div></body></html>`;
   const text = [
     o.title,
     "",
+    ...(o.banner ? [o.banner, ""] : []),
     ...(o.lead ? [`${o.lead.label} : ${o.lead.value}`, ""] : []),
     ...(o.paragraphs || []).flatMap((p) => [p, ""]),
-    ...(o.button ? [`${o.button.label} : ${o.button.href.replace(/^tel:/, "")}`, ""] : []),
+    ...buttons.map((b) => `${b.label} : ${b.href.replace(/^(tel|mailto):/, "")}`),
+    ...(buttons.length ? [""] : []),
+    ...(o.section ? [`${o.section.title} :`, o.section.text, ""] : []),
     ...facts.map(([l, v]) => `${l} : ${v}`),
   ]
     .join("\n")
@@ -317,3 +337,48 @@ export const reminderEmail = ({ lead, receivedAt, reference, origin, when, fallb
       ["Référence", reference, undefined, false, true],
     ],
   });
+
+// Notification interne d'une demande de DEVIS (design B) : remplace l'ancien tableau HTML. Une seule notification par demande.
+// Toutes les données du formulaire sont affichées ; le message du client est reproduit intégralement. `formCode` (lead_hero…) reste
+// dans la version texte pour le classement. `reviewNote` : demande suspecte (quarantaine), signalée en tête du message.
+export const devisAlert = ({ lead, receivedAt, reference, origin, formCode, reviewReasons }) => {
+  const rendered = renderEmail({
+    design: "B",
+    title: "Nouvelle demande de devis",
+    preheader: `${lead.name}${lead.city ? ` · ${lead.city}` : ""} · ${lead.phone}`,
+    banner: reviewReasons ? `Demande suspecte placée en quarantaine : à vérifier avant de répondre (indices : ${reviewReasons.join(", ")}).` : "",
+    lead: { label: "Client", value: lead.name, sub: lead.city },
+    phone: { value: lead.phone, href: telHref(lead.phone) },
+    email: lead.email ? { value: lead.email, href: `mailto:${lead.email}` } : undefined,
+    buttons: [{ label: "Appeler le client", href: telHref(lead.phone) }, ...(lead.email ? [{ label: "Répondre par e-mail", href: `mailto:${lead.email}` }] : [])],
+    section: lead.details ? { title: "Description des travaux", text: lead.details } : undefined,
+    factsTitle: "Informations de suivi",
+    facts: [
+      ["Téléphone", lead.phone, undefined, false, true],
+      ["E-mail", lead.email, undefined, false, true],
+      ["Ville", lead.city, undefined, false, true],
+      ["Type de travaux", lead.subject, undefined, false, true],
+      ["Origine", origin],
+      ["Formulaire", formCode, undefined, false, true],
+      ["Demande reçue", parisDateTime(receivedAt)],
+      ["Référence", reference],
+      ["Contrôle antispam", reviewReasons ? `QUARANTAINE — à vérifier (indices : ${reviewReasons.join(", ")})` : "", undefined, false, true],
+    ],
+  });
+  // Version texte brut : mêmes libellés que l'ancienne notification (classement et recherche inchangés), toutes les informations du client.
+  const rows = [
+    ["Formulaire", formCode],
+    ["Priorité", lead.priority],
+    ["Nom", lead.name],
+    ["Téléphone", lead.phone],
+    ["E-mail", lead.email],
+    ["Ville / Zone", lead.city],
+    ["Type de travaux", lead.subject],
+    ["Détails", lead.details],
+    ["Origine", origin],
+    ["Reçu le", parisDateTime(receivedAt)],
+    ["Référence", reference],
+    ["Contrôle antispam", reviewReasons ? `QUARANTAINE — à vérifier (indices : ${reviewReasons.join(", ")})` : ""],
+  ].filter(([, v]) => v);
+  return { html: rendered.html, text: rows.map(([l, v]) => `${l} : ${v}`).join("\n") };
+};
