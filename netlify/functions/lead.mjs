@@ -359,7 +359,8 @@ const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, key, 
 // Échec de programmation : message de secours immédiat au dirigeant (si Resend répond encore), une seule fois (clé dédiée).
 const scheduleReminder = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }) => {
   const build = (fallback) => {
-    const content = reminderEmail({ lead, receivedAt, reference, origin: ORIGIN_LABELS[lead.form], fallback });
+    const callWhen = hours.describe(slot).action.replace(/^Rappeler ce client /, "").replace(/\.$/, "");
+    const content = reminderEmail({ lead, receivedAt, reference, origin: ORIGIN_LABELS[lead.form], when: callWhen, fallback });
     return { from: env.LEAD_FROM_EMAIL, to: splitRecipients(env.LEAD_TO_EMAIL), subject: SUBJECT_REMINDER, text: content.text, html: content.html, ...(lead.email ? { reply_to: lead.email } : {}) };
   };
   const when = slot.reminderAt;

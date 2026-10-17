@@ -17,21 +17,27 @@ export const BRAND = {
   site: "https://styleetdeco.fr",
 };
 
+// Palette « Black Luxury » : valeurs du site (assets/css/style.css : --bg #0b0d10, --accent #d7b56d) + anthracites.
 const COLORS = {
-  page: "#f3f1ec", // fond de lecture clair
-  card: "#ffffff",
-  header: "#14171c", // anthracite (identique à l'en-tête du site)
-  gold: "#c9a45c", // doré discret (accent du site : #d7b56d, un ton plus foncé pour le contraste sur fond clair)
-  text: "#23272e",
-  muted: "#5d6470",
-  panel: "#f7f5f0",
-  line: "#e6e1d6",
+  outer: "#0b0d10", // noir profond (fond extérieur, en-tête, pied)
+  card: "#14171c", // anthracite (corps du message)
+  panel: "#1c2026", // anthracite secondaire (informations de suivi)
+  line: "#2a2f37", // bordures très fines, peu contrastées
+  gold: "#d7b56d", // doré (accent du site)
+  goldDim: "#8a7447", // filet doré discret
+  white: "#ffffff", // titres
+  text: "#f5f5f4", // blanc doux (texte)
+  muted: "#bfc3ca", // gris clair (libellés, texte secondaire)
+  faint: "#9aa0a8", // pied de message
+  onGold: "#151515", // texte sur bouton doré (comme .btn--primary du site)
 };
-const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+// Polices système uniquement (aucune police externe) : fiables dans toutes les messageries.
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif";
 
 export const LOGO_CID = "logo-style-deco";
 export const LOGO_FILENAME = "logo-style-deco.png";
 export const LOGO_HTTPS_URL = `${BRAND.site}/assets/images/email/logo-style-deco-email.png`;
+export const LOGO_ALT = "Style & Déco — Le Reflet de vos Envies";
 
 export const escapeHtml = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -57,82 +63,91 @@ export const parisDateTime = (instant) => {
 
 const telHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
 
+// Style de texte en ligne : couleurs explicites partout (certaines messageries recolorent : la lisibilité prime).
+const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
+
 /**
+ * Modèle commun à tous les e-mails (confirmations clients et alertes internes).
  * @param {object} o
- * @param {string} o.title            Titre principal.
+ * @param {string} o.title            Titre principal (unique <h1>).
  * @param {string} [o.preheader]      Aperçu affiché dans la liste des messages.
- * @param {string[]} o.paragraphs     Paragraphes (texte brut, échappé ici).
- * @param {[string,string,string?][]} [o.facts]  Lignes « libellé / valeur [/ lien href] ».
+ * @param {string[]} [o.paragraphs]   Paragraphes (texte brut, échappé ici).
+ * @param {{label:string,value:string,href?:string}} [o.lead]  Information principale mise en avant (ex. client à rappeler).
+ * @param {[string,string,string?,boolean?][]} [o.facts]  Lignes « libellé / valeur / lien / doré ».
  * @param {string} [o.factsTitle]
- * @param {{label:string,href:string}} [o.button]   Bouton (ex. appeler).
+ * @param {{label:string,href:string}} [o.button]   Bouton doré (ex. appeler).
  * @param {string[]} [o.closing]      Lignes avant la signature.
- * @param {"cid"|"https"|"none"} [o.logo]
- * @param {boolean} [o.signature]     Bloc coordonnées + signature (confirmations clients).
+ * @param {"cid"|"https"|"none"} [o.logo]  « none » : signature typographique Style & Déco (aucune image).
+ * @param {boolean} [o.signature]     Signature + coordonnées (confirmations clients).
  */
 export const renderEmail = (o) => {
   const logoMode = o.logo || "none";
   const logoSrc = logoMode === "cid" ? `cid:${LOGO_CID}` : LOGO_HTTPS_URL;
   const logoHtml =
     logoMode === "none"
-      ? `<div style="font:700 20px/1.2 ${FONT};color:#ffffff;letter-spacing:.2px">${escapeHtml(BRAND.name)}</div>`
-      : `<img src="${logoSrc}" width="170" alt="${escapeHtml(BRAND.name)}" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:170px;max-width:60%;height:auto">`;
+      ? `<div style="${t(24, 700, COLORS.white, "letter-spacing:3px;line-height:1.2;text-transform:uppercase")}">Style &amp; Déco</div>` +
+        `<div style="${t(13, 400, COLORS.gold, "letter-spacing:1.5px;line-height:1.5;padding-top:6px")}">${escapeHtml(BRAND.tagline)}</div>`
+      : `<img src="${logoSrc}" width="260" alt="${escapeHtml(LOGO_ALT)}" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:260px;max-width:78%;height:auto">`;
 
-  const paragraphs = o.paragraphs
-    .map((p) => `<p style="margin:0 0 16px;font:400 16px/1.6 ${FONT};color:${COLORS.text}">${escapeHtml(p)}</p>`)
-    .join("");
+  const para = (p, color = COLORS.text) => `<p style="margin:0 0 18px;${t(16, 400, color, "line-height:1.7")}">${escapeHtml(p)}</p>`;
+  const paragraphs = (o.paragraphs || []).map((p, k) => para(p, k === 0 ? COLORS.text : COLORS.text)).join("");
+
+  const leadHtml = o.lead
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px"><tr><td style="padding:0 0 4px;${t(13, 400, COLORS.muted, "letter-spacing:.5px")}">${escapeHtml(o.lead.label)}</td></tr>` +
+      `<tr><td style="${t(26, 700, COLORS.white, "line-height:1.25")}">${escapeHtml(o.lead.value)}</td></tr></table>`
+    : "";
 
   const facts = (o.facts || []).filter(([, v]) => v);
+  const factRow = ([label, value, href, gold], k) => {
+    const valueHtml = href
+      ? `<a href="${escapeHtml(href)}" style="${t(16, 700, COLORS.gold, "text-decoration:underline")}">${escapeHtml(value)}</a>`
+      : `<span style="${t(16, gold ? 700 : 400, gold ? COLORS.gold : COLORS.text, "white-space:pre-wrap;line-height:1.5")}">${escapeHtml(value)}</span>`;
+    return `<tr><td style="padding:12px 0;${k ? `border-top:1px solid ${COLORS.line};` : ""}${t(14, 400, COLORS.muted, "line-height:1.5")}" valign="top" width="38%">${escapeHtml(label)}</td><td style="padding:12px 0;${k ? `border-top:1px solid ${COLORS.line};` : ""}" valign="top">${valueHtml}</td></tr>`;
+  };
   const factsHtml = facts.length
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;background:${COLORS.panel};border-left:3px solid ${COLORS.gold}"><tr><td style="padding:14px 18px">` +
-      (o.factsTitle ? `<div style="font:700 13px/1.4 ${FONT};color:${COLORS.muted};letter-spacing:.4px;margin:0 0 8px">${escapeHtml(o.factsTitle)}</div>` : "") +
-      facts
-        .map(
-          ([label, value, href]) =>
-            `<div style="font:400 15px/1.55 ${FONT};color:${COLORS.text};margin:0 0 6px"><span style="color:${COLORS.muted}">${escapeHtml(label)} :</span> ` +
-            (href
-              ? `<a href="${escapeHtml(href)}" style="color:${COLORS.text};font-weight:700;text-decoration:underline">${escapeHtml(value)}</a>`
-              : `<span style="white-space:pre-wrap">${escapeHtml(value)}</span>`) +
-            `</div>`
-        )
-        .join("") +
-      `</td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.panel}" style="margin:6px 0 24px;background:${COLORS.panel};border:1px solid ${COLORS.line}"><tr><td class="sd-facts" style="padding:18px 22px">` +
+      (o.factsTitle ? `<div style="${t(13, 700, COLORS.gold, "letter-spacing:1.2px;text-transform:uppercase;padding-bottom:6px")}">${escapeHtml(o.factsTitle)}</div>` : "") +
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${facts.map(factRow).join("")}</table></td></tr></table>`
     : "";
 
   const buttonHtml = o.button
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 22px"><tr><td align="center" bgcolor="${COLORS.header}" style="border-radius:10px"><a href="${escapeHtml(o.button.href)}" style="display:inline-block;padding:14px 26px;font:700 17px/1.2 ${FONT};color:#ffffff;text-decoration:none;border-radius:10px">${escapeHtml(o.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 24px"><tr><td align="center" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};border-radius:12px"><a href="${escapeHtml(o.button.href)}" style="display:inline-block;padding:16px 30px;${t(18, 700, COLORS.onGold, "line-height:1.2;text-decoration:none;border-radius:12px")}">${escapeHtml(o.button.label)}</a></td></tr></table>`
     : "";
 
-  const closing = (o.closing || [])
-    .map((p) => `<p style="margin:0 0 16px;font:400 16px/1.6 ${FONT};color:${COLORS.text}">${escapeHtml(p)}</p>`)
-    .join("");
+  const closing = (o.closing || []).map((p) => para(p)).join("");
 
   const signatureHtml = o.signature
-    ? `<p style="margin:0 0 4px;font:400 16px/1.6 ${FONT};color:${COLORS.text}">Cordialement,</p>` +
-      `<p style="margin:0;font:700 16px/1.5 ${FONT};color:${COLORS.text}">${escapeHtml(BRAND.name)}</p>` +
-      `<p style="margin:0;font:400 15px/1.55 ${FONT};color:${COLORS.muted}">${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.place)}<br><a href="${BRAND.phoneHref}" style="color:${COLORS.text};text-decoration:underline">${escapeHtml(BRAND.phone)}</a></p>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr><td style="border-top:1px solid ${COLORS.line};padding-top:22px">` +
+      `<p style="margin:0 0 10px;${t(16, 400, COLORS.muted, "line-height:1.6")}">Cordialement,</p>` +
+      `<p style="margin:0;${t(18, 700, COLORS.white, "line-height:1.4;letter-spacing:.3px")}">${escapeHtml(BRAND.name)}</p>` +
+      `<p style="margin:0;${t(15, 400, COLORS.muted, "line-height:1.7")}">${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.place)}<br><a href="${BRAND.phoneHref}" style="${t(15, 700, COLORS.gold, "text-decoration:underline")}">${escapeHtml(BRAND.phone)}</a></p></td></tr></table>`
     : "";
 
   const html = `<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${escapeHtml(o.title)}</title>
-<style>@media only screen and (max-width:480px){.sd-pad{padding:22px 18px !important}.sd-h1{font-size:22px !important}}</style></head>
-<body style="margin:0;padding:0;background:${COLORS.page}">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(o.preheader || o.title)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.page}"><tr><td align="center" style="padding:20px 10px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${COLORS.card};border-radius:12px;overflow:hidden">
-<tr><td align="center" bgcolor="${COLORS.header}" style="padding:22px 20px;border-bottom:3px solid ${COLORS.gold}">${logoHtml}</td></tr>
-<tr><td class="sd-pad" style="padding:30px 32px 28px">
-<h1 class="sd-h1" style="margin:0 0 18px;font:700 25px/1.25 ${FONT};color:${COLORS.text}">${escapeHtml(o.title)}</h1>
-${paragraphs}${factsHtml}${buttonHtml}${closing}${signatureHtml}
+<html lang="fr" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>${escapeHtml(o.title)} — ${escapeHtml(BRAND.name)}</title>
+<style>:root{color-scheme:dark light;supported-color-schemes:dark light}body{margin:0;padding:0}img{-ms-interpolation-mode:bicubic}a{text-decoration:underline}@media only screen and (max-width:480px){.sd-pad{padding:30px 22px 26px !important}.sd-h1{font-size:25px !important}.sd-facts{padding:14px 16px !important}}</style></head>
+<body style="margin:0;padding:0;background:${COLORS.outer}" bgcolor="${COLORS.outer}"><div lang="fr" dir="ltr">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${COLORS.outer};font-size:1px;line-height:1px">${escapeHtml(o.preheader || o.title)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.outer}" style="background:${COLORS.outer}"><tr><td align="center" style="padding:20px 10px 28px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px">
+<tr><td align="center" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:30px 20px 28px">${logoHtml}</td></tr>
+<tr><td height="1" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
+<tr><td class="sd-pad" bgcolor="${COLORS.card}" style="background:${COLORS.card};padding:42px 44px 34px">
+<h1 class="sd-h1" style="margin:0 0 14px;${t(28, 700, COLORS.white, "line-height:1.25;letter-spacing:-.2px")}">${escapeHtml(o.title)}</h1>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px"><tr><td width="44" height="2" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};height:2px;line-height:2px;font-size:2px">&nbsp;</td></tr></table>
+${leadHtml}${paragraphs}${buttonHtml}${factsHtml}${closing}${signatureHtml}
 </td></tr>
-<tr><td style="padding:14px 32px;background:${COLORS.panel};border-top:1px solid ${COLORS.line};font:400 12px/1.5 ${FONT};color:${COLORS.muted}" align="center">${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.tagline)} · ${escapeHtml(BRAND.place)}</td></tr>
-</table></td></tr></table></body></html>`;
+<tr><td height="1" bgcolor="${COLORS.line}" style="background:${COLORS.line};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
+<tr><td align="center" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:22px 20px 6px;${t(13, 400, COLORS.faint, "line-height:1.7")}">${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.place)}<br><a href="${BRAND.site}" style="${t(13, 400, COLORS.gold, "text-decoration:underline")}">styleetdeco.fr</a></td></tr>
+</table></td></tr></table></div></body></html>`;
 
   const text = [
     o.title,
     "",
-    ...o.paragraphs.flatMap((p) => [p, ""]),
-    ...(facts.length ? [...(o.factsTitle ? [o.factsTitle] : []), ...facts.map(([l, v]) => `${l} : ${v}`), ""] : []),
+    ...(o.lead ? [`${o.lead.label} : ${o.lead.value}`, ""] : []),
+    ...(o.paragraphs || []).flatMap((p) => [p, ""]),
     ...(o.button ? [`${o.button.label} : ${o.button.href.replace(/^tel:/, "")}`, ""] : []),
+    ...(facts.length ? [...(o.factsTitle ? [o.factsTitle] : []), ...facts.map(([l, v]) => `${l} : ${v}`), ""] : []),
     ...(o.closing || []).flatMap((p) => [p, ""]),
     ...(o.signature ? ["Cordialement,", "", BRAND.name, BRAND.tagline, BRAND.place, BRAND.phone] : []),
   ]
@@ -163,7 +178,7 @@ export const devisConfirmation = ({ receivedAt, reference, logo }) =>
     factsTitle: "Suivi de votre demande",
     facts: [
       ["Demande reçue", parisDateTime(receivedAt)],
-      ["Réponse", "sous 24 heures"],
+      ["Réponse", "sous 24 heures", undefined, true],
       ["Référence", reference],
     ],
     closing: ["Nous vous remercions de votre confiance."],
@@ -186,20 +201,22 @@ export const callbackConfirmation = ({ receivedAt, reference, sentence, logo }) 
     factsTitle: "Suivi de votre demande",
     facts: [
       ["Demande reçue", parisDateTime(receivedAt)],
-      ["Rappel", sentence.replace(/^Nous vous (rappelons|recontacterons) /, "").replace(/\.$/, "")],
+      ["Rappel", sentence.replace(/^Nous vous (rappelons|recontacterons) /, "").replace(/\.$/, ""), undefined, true],
       ["Référence", reference],
     ],
   });
 
-// Alerte interne immédiate : un client attend d'être rappelé (Gmail / Apple Mail : numéro cliquable).
+// Alerte interne immédiate : un client attend d'être rappelé (Gmail / Apple Mail : numéro cliquable, lecture rapide).
 export const callbackAlert = ({ lead, receivedAt, reference, action, origin, reviewNote }) =>
   renderEmail({
     logo: "none",
     title: "Nouvelle demande de rappel",
     preheader: `${lead.name} · ${lead.phone} — ${action}`,
-    paragraphs: [],
+    lead: { label: "Client à rappeler", value: lead.name },
+    paragraphs: [`Action : ${action}`],
+    button: { label: `Appeler ${lead.phone}`, href: telHref(lead.phone) },
+    factsTitle: "Coordonnées",
     facts: [
-      ["Client", lead.name],
       ["Téléphone", lead.phone, telHref(lead.phone)],
       ["E-mail", lead.email],
       ["Ville", lead.city],
@@ -208,30 +225,28 @@ export const callbackAlert = ({ lead, receivedAt, reference, action, origin, rev
       ["Référence", reference],
       ["Contrôle antispam", reviewNote],
     ],
-    factsTitle: "Coordonnées",
-    button: { label: `Appeler ${lead.phone}`, href: telHref(lead.phone) },
-    closing: [`Action : ${action}`],
   });
 
-// Rappel interne programmé (aucune pièce jointe) : à partir de l'ouverture.
-export const reminderEmail = ({ lead, receivedAt, reference, origin, fallback }) =>
+// Rappel interne programmé (aucune pièce jointe, aucune image) : à partir de l'ouverture. `when` = « lundi dès 8 h ».
+export const reminderEmail = ({ lead, receivedAt, reference, origin, when, fallback }) =>
   renderEmail({
     logo: "none",
     title: "Un client attend votre rappel",
-    preheader: `${lead.name} · ${lead.phone} — à rappeler dès 8 h`,
+    preheader: `${lead.name} · ${lead.phone} — à rappeler ${when || "dès 8 h"}`,
+    lead: { label: "Client à rappeler", value: lead.name },
     paragraphs: [
       fallback
         ? "Le rappel automatique n'a pas pu être programmé : ce client est à contacter dès l'ouverture."
         : "Un client attend votre rappel à partir de 8 h.",
     ],
+    button: { label: `Appeler ${lead.phone}`, href: telHref(lead.phone) },
+    factsTitle: "Coordonnées",
     facts: [
-      ["Client", lead.name],
       ["Téléphone", lead.phone, telHref(lead.phone)],
+      ["Rappel prévu", when || "dès 8 h", undefined, true],
       ["Ville", lead.city],
       ["Origine", origin],
       ["Demande reçue", parisDateTime(receivedAt)],
       ["Référence", reference],
     ],
-    factsTitle: "Coordonnées",
-    button: { label: `Appeler ${lead.phone}`, href: telHref(lead.phone) },
   });

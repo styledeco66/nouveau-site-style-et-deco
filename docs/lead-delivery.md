@@ -149,7 +149,7 @@ affiche « Demander un rappel » (aucune promesse horaire). La page est actualis
 ## E-mails
 
 Modèle unique : `netlify/lib/emails.mjs` (`renderEmail` : logo, couleurs, police, coordonnées, signature ; version HTML + texte brut). Contenus : confirmation devis,
-confirmation rappel, alerte interne de rappel, rappel interne programmé.
+confirmation rappel, alerte interne de rappel, rappel interne programmé. L'engagement « réponse sous 24 heures » est maintenu 7 jours sur 7.
 
 | E-mail | Destinataire | Quand |
 |---|---|---|
@@ -157,8 +157,9 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé.
 | Confirmation client (« Votre demande de devis a bien été reçue — Style & Déco » / « Votre demande de rappel — Style & Déco ») | l'adresse du client, `Reply-To` : style.deco66@gmail.com | si activée **et** demande valide **et** non suspecte **et** adresse valide **et** notification principale acceptée |
 | `[RAPPEL À EFFECTUER] Client à contacter dès 8 h` (programmé) | `LEAD_TO_EMAIL` | si activé, rappel hors créneau « 30 min », non suspect ; envoyé à ouverture − 30 min (`scheduled_at`, UTC calculé par le serveur) |
 
-- **Logo** : le PNG officiel (`sitesite-template/assets/images/email/logo-style-deco-email.png`, dérivé de `logo-fin-640.webp`, sans métadonnées) est intégré en image CID
-  nommée `logo-style-deco.png` (jamais « noname »). Les e-mails internes et le rappel programmé n'ont **pas** de pièce jointe. Le module généré `netlify/lib/email-logo.mjs`
+- **Design « Black Luxury »** : fond noir profond `#0b0d10`, corps anthracite `#14171c`, informations de suivi `#1c2026`, filets `#2a2f37`, doré `#d7b56d` (valeurs du site), titres blancs, texte blanc doux `#f5f5f4`, libellés gris clair `#bfc3ca`. Largeur 600 px, tableaux de présentation, styles en ligne, polices système, texte 16 px, titre 28 px (25 px sur petit écran), contrastes ≥ 4,5:1 (testés). Aucun fond blanc ou beige, aucun JavaScript, flexbox ou grille. `color-scheme: dark light` : les messageries qui inversent les couleurs ne changent pas un e-mail déjà sombre ; la lisibilité prime sur la fidélité exacte des couleurs.
+- **Logo** : le PNG officiel (`sitesite-template/assets/images/email/logo-style-deco-email.png`, dérivé de `logo-fin-640.webp`) est **recadré sur les marges transparentes inutiles** (512 × 312 px, affiché à 260 px : net sur Retina), transparence conservée, sans métadonnées, palette indexée de 256 couleurs (44 Ko, rendu visuellement identique). Il est intégré en image CID
+  nommée `logo-style-deco.png` (jamais « noname ") aux **confirmations clients** ; les e-mails internes et le rappel programmé n'ont **pas** de pièce jointe ni d'image (signature typographique « STYLE & DÉCO »). Le module généré `netlify/lib/email-logo.mjs`
   (base64) se régénère avec `node scripts/build-email-logo.mjs` (vérifié par `--check`). **Un test réel dans Gmail et Apple Mail est nécessaire avant activation** : si le logo
   apparaît comme pièce jointe visible, passer `LEAD_EMAIL_LOGO_MODE=https` (image sur `https://styleetdeco.fr/assets/images/email/…`).
 - **Contenu transactionnel** : aucune publicité, aucun suivi, aucune inscription à une liste. La confirmation ne recopie aucune donnée saisie (pas de nom ni de texte du visiteur) et ne
