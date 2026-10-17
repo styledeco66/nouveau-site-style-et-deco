@@ -19,7 +19,7 @@ const TEMPLATES = {
   programme: () => reminderEmail({ lead, receivedAt: fri, reference: "A1B2C3D4", origin: "Page Perpignan", when: "lundi dès 8 h" }),
 };
 
-const PALETTE = { outer: "#0b0d10", card: "#14171c", panel: "#1c2026", line: "#2a2f37", gold: "#d7b56d" };
+const PALETTE = { outer: "#0b0d10", card: "#14171c", panel: "#1c2026", line: "#2a2f37", gold: "#d7b56d", goldDim: "#8a7447" };
 const luminance = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -32,7 +32,8 @@ test("palette Black Luxury : aucun fond blanc, crème ou beige ; seulement noir,
     const backgrounds = new Set([...html.matchAll(/(?:background(?:-color)?:|bgcolor=")\s*(#[0-9a-fA-F]{6})/g)].map((m) => m[1].toLowerCase()));
     const allowed = new Set(Object.values(PALETTE));
     for (const bg of backgrounds) assert.ok(allowed.has(bg), `${name} : fond non prévu ${bg}`);
-    assert.ok(backgrounds.has(PALETTE.outer) && backgrounds.has(PALETTE.card), name);
+    assert.ok(backgrounds.has(PALETTE.outer), `${name} : page noire`);
+    assert.ok(!backgrounds.has(PALETTE.card) && !backgrounds.has(PALETTE.panel), `${name} : direction A — aucune carte ni encadré`);
     assert.doesNotMatch(html, /background(?:-color)?:\s*(?:#fff\b|#ffffff|white)|bgcolor="(?:#fff|#ffffff|white)"/i, `${name} : aucun fond blanc`);
     for (const beige of ["#f3f1ec", "#f7f5f0", "#f1efea", "#e6e1d6"]) assert.ok(!html.toLowerCase().includes(beige), `${name} : ${beige}`);
   }
@@ -65,19 +66,21 @@ test("tailles de texte lisibles sur téléphone : corps 16 px, titre 28 px (25 p
     const { html } = make();
     const sizes = [...html.matchAll(/font-size:\s*([\d.]+)px/g)].map((m) => Number(m[1])).filter((n) => n > 2);
     assert.ok(Math.min(...sizes) >= 13, `${name} : ${Math.min(...sizes)} px`);
-    assert.match(html, /font-size:28px/, name);
-    assert.match(html, /font-size:16px/, name);
-    assert.match(html, /max-width:480px\)\{[^@]*\.sd-h1\{font-size:25px/, name);
+    assert.match(html, /font-size:25px;font-weight:600/, `${name} : titre 25 px semi-bold`);
+    assert.match(html, /font-size:16px;font-weight:400/, name);
+    assert.match(html, /max-width:480px\)\{[^@]*\.sd-h1\{font-size:23px/, name);
+    assert.doesNotMatch(html, /font-weight:(7|8|9)00|text-transform:uppercase|letter-spacing:[1-9]/i, `${name} : ni titre extra-gras, ni capitales, ni espacement artificiel`);
+    assert.doesNotMatch(html, /Georgia|Times New Roman|(?<!sans-)serif/i, `${name} : aucune police à empattement`);
   }
 });
 
 test("logo : CID nommé pour les confirmations clients, repli HTTPS, signature typographique (sans image) pour les alertes internes", () => {
-  assert.match(TEMPLATES.devis().html, /<img src="cid:logo-style-deco" width="260" alt="Style &amp; Déco — Le Reflet de vos Envies"/);
-  assert.match(devisConfirmation({ receivedAt: fri, reference: "X", logo: "https" }).html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="260"/);
+  assert.match(TEMPLATES.devis().html, /<img src="cid:logo-style-deco" width="240" alt="Style &amp; Déco — Le Reflet de vos Envies"/);
+  assert.match(devisConfirmation({ receivedAt: fri, reference: "X", logo: "https" }).html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="240"/);
   for (const name of ["alerte", "programme"]) {
     const { html } = TEMPLATES[name]();
     assert.ok(!html.includes("<img"), `${name} : aucune image`);
-    assert.match(html, /Style &amp; Déco<\/div>/, name);
+    assert.match(html, />Style &amp; Déco<\/div>/, name);
   }
   const png = Buffer.from(LOGO_PNG_BASE64, "base64");
   assert.equal(png.readUInt32BE(16), 512);
@@ -95,7 +98,7 @@ test("contenu : téléphone cliquable, référence, informations de suivi, versi
   for (const v of ["Marie Exemple", "06 12 34 56 78", "Rappel prévu : lundi dès 8 h", "Page Perpignan", "A1B2C3D4", "Un client attend votre rappel à partir de 8 h."]) assert.ok(prog.text.includes(v), v);
   const devis = TEMPLATES.devis();
   assert.ok(devis.html.includes("tel:+33650756242") && devis.text.includes("06 50 75 62 42"));
-  for (const v of ["sous 24 heures", "Référence : A1B2C3D4", "Demande reçue : vendredi 23 octobre 2026 à 19 h 05", "Cordialement,", "Saint-Cyprien — Pyrénées-Orientales"]) assert.ok(devis.text.includes(v), v);
+  for (const v of ["sous 24 heures", "Référence : A1B2C3D4", "Demande reçue : vendredi 23 octobre 2026 à 19 h 05", "Cordialement,", "Adresse administrative : 18 rue Madame de la Fayette, 66750 Saint-Cyprien, France", "style.deco66@gmail.com", "https://styleetdeco.fr"]) assert.ok(devis.text.includes(v), v);
   const rappel = TEMPLATES.rappel();
   assert.ok(rappel.text.includes("Nous vous recontacterons lundi à partir de 8 h.") && rappel.text.includes("Rappel : lundi à partir de 8 h"));
   assert.doesNotMatch(devis.text + rappel.text, /ouvrées/);
@@ -113,7 +116,7 @@ test("échappement HTML de toutes les données saisies", () => {
 test("un seul modèle commun : mêmes couleurs, logo, signature et pied pour les quatre e-mails", () => {
   for (const make of Object.values(TEMPLATES)) {
     const { html } = make();
-    for (const v of [PALETTE.gold, PALETTE.card, PALETTE.outer, "styleetdeco.fr", "Artisan peintre en bâtiment", "Saint-Cyprien — Pyrénées-Orientales"]) assert.ok(html.includes(v) || html.toLowerCase().includes(v), v);
+    for (const v of [PALETTE.gold, PALETTE.line, PALETTE.outer, "styleetdeco.fr", "Artisan peintre en bâtiment", "Adresse administrative"]) assert.ok(html.includes(v) || html.toLowerCase().includes(v), v);
   }
   assert.equal(renderEmail({ title: "T", paragraphs: ["p"] }).html.includes("<h1"), true);
 });
@@ -142,4 +145,26 @@ test("le HTML transmis à Resend est exactement celui du modèle (confirmations,
   assert.equal(reminder.attachments, undefined);
   assert.equal(reminder.scheduled_at, "2026-10-26T06:30:00.000Z");
   assert.ok(reminder.html.includes("tel:0612345678"));
+});
+
+test("coordonnées professionnelles complètes, centralisées, cliquables, sans laisser entendre un établissement ouvert au public", () => {
+  const urls = [];
+  for (const [name, make] of Object.entries(TEMPLATES)) {
+    const { html, text } = make();
+    for (const v of ["18 rue Madame de la Fayette", "66750 Saint-Cyprien", "France", "Adresse administrative"]) assert.ok(html.includes(v) || html.includes(v.replace(" Saint", "&nbsp;Saint")), `${name} : ${v}`);
+    assert.ok(html.includes('href="tel:+33650756242"') && html.includes('href="mailto:style.deco66@gmail.com"') && html.includes('href="https://styleetdeco.fr"'), `${name} : téléphone, e-mail et site cliquables`);
+    assert.ok(text.includes("18 rue Madame de la Fayette, 66750 Saint-Cyprien, France") && text.includes("06 50 75 62 42") && text.includes("style.deco66@gmail.com") && text.includes("https://styleetdeco.fr"), `${name} : texte brut`);
+    assert.doesNotMatch(html + text, /showroom|boutique|visitez-nous|nous accueillons|sur rendez-vous à notre adresse|ouvert au public/i, name);
+    urls.push(html);
+  }
+  // signature des confirmations clients : téléphone, e-mail, site (en plus du pied)
+  for (const name of ["devis", "rappel"]) {
+    const { html } = TEMPLATES[name]();
+    assert.ok(html.indexOf("Cordialement") < html.indexOf("mailto:style.deco66@gmail.com"), `${name} : e-mail dans la signature`);
+    assert.equal((html.match(/mailto:style\.deco66@gmail\.com/g) || []).length, 2, `${name} : signature + pied`);
+  }
+  // une seule source : l'adresse n'est écrite en dur que dans BRAND
+  const source = readFileSync(new URL("../netlify/lib/emails.mjs", import.meta.url), "utf8");
+  assert.equal((source.match(/18 rue Madame de la Fayette/g) || []).length, 1);
+  assert.equal((source.match(/style\.deco66@gmail\.com/g) || []).length, 2, "BRAND.email + BRAND.emailHref");
 });

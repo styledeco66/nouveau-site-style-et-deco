@@ -7,14 +7,22 @@
 
 import { LOGO_PNG_BASE64 } from "./email-logo.mjs";
 
+// Coordonnées professionnelles OFFICIELLES : source unique pour tous les e-mails (signature, pied, texte brut).
 export const BRAND = {
   name: "Style & Déco",
   tagline: "Artisan peintre en bâtiment",
   place: "Saint-Cyprien — Pyrénées-Orientales",
+  addressLabel: "Adresse administrative", // pas un établissement accueillant du public
+  street: "18 rue Madame de la Fayette",
+  postalCode: "66750",
+  city: "Saint-Cyprien",
+  country: "France",
   phone: "06 50 75 62 42",
   phoneHref: "tel:+33650756242",
   email: "style.deco66@gmail.com",
+  emailHref: "mailto:style.deco66@gmail.com",
   site: "https://styleetdeco.fr",
+  siteLabel: "styleetdeco.fr",
 };
 
 // Palette « Black Luxury » : valeurs du site (assets/css/style.css : --bg #0b0d10, --accent #d7b56d) + anthracites.
@@ -32,7 +40,7 @@ const COLORS = {
   onGold: "#151515", // texte sur bouton doré (comme .btn--primary du site)
 };
 // Polices système uniquement (aucune police externe) : fiables dans toutes les messageries.
-const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif";
+const FONT = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,'Segoe UI',Roboto,Arial,sans-serif";
 
 export const LOGO_CID = "logo-style-deco";
 export const LOGO_FILENAME = "logo-style-deco.png";
@@ -61,84 +69,94 @@ export const parisDateTime = (instant) => {
   return `${parts.weekday} ${parts.day} ${parts.month} ${parts.year} à ${parts.hour} h ${parts.minute}`;
 };
 
+// « lundi 19 octobre 2026 » (en-tête de courrier).
+const parisDay = (instant) => parisDateTime(instant).replace(/ à \d{2} h \d{2}$/, "");
+
 const telHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
+
+// Espace insécable avant « h » dans les heures (« 8 h » ne se coupe jamais en fin de ligne), HTML uniquement.
+const nb = (value) => escapeHtml(String(value ?? "").replace(/(\d) h(?=[\s.,;:)]|$)/g, "$1\u00a0h"));
 
 // Style de texte en ligne : couleurs explicites partout (certaines messageries recolorent : la lisibilité prime).
 const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
+const hairline = (width, color, align = "left", margin = "0") =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="${align}" style="margin:${margin}"><tr><td width="${width}" height="1" bgcolor="${color}" style="background:${color};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr></table>`;
 
 /**
- * Modèle commun à tous les e-mails (confirmations clients et alertes internes).
+ * Modèle commun à tous les e-mails — direction « Luxe éditorial » : page entièrement noire, colonne étroite, logo centré,
+ * filets fins, aucune carte ni encadré, une seule famille sans empattement (graisses 400 et 600, aucune capitale).
  * @param {object} o
  * @param {string} o.title            Titre principal (unique <h1>).
  * @param {string} [o.preheader]      Aperçu affiché dans la liste des messages.
+ * @param {{date:string, ref:string}} [o.meta]  Date et référence en en-tête (comme un courrier).
  * @param {string[]} [o.paragraphs]   Paragraphes (texte brut, échappé ici).
- * @param {{label:string,value:string,href?:string}} [o.lead]  Information principale mise en avant (ex. client à rappeler).
- * @param {[string,string,string?,boolean?][]} [o.facts]  Lignes « libellé / valeur / lien / doré ».
- * @param {string} [o.factsTitle]
+ * @param {{label:string,value:string}} [o.lead]  Information principale mise en avant (ex. client à rappeler).
+ * @param {[string,string,string?,boolean?,boolean?][]} [o.facts]  « libellé / valeur / lien / doré / masqué dans le HTML ».
  * @param {{label:string,href:string}} [o.button]   Bouton doré (ex. appeler).
  * @param {string[]} [o.closing]      Lignes avant la signature.
  * @param {"cid"|"https"|"none"} [o.logo]  « none » : signature typographique Style & Déco (aucune image).
- * @param {boolean} [o.signature]     Signature + coordonnées (confirmations clients).
+ * @param {boolean} [o.signature]     Signature + coordonnées complètes (confirmations clients).
  */
 export const renderEmail = (o) => {
   const logoMode = o.logo || "none";
   const logoSrc = logoMode === "cid" ? `cid:${LOGO_CID}` : LOGO_HTTPS_URL;
   const logoHtml =
     logoMode === "none"
-      ? `<div style="${t(24, 700, COLORS.white, "letter-spacing:3px;line-height:1.2;text-transform:uppercase")}">Style &amp; Déco</div>` +
-        `<div style="${t(13, 400, COLORS.gold, "letter-spacing:1.5px;line-height:1.5;padding-top:6px")}">${escapeHtml(BRAND.tagline)}</div>`
-      : `<img src="${logoSrc}" width="260" alt="${escapeHtml(LOGO_ALT)}" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:260px;max-width:78%;height:auto">`;
+      ? `<div style="${t(22, 600, COLORS.white, "line-height:1.2;text-align:center")}">${escapeHtml(BRAND.name)}</div><div style="${t(14, 400, COLORS.muted, "line-height:1.6;text-align:center;padding-top:4px")}">${escapeHtml(BRAND.tagline)}</div>`
+      : `<div style="text-align:center"><img src="${logoSrc}" width="240" alt="${escapeHtml(LOGO_ALT)}" style="display:inline-block;border:0;outline:none;text-decoration:none;width:240px;max-width:100%;height:auto"></div>`;
 
-  const para = (p, color = COLORS.text) => `<p style="margin:0 0 18px;${t(16, 400, color, "line-height:1.7")}">${escapeHtml(p)}</p>`;
-  const paragraphs = (o.paragraphs || []).map((p, k) => para(p, k === 0 ? COLORS.text : COLORS.text)).join("");
+  const para = (p, color = COLORS.text) => `<p style="margin:0 0 18px;${t(16, 400, color, "line-height:1.75")}">${nb(p)}</p>`;
+  const paragraphs = (o.paragraphs || []).map((p, k) => para(p, k === 0 ? COLORS.white : COLORS.text)).join("");
+
+  const metaHtml = o.meta
+    ? `<tr><td class="sd-pad" style="padding:34px 52px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="${t(14, 400, COLORS.faint)}">${escapeHtml(o.meta.date)}</td><td align="right" style="${t(14, 400, COLORS.faint)}">Réf. ${escapeHtml(o.meta.ref)}</td></tr></table></td></tr>`
+    : "";
 
   const leadHtml = o.lead
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px"><tr><td style="padding:0 0 4px;${t(13, 400, COLORS.muted, "letter-spacing:.5px")}">${escapeHtml(o.lead.label)}</td></tr>` +
-      `<tr><td style="${t(26, 700, COLORS.white, "line-height:1.25")}">${escapeHtml(o.lead.value)}</td></tr></table>`
+    ? `<p style="margin:0 0 2px;${t(14, 400, COLORS.muted)}">${escapeHtml(o.lead.label)}</p><p style="margin:0 0 22px;${t(24, 600, COLORS.white, "line-height:1.3")}">${escapeHtml(o.lead.value)}</p>`
     : "";
 
   const facts = (o.facts || []).filter(([, v]) => v);
+  const shown = facts.filter((f) => !f[4]);
   const factRow = ([label, value, href, gold], k) => {
+    const border = k ? `border-top:1px solid ${COLORS.line};` : "";
     const valueHtml = href
-      ? `<a href="${escapeHtml(href)}" style="${t(16, 700, COLORS.gold, "text-decoration:underline")}">${escapeHtml(value)}</a>`
-      : `<span style="${t(16, gold ? 700 : 400, gold ? COLORS.gold : COLORS.text, "white-space:pre-wrap;line-height:1.5")}">${escapeHtml(value)}</span>`;
-    return `<tr><td style="padding:12px 0;${k ? `border-top:1px solid ${COLORS.line};` : ""}${t(14, 400, COLORS.muted, "line-height:1.5")}" valign="top" width="38%">${escapeHtml(label)}</td><td style="padding:12px 0;${k ? `border-top:1px solid ${COLORS.line};` : ""}" valign="top">${valueHtml}</td></tr>`;
+      ? `<a href="${escapeHtml(href)}" style="${t(15, 600, COLORS.gold)}">${escapeHtml(value)}</a>`
+      : `<span style="${t(15, gold ? 600 : 400, gold ? COLORS.gold : COLORS.text, "line-height:1.5")}">${nb(value)}</span>`;
+    return `<tr><td style="padding:14px 0;${border}${t(14, 400, COLORS.muted, "line-height:1.5")}" valign="top" width="38%">${escapeHtml(label)}</td><td style="padding:14px 0;${border}" valign="top">${valueHtml}</td></tr>`;
   };
-  const factsHtml = facts.length
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.panel}" style="margin:6px 0 24px;background:${COLORS.panel};border:1px solid ${COLORS.line}"><tr><td class="sd-facts" style="padding:18px 22px">` +
-      (o.factsTitle ? `<div style="${t(13, 700, COLORS.gold, "letter-spacing:1.2px;text-transform:uppercase;padding-bottom:6px")}">${escapeHtml(o.factsTitle)}</div>` : "") +
-      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${facts.map(factRow).join("")}</table></td></tr></table>`
+  const factsHtml = shown.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:14px 0 30px"><tr><td colspan="2" height="1" bgcolor="${COLORS.goldDim}" style="background:${COLORS.goldDim};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>${shown.map(factRow).join("")}<tr><td colspan="2" height="1" bgcolor="${COLORS.line}" style="background:${COLORS.line};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr></table>`
     : "";
 
   const buttonHtml = o.button
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 24px"><tr><td align="center" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};border-radius:12px"><a href="${escapeHtml(o.button.href)}" style="display:inline-block;padding:16px 30px;${t(18, 700, COLORS.onGold, "line-height:1.2;text-decoration:none;border-radius:12px")}">${escapeHtml(o.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px"><tr><td bgcolor="${COLORS.gold}" style="background:${COLORS.gold};border-radius:4px"><a href="${escapeHtml(o.button.href)}" style="display:inline-block;padding:15px 30px;${t(16, 600, COLORS.onGold, "text-decoration:none;border-radius:4px")}">${escapeHtml(o.button.label)}</a></td></tr></table>`
     : "";
 
   const closing = (o.closing || []).map((p) => para(p)).join("");
 
+  // Signature : nom, activité, téléphone, e-mail et site cliquables. L'adresse (administrative) figure dans le pied.
+  const link = (href, label) => `<a href="${href}" style="${t(15, 600, COLORS.gold)}">${escapeHtml(label)}</a>`;
   const signatureHtml = o.signature
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr><td style="border-top:1px solid ${COLORS.line};padding-top:22px">` +
-      `<p style="margin:0 0 10px;${t(16, 400, COLORS.muted, "line-height:1.6")}">Cordialement,</p>` +
-      `<p style="margin:0;${t(18, 700, COLORS.white, "line-height:1.4;letter-spacing:.3px")}">${escapeHtml(BRAND.name)}</p>` +
-      `<p style="margin:0;${t(15, 400, COLORS.muted, "line-height:1.7")}">${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.place)}<br><a href="${BRAND.phoneHref}" style="${t(15, 700, COLORS.gold, "text-decoration:underline")}">${escapeHtml(BRAND.phone)}</a></p></td></tr></table>`
+    ? `<p style="margin:26px 0 4px;${t(16, 400, COLORS.muted)}">Cordialement,</p><p style="margin:0;${t(16, 600, COLORS.white)}">${escapeHtml(BRAND.name)}</p><p style="margin:0;${t(14, 400, COLORS.muted, "line-height:1.8")}">${escapeHtml(BRAND.tagline)}<br>${link(BRAND.phoneHref, BRAND.phone)}<br>${link(BRAND.emailHref, BRAND.email)}<br>${link(BRAND.site, BRAND.siteLabel)}</p>`
     : "";
+
+  const footerHtml = `<tr><td align="center" class="sd-pad" style="padding:44px 52px 38px">${hairline(56, COLORS.goldDim, "center", "0 auto")}<p style="margin:20px 0 0;${t(13, 400, COLORS.faint, "line-height:1.8")}">${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.addressLabel)}<br>${escapeHtml(BRAND.street)}, ${escapeHtml(BRAND.postalCode)} ${escapeHtml(BRAND.city)}, ${escapeHtml(BRAND.country)}<br><a href="${BRAND.phoneHref}" style="${t(13, 400, COLORS.gold)}">${escapeHtml(BRAND.phone)}</a> · <a href="${BRAND.emailHref}" style="${t(13, 400, COLORS.gold)}">${escapeHtml(BRAND.email)}</a> · <a href="${BRAND.site}" style="${t(13, 400, COLORS.gold)}">${escapeHtml(BRAND.siteLabel)}</a></p></td></tr>`;
 
   const html = `<!doctype html>
 <html lang="fr" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>${escapeHtml(o.title)} — ${escapeHtml(BRAND.name)}</title>
-<style>:root{color-scheme:dark light;supported-color-schemes:dark light}body{margin:0;padding:0}img{-ms-interpolation-mode:bicubic}a{text-decoration:underline}@media only screen and (max-width:480px){.sd-pad{padding:30px 22px 26px !important}.sd-h1{font-size:25px !important}.sd-facts{padding:14px 16px !important}}</style></head>
+<style>:root{color-scheme:dark light;supported-color-schemes:dark light}body{margin:0;padding:0;-webkit-text-size-adjust:100%}img{-ms-interpolation-mode:bicubic}a{text-decoration:underline}@media only screen and (max-width:480px){.sd-pad{padding-left:24px !important;padding-right:24px !important}.sd-h1{font-size:23px !important}}</style></head>
 <body style="margin:0;padding:0;background:${COLORS.outer}" bgcolor="${COLORS.outer}"><div lang="fr" dir="ltr">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${COLORS.outer};font-size:1px;line-height:1px">${escapeHtml(o.preheader || o.title)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.outer}" style="background:${COLORS.outer}"><tr><td align="center" style="padding:20px 10px 28px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.outer}" style="background:${COLORS.outer}"><tr><td align="center">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px">
-<tr><td align="center" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:30px 20px 28px">${logoHtml}</td></tr>
-<tr><td height="1" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
-<tr><td class="sd-pad" bgcolor="${COLORS.card}" style="background:${COLORS.card};padding:42px 44px 34px">
-<h1 class="sd-h1" style="margin:0 0 14px;${t(28, 700, COLORS.white, "line-height:1.25;letter-spacing:-.2px")}">${escapeHtml(o.title)}</h1>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px"><tr><td width="44" height="2" bgcolor="${COLORS.gold}" style="background:${COLORS.gold};height:2px;line-height:2px;font-size:2px">&nbsp;</td></tr></table>
+${metaHtml}
+<tr><td class="sd-pad" style="padding:34px 52px 0">${logoHtml}${hairline(56, COLORS.gold, "center", "30px auto 0")}</td></tr>
+<tr><td class="sd-pad" style="padding:42px 52px 0">
+<h1 class="sd-h1" style="margin:0 0 26px;${t(25, 600, COLORS.white, "line-height:1.3;letter-spacing:-.2px")}">${escapeHtml(o.title)}</h1>
 ${leadHtml}${paragraphs}${buttonHtml}${factsHtml}${closing}${signatureHtml}
 </td></tr>
-<tr><td height="1" bgcolor="${COLORS.line}" style="background:${COLORS.line};height:1px;line-height:1px;font-size:1px">&nbsp;</td></tr>
-<tr><td align="center" bgcolor="${COLORS.outer}" style="background:${COLORS.outer};padding:22px 20px 6px;${t(13, 400, COLORS.faint, "line-height:1.7")}">${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.tagline)}<br>${escapeHtml(BRAND.place)}<br><a href="${BRAND.site}" style="${t(13, 400, COLORS.gold, "text-decoration:underline")}">styleetdeco.fr</a></td></tr>
+${footerHtml}
 </table></td></tr></table></div></body></html>`;
 
   const text = [
@@ -147,9 +165,13 @@ ${leadHtml}${paragraphs}${buttonHtml}${factsHtml}${closing}${signatureHtml}
     ...(o.lead ? [`${o.lead.label} : ${o.lead.value}`, ""] : []),
     ...(o.paragraphs || []).flatMap((p) => [p, ""]),
     ...(o.button ? [`${o.button.label} : ${o.button.href.replace(/^tel:/, "")}`, ""] : []),
-    ...(facts.length ? [...(o.factsTitle ? [o.factsTitle] : []), ...facts.map(([l, v]) => `${l} : ${v}`), ""] : []),
+    ...(facts.length ? [...facts.map(([l, v]) => `${l} : ${v}`), ""] : []),
     ...(o.closing || []).flatMap((p) => [p, ""]),
-    ...(o.signature ? ["Cordialement,", "", BRAND.name, BRAND.tagline, BRAND.place, BRAND.phone] : []),
+    ...(o.signature ? ["Cordialement,", "", BRAND.name, BRAND.tagline, BRAND.phone, BRAND.email, BRAND.site, ""] : []),
+    "--",
+    `${BRAND.name} — ${BRAND.tagline}`,
+    `${BRAND.addressLabel} : ${BRAND.street}, ${BRAND.postalCode} ${BRAND.city}, ${BRAND.country}`,
+    `${BRAND.phone} · ${BRAND.email} · ${BRAND.site}`,
   ]
     .join("\n")
     .trim();
@@ -166,6 +188,7 @@ export const SUBJECT_CONFIRM_CALLBACK = "Votre demande de rappel — Style & Dé
 export const devisConfirmation = ({ receivedAt, reference, logo }) =>
   renderEmail({
     logo,
+    meta: { date: parisDay(receivedAt), ref: reference },
     signature: true,
     title: "Votre demande de devis a bien été reçue",
     preheader: "Nous reviendrons vers vous sous 24 heures.",
@@ -179,7 +202,7 @@ export const devisConfirmation = ({ receivedAt, reference, logo }) =>
     facts: [
       ["Demande reçue", parisDateTime(receivedAt)],
       ["Réponse", "sous 24 heures", undefined, true],
-      ["Référence", reference],
+      ["Référence", reference, undefined, false, true],
     ],
     closing: ["Nous vous remercions de votre confiance."],
   });
@@ -188,6 +211,7 @@ export const devisConfirmation = ({ receivedAt, reference, logo }) =>
 export const callbackConfirmation = ({ receivedAt, reference, sentence, logo }) =>
   renderEmail({
     logo,
+    meta: { date: parisDay(receivedAt), ref: reference },
     signature: true,
     title: "Votre demande de rappel a bien été reçue",
     preheader: sentence,
@@ -202,7 +226,7 @@ export const callbackConfirmation = ({ receivedAt, reference, sentence, logo }) 
     facts: [
       ["Demande reçue", parisDateTime(receivedAt)],
       ["Rappel", sentence.replace(/^Nous vous (rappelons|recontacterons) /, "").replace(/\.$/, ""), undefined, true],
-      ["Référence", reference],
+      ["Référence", reference, undefined, false, true],
     ],
   });
 
@@ -210,6 +234,7 @@ export const callbackConfirmation = ({ receivedAt, reference, sentence, logo }) 
 export const callbackAlert = ({ lead, receivedAt, reference, action, origin, reviewNote }) =>
   renderEmail({
     logo: "none",
+    meta: { date: parisDay(receivedAt), ref: reference },
     title: "Nouvelle demande de rappel",
     preheader: `${lead.name} · ${lead.phone} — ${action}`,
     lead: { label: "Client à rappeler", value: lead.name },
@@ -222,7 +247,7 @@ export const callbackAlert = ({ lead, receivedAt, reference, action, origin, rev
       ["Ville", lead.city],
       ["Origine", origin],
       ["Demande reçue", parisDateTime(receivedAt)],
-      ["Référence", reference],
+      ["Référence", reference, undefined, false, true],
       ["Contrôle antispam", reviewNote],
     ],
   });
@@ -231,6 +256,7 @@ export const callbackAlert = ({ lead, receivedAt, reference, action, origin, rev
 export const reminderEmail = ({ lead, receivedAt, reference, origin, when, fallback }) =>
   renderEmail({
     logo: "none",
+    meta: { date: parisDay(receivedAt), ref: reference },
     title: "Un client attend votre rappel",
     preheader: `${lead.name} · ${lead.phone} — à rappeler ${when || "dès 8 h"}`,
     lead: { label: "Client à rappeler", value: lead.name },
@@ -247,6 +273,6 @@ export const reminderEmail = ({ lead, receivedAt, reference, origin, when, fallb
       ["Ville", lead.city],
       ["Origine", origin],
       ["Demande reçue", parisDateTime(receivedAt)],
-      ["Référence", reference],
+      ["Référence", reference, undefined, false, true],
     ],
   });
