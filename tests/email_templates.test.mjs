@@ -26,14 +26,16 @@ const luminance = (hex) => {
 };
 const contrast = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
 
-test("palette Black Luxury : aucun fond blanc, crème ou beige ; seulement noir, anthracites, doré", () => {
+test("palette Black Luxury : aucun fond blanc, crème ou beige ; design A (clients) tout noir, design B (internes) noir et anthracites", () => {
   for (const [name, make] of Object.entries(TEMPLATES)) {
     const { html } = make();
     const backgrounds = new Set([...html.matchAll(/(?:background(?:-color)?:|bgcolor=")\s*(#[0-9a-fA-F]{6})/g)].map((m) => m[1].toLowerCase()));
-    const allowed = new Set(Object.values(PALETTE));
+    const internal = ["alerte", "programme"].includes(name);
+    const allowed = new Set(internal ? Object.values(PALETTE) : [PALETTE.outer, PALETTE.line, PALETTE.gold, PALETTE.goldDim]);
     for (const bg of backgrounds) assert.ok(allowed.has(bg), `${name} : fond non prévu ${bg}`);
-    assert.ok(backgrounds.has(PALETTE.outer), `${name} : page noire`);
-    assert.ok(!backgrounds.has(PALETTE.card) && !backgrounds.has(PALETTE.panel), `${name} : direction A — aucune carte ni encadré`);
+    assert.ok(backgrounds.has(PALETTE.outer), `${name} : fond noir profond`);
+    if (internal) assert.ok(backgrounds.has(PALETTE.card), `${name} : design B sur anthracite`);
+    else assert.ok(!backgrounds.has(PALETTE.card) && !backgrounds.has(PALETTE.panel), `${name} : design A — aucune carte ni encadré`);
     assert.doesNotMatch(html, /background(?:-color)?:\s*(?:#fff\b|#ffffff|white)|bgcolor="(?:#fff|#ffffff|white)"/i, `${name} : aucun fond blanc`);
     for (const beige of ["#f3f1ec", "#f7f5f0", "#f1efea", "#e6e1d6"]) assert.ok(!html.toLowerCase().includes(beige), `${name} : ${beige}`);
   }
@@ -74,13 +76,19 @@ test("tailles de texte lisibles sur téléphone : corps 16 px, titre 28 px (25 p
   }
 });
 
-test("logo : CID nommé pour les confirmations clients, repli HTTPS, signature typographique (sans image) pour les alertes internes", () => {
-  assert.match(TEMPLATES.devis().html, /<img src="cid:logo-style-deco" width="240" alt="Style &amp; Déco — Le Reflet de vos Envies"/);
+test("logo officiel sur les quatre e-mails : CID nommé (clients), repli HTTPS, HTTPS compact sans pièce jointe (internes), texte alternatif", () => {
+  const ALT = 'alt="Style &amp; Déco — Le Reflet de vos Envies"';
+  for (const name of ["devis", "rappel"]) {
+    const { html } = TEMPLATES[name]();
+    assert.ok(html.includes(`<img src="cid:logo-style-deco" width="240" ${ALT}`), `${name} : logo CID centré à 240 px`);
+    assert.match(html, /text-align:center"><img/, `${name} : logo centré`);
+  }
   assert.match(devisConfirmation({ receivedAt: fri, reference: "X", logo: "https" }).html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="240"/);
   for (const name of ["alerte", "programme"]) {
     const { html } = TEMPLATES[name]();
-    assert.ok(!html.includes("<img"), `${name} : aucune image`);
-    assert.match(html, />Style &amp; Déco<\/div>/, name);
+    assert.ok(html.includes(`<img src="https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png" width="150" ${ALT}`), `${name} : logo officiel HTTPS compact (150 px)`);
+    assert.ok(!html.includes("cid:"), `${name} : aucun CID, aucune pièce jointe`);
+    assert.equal((html.match(/<img\b/g) || []).length, 1, name);
   }
   const png = Buffer.from(LOGO_PNG_BASE64, "base64");
   assert.equal(png.readUInt32BE(16), 512);
@@ -89,12 +97,17 @@ test("logo : CID nommé pour les confirmations clients, repli HTTPS, signature t
   assert.equal(statSync(new URL("../sitesite-template/assets/images/email/logo-style-deco-email.png", import.meta.url)).size, png.length);
 });
 
-test("contenu : téléphone cliquable, référence, informations de suivi, version texte brut complète", () => {
+test("contenu : téléphone cliquable, créneau, référence, version texte brut complète", () => {
   const alerte = TEMPLATES.alerte();
-  assert.ok(alerte.html.includes('href="tel:0612345678"') && alerte.html.includes("Appeler 06 12 34 56 78"));
-  for (const v of ["Marie Exemple", "06 12 34 56 78", "Perpignan", "A1B2C3D4", "Rappeler ce client lundi dès 8 h.", "Page Perpignan"]) assert.ok(alerte.text.includes(v), v);
+  assert.ok(alerte.html.includes('href="tel:0612345678"'));
+  assert.match(alerte.html, />Appeler<\/a>/, "bouton doré « Appeler »");
+  assert.match(alerte.html, /font-size:28px;font-weight:600;color:#ffffff[^"]*"><a href="tel:0612345678"[^>]*>06 12 34 56 78</, "numéro très lisible (28 px)");
+  assert.match(alerte.html, /font-size:26px;font-weight:600;color:#ffffff;line-height:1\.25[^>]*>Marie Exemple/, "nom du client bien visible");
+  assert.ok(alerte.html.includes(">Perpignan<"), "commune");
+  assert.ok(alerte.html.includes("Réf. A1B2C3D4"), "référence");
+  for (const v of ["Marie Exemple", "06 12 34 56 78", "Perpignan", "A1B2C3D4", "Rappeler ce client lundi dès 8 h.", "Page Perpignan", "marie@exemple.fr", "Demande reçue : vendredi 23 octobre 2026 à 19 h 05"]) assert.ok(alerte.text.includes(v), `texte brut : ${v}`);
   const prog = TEMPLATES.programme();
-  assert.ok(prog.html.includes('href="tel:0612345678"'));
+  assert.ok(prog.html.includes('href="tel:0612345678"') && /Rappel prévu/.test(prog.html) && prog.html.includes("lundi dès"), "créneau de rappel visible");
   for (const v of ["Marie Exemple", "06 12 34 56 78", "Rappel prévu : lundi dès 8 h", "Page Perpignan", "A1B2C3D4", "Un client attend votre rappel à partir de 8 h."]) assert.ok(prog.text.includes(v), v);
   const devis = TEMPLATES.devis();
   assert.ok(devis.html.includes("tel:+33650756242") && devis.text.includes("06 50 75 62 42"));
@@ -113,11 +126,12 @@ test("échappement HTML de toutes les données saisies", () => {
   }
 });
 
-test("un seul modèle commun : mêmes couleurs, logo, signature et pied pour les quatre e-mails", () => {
+test("identité commune aux quatre modèles (palette, famille de police, logo officiel) sans composition identique", () => {
   for (const make of Object.values(TEMPLATES)) {
     const { html } = make();
-    for (const v of [PALETTE.gold, PALETTE.line, PALETTE.outer, "styleetdeco.fr", "Artisan peintre en bâtiment", "Adresse administrative"]) assert.ok(html.includes(v) || html.toLowerCase().includes(v), v);
+    for (const v of [PALETTE.gold, PALETTE.line, PALETTE.outer, "logo-style-deco", "-apple-system,BlinkMacSystemFont,'Helvetica Neue'"]) assert.ok(html.includes(v), v);
   }
+  assert.ok(TEMPLATES.devis().html.includes("Cordialement") && !TEMPLATES.alerte().html.includes("Cordialement"));
   assert.equal(renderEmail({ title: "T", paragraphs: ["p"] }).html.includes("<h1"), true);
 });
 
@@ -147,24 +161,26 @@ test("le HTML transmis à Resend est exactement celui du modèle (confirmations,
   assert.ok(reminder.html.includes("tel:0612345678"));
 });
 
-test("coordonnées professionnelles complètes, centralisées, cliquables, sans laisser entendre un établissement ouvert au public", () => {
-  const urls = [];
-  for (const [name, make] of Object.entries(TEMPLATES)) {
-    const { html, text } = make();
-    for (const v of ["18 rue Madame de la Fayette", "66750 Saint-Cyprien", "France", "Adresse administrative"]) assert.ok(html.includes(v) || html.includes(v.replace(" Saint", "&nbsp;Saint")), `${name} : ${v}`);
-    assert.ok(html.includes('href="tel:+33650756242"') && html.includes('href="mailto:style.deco66@gmail.com"') && html.includes('href="https://styleetdeco.fr"'), `${name} : téléphone, e-mail et site cliquables`);
+test("coordonnées : clients = signature (nom, activité, téléphone, e-mail) + pied (adresse administrative, site) sans répétition ; internes = aucune coordonnée de Style & Déco", () => {
+  const source = readFileSync(new URL("../netlify/lib/emails.mjs", import.meta.url), "utf8");
+  assert.equal((source.match(/18 rue Madame de la Fayette/g) || []).length, 1, "adresse écrite une seule fois (BRAND)");
+  for (const name of ["devis", "rappel"]) {
+    const { html, text } = TEMPLATES[name]();
+    const count = (re) => (html.match(re) || []).length;
+    assert.equal(count(/href="tel:\+33650756242"/g), 1, `${name} : téléphone une seule fois`);
+    assert.equal(count(/href="mailto:style\.deco66@gmail\.com"/g), 1, `${name} : e-mail une seule fois`);
+    assert.equal(count(/href="https:\/\/styleetdeco\.fr"/g), 1, `${name} : site une seule fois`);
+    assert.equal(count(/18 rue Madame de la Fayette/g), 1, `${name} : adresse une seule fois`);
+    const at = (v) => html.indexOf(v);
+    assert.ok(at("Cordialement") < at("tel:+33650756242") && at("tel:+33650756242") < at("mailto:style.deco66@gmail.com") && at("mailto:style.deco66@gmail.com") < at("Adresse administrative") && at("Adresse administrative") < at('href="https://styleetdeco.fr"'), `${name} : signature puis pied`);
+    for (const v of ["66750 Saint-Cyprien", "France", "Adresse administrative"]) assert.ok(html.includes(v), `${name} : ${v}`);
     assert.ok(text.includes("18 rue Madame de la Fayette, 66750 Saint-Cyprien, France") && text.includes("06 50 75 62 42") && text.includes("style.deco66@gmail.com") && text.includes("https://styleetdeco.fr"), `${name} : texte brut`);
     assert.doesNotMatch(html + text, /showroom|boutique|visitez-nous|nous accueillons|sur rendez-vous à notre adresse|ouvert au public/i, name);
-    urls.push(html);
   }
-  // signature des confirmations clients : téléphone, e-mail, site (en plus du pied)
-  for (const name of ["devis", "rappel"]) {
-    const { html } = TEMPLATES[name]();
-    assert.ok(html.indexOf("Cordialement") < html.indexOf("mailto:style.deco66@gmail.com"), `${name} : e-mail dans la signature`);
-    assert.equal((html.match(/mailto:style\.deco66@gmail\.com/g) || []).length, 2, `${name} : signature + pied`);
+  for (const name of ["alerte", "programme"]) {
+    const { html, text } = TEMPLATES[name]();
+    assert.ok(!html.includes("18 rue Madame") && !html.includes("style.deco66@gmail.com") && !html.includes("+33650756242") && !html.includes("06 50 75 62 42"), `${name} : aucune coordonnée de Style & Déco`);
+    assert.ok(!text.includes("18 rue Madame") && !text.includes("style.deco66@gmail.com") && !text.includes("06 50 75 62 42"), `${name} : texte brut`);
   }
-  // une seule source : l'adresse n'est écrite en dur que dans BRAND
-  const source = readFileSync(new URL("../netlify/lib/emails.mjs", import.meta.url), "utf8");
-  assert.equal((source.match(/18 rue Madame de la Fayette/g) || []).length, 1);
-  assert.equal((source.match(/style\.deco66@gmail\.com/g) || []).length, 2, "BRAND.email + BRAND.emailHref");
 });
+
