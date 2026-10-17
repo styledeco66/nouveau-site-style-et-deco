@@ -5,7 +5,6 @@
 // Contraintes e-mail respectées : mise en page en tableaux, styles en ligne, largeur fluide ≤ 600 px (lisible sur smartphone),
 // polices système, fond clair, aucune image CSS, aucun script. Toute donnée saisie par le visiteur est échappée (escapeHtml).
 
-import { LOGO_PNG_BASE64 } from "./email-logo.mjs";
 
 // Coordonnées professionnelles OFFICIELLES : source unique pour tous les e-mails (signature, pied, texte brut).
 export const BRAND = {
@@ -42,21 +41,13 @@ const COLORS = {
 // Polices système uniquement (aucune police externe) : fiables dans toutes les messageries.
 const FONT = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,'Segoe UI',Roboto,Arial,sans-serif";
 
-export const LOGO_CID = "logo-style-deco";
-export const LOGO_FILENAME = "logo-style-deco.png";
+// Logo officiel : image PNG hébergée en HTTPS sur notre domaine, chargée directement par le HTML. Aucune pièce jointe, aucun CID,
+// aucun base64 ni data URI : une image jointe peut apparaître comme pièce jointe « noname » dans certaines messageries.
 export const LOGO_HTTPS_URL = `${BRAND.site}/assets/images/email/logo-style-deco-email.png`;
 export const LOGO_ALT = "Style & Déco — Le Reflet de vos Envies";
 
 export const escapeHtml = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-
-// Pièce jointe Resend pour le logo intégré (CID). Nommée explicitement : jamais « noname ».
-export const logoAttachment = () => ({
-  filename: LOGO_FILENAME,
-  content: LOGO_PNG_BASE64,
-  content_type: "image/png",
-  content_id: LOGO_CID,
-});
 
 export const parisDateTime = (instant) => {
   const parts = Object.fromEntries(
@@ -151,17 +142,12 @@ ${leadHtml}${phoneHtml}${buttonHtml}${callout}${factsHtml}
  * @param {[string,string,string?,boolean?,boolean?][]} [o.facts]  « libellé / valeur / lien / doré / masqué dans le HTML ».
  * @param {{label:string,href:string}} [o.button]   Bouton doré (ex. appeler).
  * @param {string[]} [o.closing]      Lignes avant la signature.
- * @param {"cid"|"https"|"none"} [o.logo]  « none » : signature typographique Style & Déco (aucune image).
  * @param {boolean} [o.signature]     Signature + coordonnées complètes (confirmations clients).
  */
 export const renderEmail = (o) => {
   if (o.design === "B") return renderB(o);
-  const logoMode = o.logo || "none";
-  const logoSrc = logoMode === "cid" ? `cid:${LOGO_CID}` : LOGO_HTTPS_URL;
-  const logoHtml =
-    logoMode === "none"
-      ? `<div style="${t(22, 600, COLORS.white, "line-height:1.2;text-align:center")}">${escapeHtml(BRAND.name)}</div><div style="${t(14, 400, COLORS.muted, "line-height:1.6;text-align:center;padding-top:4px")}">${escapeHtml(BRAND.tagline)}</div>`
-      : `<div style="text-align:center"><img src="${logoSrc}" width="240" alt="${escapeHtml(LOGO_ALT)}" style="display:inline-block;border:0;outline:none;text-decoration:none;color:#f5f5f4;font-family:${FONT};font-size:15px;line-height:1.5;width:240px;max-width:100%;height:auto"></div>`;
+  // Texte alternatif lisible (clair sur fond noir) : le nom « Style & Déco » reste visible si les images sont désactivées.
+  const logoHtml = `<div style="text-align:center"><img src="${LOGO_HTTPS_URL}" width="240" alt="${escapeHtml(LOGO_ALT)}" style="display:inline-block;border:0;outline:none;text-decoration:none;color:#f5f5f4;font-family:${FONT};font-size:15px;line-height:1.5;width:240px;max-width:100%;height:auto"></div>`;
 
   const para = (p, color = COLORS.text) => `<p style="margin:0 0 18px;${t(16, 400, color, "line-height:1.75")}">${nb(p)}</p>`;
   const paragraphs = (o.paragraphs || []).map((p, k) => para(p, k === 0 ? COLORS.white : COLORS.text)).join("");
@@ -242,9 +228,8 @@ export const SUBJECT_CONFIRM_DEVIS = "Votre demande de devis a bien été reçue
 export const SUBJECT_CONFIRM_CALLBACK = "Votre demande de rappel — Style & Déco";
 
 // Confirmation envoyée au client pour une demande de devis. Pas de promesse de devis établi ni de date de chantier.
-export const devisConfirmation = ({ receivedAt, reference, logo }) =>
+export const devisConfirmation = ({ receivedAt, reference }) =>
   renderEmail({
-    logo,
     meta: { date: parisDay(receivedAt), ref: reference },
     signature: true,
     title: "Votre demande de devis a bien été reçue",
@@ -265,9 +250,8 @@ export const devisConfirmation = ({ receivedAt, reference, logo }) =>
   });
 
 // Confirmation envoyée au client pour une demande de rappel : `describe` = business-hours.describe(slot).
-export const callbackConfirmation = ({ receivedAt, reference, sentence, logo }) =>
+export const callbackConfirmation = ({ receivedAt, reference, sentence }) =>
   renderEmail({
-    logo,
     meta: { date: parisDay(receivedAt), ref: reference },
     signature: true,
     title: "Votre demande de rappel a bien été reçue",

@@ -262,17 +262,17 @@ test("18. deux demandes légitimes distinctes le même jour avec la même adress
   assert.equal(new Set(byKind(fetchImpl, "confirm").map((m) => m.key)).size, 3, "clé = identifiant stable de la demande");
 });
 
-test("19. logo : image intégrée (CID) nommée, ou repli HTTPS sur notre domaine (LEAD_EMAIL_LOGO_MODE=https)", async () => {
-  const cid = byKind((await run(devis())).fetchImpl, "confirm")[0].body;
-  assert.equal(cid.attachments.length, 1);
-  assert.equal(cid.attachments[0].filename, "logo-style-deco.png");
-  assert.equal(cid.attachments[0].content_id, "logo-style-deco");
-  assert.equal(cid.attachments[0].content_type, "image/png");
-  assert.ok(cid.html.includes('src="cid:logo-style-deco"'));
-  assert.ok(!/noname/i.test(JSON.stringify(cid.attachments[0])));
-  const https = byKind((await run(devis(), { env: { ...ENV_ON, LEAD_EMAIL_LOGO_MODE: "https" } })).fetchImpl, "confirm")[0].body;
-  assert.equal(https.attachments, undefined);
-  assert.ok(https.html.includes('src="https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png"'));
+test("19. logo : image PNG hébergée en HTTPS dans le HTML, aucune pièce jointe, aucun CID — même si l'ancienne variable LEAD_EMAIL_LOGO_MODE est définie", async () => {
+  for (const env of [ENV_ON, { ...ENV_ON, LEAD_EMAIL_LOGO_MODE: "cid" }, { ...ENV_ON, LEAD_EMAIL_LOGO_MODE: "https" }]) {
+    const { fetchImpl } = await run(devis(), { env });
+    for (const m of fetchImpl.sent) {
+      assert.equal(m.body.attachments, undefined, `${m.kind} : aucune pièce jointe`);
+      assert.ok(!JSON.stringify(m.body).includes("cid:") && !/noname/i.test(JSON.stringify(m.body)));
+    }
+    const confirm = byKind(fetchImpl, "confirm")[0].body;
+    assert.ok(confirm.html.includes('src="https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png"'));
+    assert.ok(confirm.html.includes('alt="Style &amp; Déco — Le Reflet de vos Envies"'));
+  }
 });
 
 test("20. contenu saisi échappé dans les e-mails HTML ; journaux sans donnée personnelle", async () => {

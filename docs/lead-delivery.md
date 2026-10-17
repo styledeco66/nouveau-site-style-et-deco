@@ -18,7 +18,6 @@ commitée** ; les fichiers `.env` / `.env.*` sont ignorés par git.
 | `LEAD_QUARANTINE_EMAIL` | non | Destinataire des demandes marquées « à vérifier » (voir *Protection antispam*). Défaut : `LEAD_TO_EMAIL`. |
 | `LEAD_CLIENT_CONFIRMATIONS` | non | `on` pour activer l'e-mail de confirmation envoyé au client (devis, et rappel si une adresse est renseignée). **Absente = désactivé.** Voir *Activation progressive*. |
 | `LEAD_SCHEDULED_REMINDERS` | non | `on` pour activer le rappel interne programmé avant l'ouverture. **Absente = désactivé.** |
-| `LEAD_EMAIL_LOGO_MODE` | non | `cid` (défaut : logo intégré à l'e-mail) ou `https` (repli : logo hébergé sur `styleetdeco.fr`). |
 | `LEAD_ALLOWED_ORIGINS` | non | Liste explicite et stricte des origines autorisées **en production et en branch deploy**, séparées par des virgules. Défaut : `https://styleetdeco.fr`. Ne jamais y ajouter une URL de preview : voir ci-dessous. |
 
 Si une variable obligatoire manque, la function répond 500 et le visiteur voit le message d'erreur : jamais de faux succès.
@@ -159,10 +158,10 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé. L'enga
 
 - **Design « Black Luxury », direction A « Luxe éditorial »** : page entièrement noire `#0b0d10` (aucune carte, aucun encadré), colonne de 600 px, logo centré, filets fins (`#2a2f37`, doré discret `#8a7447`), doré `#d7b56d` pour les liens et la promesse, titres blancs, texte blanc doux `#f5f5f4`, libellés gris clair `#bfc3ca`. Une seule famille sans empattement (pile du site : police système, Helvetica Neue, Segoe UI, Roboto, Arial ; aucun téléchargement), graisses 400 et 600, titre 25 px (23 px sur petit écran), texte 16 px, suivi 14–15 px, sans capitales ni espacement artificiel. Tableaux de présentation, styles en ligne, contrastes ≥ 4,5:1 (testés), aucun JavaScript, flexbox ou grille. `color-scheme: dark light` : un e-mail déjà sombre n'est pas inversé ; la lisibilité prime sur la fidélité exacte des couleurs.
 - **Coordonnées** : source unique `BRAND` dans `netlify/lib/emails.mjs` (nom, activité, « Adresse administrative » 18 rue Madame de la Fayette 66750 Saint-Cyprien France — formulation qui ne laisse pas entendre un établissement ouvert au public —, téléphone `tel:+33650756242`, e-mail `mailto:style.deco66@gmail.com`, site `https://styleetdeco.fr`). Signature des confirmations clients : nom, activité, téléphone, e-mail, site ; pied de tous les e-mails : activité, adresse administrative, téléphone, e-mail, site. Toutes les coordonnées sont cliquables et reprises dans la version texte brut.
-- **Logo** : le PNG officiel (`sitesite-template/assets/images/email/logo-style-deco-email.png`, dérivé de `logo-fin-640.webp`) est **recadré sur les marges transparentes inutiles** (512 × 312 px, affiché à 260 px : net sur Retina), transparence conservée, sans métadonnées, palette indexée de 256 couleurs (44 Ko, rendu visuellement identique). Il est intégré en image CID
-  nommée `logo-style-deco.png` (jamais « noname ") aux **confirmations clients** ; les e-mails internes et le rappel programmé n'ont **pas** de pièce jointe ni d'image (signature typographique « STYLE & DÉCO »). Le module généré `netlify/lib/email-logo.mjs`
-  (base64) se régénère avec `node scripts/build-email-logo.mjs` (vérifié par `--check`). **Un test réel dans Gmail et Apple Mail est nécessaire avant activation** : si le logo
-  apparaît comme pièce jointe visible, passer `LEAD_EMAIL_LOGO_MODE=https` (image sur `https://styleetdeco.fr/assets/images/email/…`).
+- **Logo** : le PNG officiel `sitesite-template/assets/images/email/logo-style-deco-email.png` (dérivé de `logo-fin-640.webp`, recadré sur ses marges transparentes : 512 × 312 px, transparence conservée, sans métadonnées, palette indexée de 256 couleurs, 44 Ko) est **hébergé sur notre domaine** et chargé directement par le HTML des quatre e-mails :
+  `https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png` (240 px dans les confirmations clients, 150 px dans les notifications internes ; texte alternatif « Style & Déco — Le Reflet de vos Envies », lisible sur fond noir si les images sont désactivées).
+  **Aucune pièce jointe, aucun CID, aucun base64, aucune data URI, aucun SVG** : une image jointe peut apparaître comme pièce jointe « noname ». Plus aucune variable ne permet de réactiver l'ancienne méthode (un test vérifie que ni `attachments`, ni `cid:`, ni `base64` n'existent dans le code d'envoi).
+  Le logo n'est disponible en production qu'**après la publication** de la PR (le fichier est livré avec elle) : ne pas activer les confirmations avant. Le fichier est servi avec un cache d'un an (`/assets/*`, `immutable`) : si le logo change un jour, utiliser un nouveau nom de fichier.
 - **Contenu transactionnel** : aucune publicité, aucun suivi, aucune inscription à une liste. La confirmation ne recopie aucune donnée saisie (pas de nom ni de texte du visiteur) et ne
   promet ni devis établi, ni date de chantier. Tout contenu saisi est échappé dans les e-mails HTML internes.
 - **Gmail sur téléphone** : l'e-mail d'alerte contient un bouton et un numéro cliquables (`tel:`). Une notification push dépend des réglages de l'application Gmail (notifications activées,
@@ -201,7 +200,7 @@ donc pas provoquer un faux échec ni dépasser les 15 s du navigateur ; leurs er
 ## Activation progressive
 
 1. Fusionner : aucun changement visible côté e-mails client tant que les variables ne sont pas définies. Les **textes de rappel dynamiques** et le **champ e-mail facultatif** sont actifs dès la publication.
-2. Netlify (projet `iridescent-twilight-cce7df`, portée Functions, contexte **Production uniquement**) : `LEAD_CLIENT_CONFIRMATIONS=on`, `LEAD_SCHEDULED_REMINDERS=on`, éventuellement `LEAD_EMAIL_LOGO_MODE=https`. Relancer un déploiement.
+2. Vérifier que le logo répond (HTTP 200, `image/png`) sur l'URL de production ci-dessus. Puis, dans Netlify (projet `iridescent-twilight-cce7df`, portée Functions, contexte **Production uniquement**) : `LEAD_CLIENT_CONFIRMATIONS=on`, `LEAD_SCHEDULED_REMINDERS=on`. Relancer un déploiement.
 3. Tests réels (à demander séparément, un par un, avec une adresse du dirigeant) : un devis, un rappel en journée avec e-mail, un rappel hors horaires (vérifier le rappel programmé dans Resend → Emails → *Scheduled*), contrôle du rendu et du logo dans Gmail et Apple Mail.
 4. **Production explicite uniquement** : les confirmations et rappels programmés ne partent que si le contexte vaut exactement `production` (`context.deploy.context`, ou variable `CONTEXT`).
    Contexte absent, vide, inconnu, ambigu (les deux sources en désaccord), `deploy-preview` ou `branch-deploy` → désactivés, même si les variables sont définies globalement.
@@ -211,7 +210,6 @@ donc pas provoquer un faux échec ni dépasser les 15 s du navigateur ; leurs er
 ```sh
 node --test tests/*.test.mjs        # horaires, function (faux Resend), e-mails, formulaires
 python3 -m unittest discover -s tests
-node scripts/build-email-logo.mjs --check
 ```
 
 Aucun test n'envoie d'e-mail : Resend est simulé (y compris l'idempotence et les pannes).

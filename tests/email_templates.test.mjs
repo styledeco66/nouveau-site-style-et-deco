@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import { handleLead } from "../netlify/functions/lead.mjs";
 import hours from "../sitesite-template/assets/js/business-hours.js";
-import { LOGO_PNG_BASE64 } from "../netlify/lib/email-logo.mjs";
 import { callbackAlert, callbackConfirmation, devisConfirmation, reminderEmail, renderEmail } from "../netlify/lib/emails.mjs";
 
 // Refonte « Black Luxury » des 4 modèles : palette, structure compatible messageries, accessibilité, logo, génération depuis le code réel.
@@ -13,8 +12,8 @@ const fri = hours.parisInstant("2026-10-23", 19 * 60 + 5);
 const sentence = hours.describe(hours.callbackSlot(fri)).sentence;
 const lead = { name: "Marie Exemple", phone: "06 12 34 56 78", email: "marie@exemple.fr", city: "Perpignan" };
 const TEMPLATES = {
-  devis: () => devisConfirmation({ receivedAt: fri, reference: "A1B2C3D4", logo: "cid" }),
-  rappel: () => callbackConfirmation({ receivedAt: fri, reference: "A1B2C3D4", sentence, logo: "cid" }),
+  devis: () => devisConfirmation({ receivedAt: fri, reference: "A1B2C3D4" }),
+  rappel: () => callbackConfirmation({ receivedAt: fri, reference: "A1B2C3D4", sentence }),
   alerte: () => callbackAlert({ lead, receivedAt: fri, reference: "A1B2C3D4", action: "Rappeler ce client lundi dès 8 h.", origin: "Page Perpignan" }),
   programme: () => reminderEmail({ lead, receivedAt: fri, reference: "A1B2C3D4", origin: "Page Perpignan", when: "lundi dès 8 h" }),
 };
@@ -76,25 +75,35 @@ test("tailles de texte lisibles sur téléphone : corps 16 px, titre 28 px (25 p
   }
 });
 
-test("logo officiel sur les quatre e-mails : CID nommé (clients), repli HTTPS, HTTPS compact sans pièce jointe (internes), texte alternatif", () => {
+test("logo officiel PNG en HTTPS dans les quatre HTML : 240 px (design A), 150 px (design B), aucun CID, aucun base64, aucune pièce jointe", () => {
+  const URL = "https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png";
   const ALT = 'alt="Style &amp; Déco — Le Reflet de vos Envies"';
-  for (const name of ["devis", "rappel"]) {
-    const { html } = TEMPLATES[name]();
-    assert.ok(html.includes(`<img src="cid:logo-style-deco" width="240" ${ALT}`), `${name} : logo CID centré à 240 px`);
-    assert.match(html, /text-align:center"><img/, `${name} : logo centré`);
-  }
-  assert.match(devisConfirmation({ receivedAt: fri, reference: "X", logo: "https" }).html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="240"/);
-  for (const name of ["alerte", "programme"]) {
-    const { html } = TEMPLATES[name]();
-    assert.ok(html.includes(`<img src="https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png" width="150" ${ALT}`), `${name} : logo officiel HTTPS compact (150 px)`);
-    assert.ok(!html.includes("cid:"), `${name} : aucun CID, aucune pièce jointe`);
+  const expected = { devis: 240, rappel: 240, alerte: 150, programme: 150 };
+  for (const [name, width] of Object.entries(expected)) {
+    const { html, text } = TEMPLATES[name]();
+    assert.ok(html.includes(`<img src="${URL}" width="${width}" ${ALT}`), `${name} : logo HTTPS à ${width} px`);
     assert.equal((html.match(/<img\b/g) || []).length, 1, name);
+    assert.doesNotMatch(html + text, /cid:|data:image|base64|\.svg|noname/i, name);
+    assert.match(html, /<img[^>]*color:#f5f5f4/, `${name} : texte alternatif lisible sur fond noir`);
   }
-  const png = Buffer.from(LOGO_PNG_BASE64, "base64");
+  assert.match(TEMPLATES.devis().html, /text-align:center"><img/, "design A : logo centré");
+});
+
+test("le code d'envoi ne contient plus aucun mécanisme de pièce jointe ni de logo intégré (CID, base64, data URI)", () => {
+  for (const file of ["../netlify/lib/emails.mjs", "../netlify/functions/lead.mjs"]) {
+    const source = readFileSync(new URL(file, import.meta.url), "utf8").replace(/\/\/[^\n]*/g, "");
+    assert.doesNotMatch(source, /attachments|content_id|contentId|cid:|data:image|base64|logoAttachment|LEAD_EMAIL_LOGO_MODE/, file);
+  }
+  assert.ok(!existsSync(new URL("../netlify/lib/email-logo.mjs", import.meta.url)), "module base64 supprimé");
+  assert.ok(!existsSync(new URL("../scripts/build-email-logo.mjs", import.meta.url)), "script de génération supprimé");
+});
+
+test("fichier PNG officiel : 512 × 312 px, léger, sans métadonnées, publié sous assets/images/email/", () => {
+  const png = readFileSync(new URL("../sitesite-template/assets/images/email/logo-style-deco-email.png", import.meta.url));
   assert.equal(png.readUInt32BE(16), 512);
   assert.equal(png.readUInt32BE(20), 312);
   assert.ok(png.length < 60000, `PNG léger (${png.length} octets)`);
-  assert.equal(statSync(new URL("../sitesite-template/assets/images/email/logo-style-deco-email.png", import.meta.url)).size, png.length);
+  assert.doesNotMatch(png.toString("latin1"), /eXIf|tEXt|iTXt|zTXt/);
 });
 
 test("contenu : téléphone cliquable, créneau, référence, version texte brut complète", () => {
@@ -136,7 +145,7 @@ test("identité commune aux quatre modèles (palette, famille de police, logo of
 });
 
 // L'aperçu, le modèle source et le HTML transmis à Resend sont les mêmes : on compare avec ce que la fonction envoie réellement.
-test("le HTML transmis à Resend est exactement celui du modèle (confirmations, alerte, rappel programmé) ; logo CID joint seulement aux confirmations", async () => {
+test("le HTML transmis à Resend est exactement celui du modèle (confirmations, alerte, rappel programmé) ; aucune pièce jointe, logo en HTTPS", async () => {
   const sent = [];
   const fetchImpl = async (url, init) => { const body = JSON.parse(init.body); sent.push({ key: init.headers["Idempotency-Key"], body }); return new Response(JSON.stringify({ id: `e${sent.length}` }), { status: 200 }); };
   const env = { RESEND_API_KEY: "re_test_fake_key", LEAD_TO_EMAIL: "dirigeant@example.test", LEAD_FROM_EMAIL: "S <n@example.test>", LEAD_ALLOWED_ORIGINS: "https://styleetdeco.fr", LEAD_CLIENT_CONFIRMATIONS: "on", LEAD_SCHEDULED_REMINDERS: "on" };
@@ -149,9 +158,9 @@ test("le HTML transmis à Resend est exactement celui du modèle (confirmations,
   const reference = createHash("sha256").update("tpl-0001-aaaa-bbbb").digest("hex").slice(0, 8).toUpperCase();
   const by = (prefix) => sent.find((m) => m.key.startsWith(prefix)).body;
   const slot = hours.callbackSlot(fri);
-  assert.equal(by("confirm-").html, callbackConfirmation({ receivedAt: fri, reference, sentence: hours.describe(slot).sentence, logo: "cid" }).html);
-  assert.equal(by("confirm-").text, callbackConfirmation({ receivedAt: fri, reference, sentence: hours.describe(slot).sentence, logo: "cid" }).text);
-  assert.equal(by("confirm-").attachments.length, 1);
+  assert.equal(by("confirm-").html, callbackConfirmation({ receivedAt: fri, reference, sentence: hours.describe(slot).sentence }).html);
+  assert.equal(by("confirm-").text, callbackConfirmation({ receivedAt: fri, reference, sentence: hours.describe(slot).sentence }).text);
+  assert.equal(by("confirm-").attachments, undefined, "aucune pièce jointe pour le logo");
   assert.equal(by("lead-").html, callbackAlert({ lead: { name: "Marie Exemple", phone: "06 12 34 56 78", email: "marie@exemple.fr", city: "Perpignan" }, receivedAt: fri, reference, action: hours.describe(slot).action, origin: "Page Perpignan", reviewNote: "" }).html);
   assert.equal(by("lead-").attachments, undefined);
   const reminder = by("remind-");
@@ -184,3 +193,35 @@ test("coordonnées : clients = signature (nom, activité, téléphone, e-mail) +
   }
 });
 
+
+test("compatibilité Gmail, Apple Mail, Outlook : CSS prudent, attributs de secours, poids sous le seuil d'écrêtage de Gmail", () => {
+  for (const [name, make] of Object.entries(TEMPLATES)) {
+    const { html } = make();
+    assert.doesNotMatch(html, /position:|float:|background-image|calc\(|var\(|rgba?\(|hsl|clamp\(|@supports|grid|flex|<svg|<video|<form|<iframe|<object/i, `${name} : CSS ou balise fragile`);
+    assert.ok(Buffer.byteLength(html) < 100 * 1024, `${name} : ${Buffer.byteLength(html)} octets (Gmail écrête au-delà de 102 Ko)`);
+    assert.match(html, /<meta http-equiv="X-UA-Compatible"/, name);
+    // chaque cellule qui porte un fond a aussi l'attribut bgcolor (Outlook de bureau ignore parfois `background`)
+    for (const cell of html.match(/<t[dr][^>]*style="[^"]*background:#[0-9a-f]{6}[^"]*"[^>]*>/gi) || []) assert.match(cell, /bgcolor="#[0-9a-f]{6}"/i, `${name} : ${cell.slice(0, 80)}`);
+    for (const img of html.match(/<img\b[^>]*>/g) || []) assert.match(img, /width="\d+"/, `${name} : largeur déclarée`);
+    for (const link of html.match(/<a\b[^>]*>/g) || []) assert.match(link, /href="(tel:|mailto:|https:\/\/)[^"]+"/, `${name} : lien absolu`);
+  }
+});
+
+test("version texte brut cohérente avec le HTML : titre, paragraphes, liens et informations visibles se retrouvent dans le texte", () => {
+  const plain = (fragment) => fragment.replace(/<[^>]+>/g, " ").replace(/&nbsp;| /g, " ").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
+  for (const [name, make] of Object.entries(TEMPLATES)) {
+    const { html, text } = make();
+    const flat = text.replace(/ /g, " ").replace(/\s+/g, " ");
+    const title = plain(html.match(/<h1[\s\S]*?<\/h1>/)[0]);
+    assert.ok(flat.includes(title), `${name} : titre`);
+    for (const p of html.match(/<p style="margin:0 0 18px[\s\S]*?<\/p>/g) || []) {
+      const sentence = plain(p);
+      assert.ok(flat.includes(sentence), `${name} : paragraphe « ${sentence.slice(0, 40)} »`);
+    }
+    for (const href of html.match(/href="(?:tel|mailto):[^"]+"/g) || []) {
+      const value = href.slice(6, -1).replace(/^(tel:|mailto:)/, "");
+      assert.ok(flat.replace(/\s/g, "").includes(value.replace(/^\+33/, "0").replace(/^0(\d)/, "0$1")) || flat.includes(value) || flat.replace(/\s/g, "").includes(value.replace(/^\+33/, "0")), `${name} : ${value}`);
+    }
+    assert.ok(!/<[a-z][^>]*>/i.test(text), `${name} : aucun HTML dans le texte brut`);
+  }
+});

@@ -8,7 +8,6 @@ import {
   callbackAlert,
   callbackConfirmation,
   devisConfirmation,
-  logoAttachment,
   reminderEmail,
 } from "../lib/emails.mjs";
 
@@ -16,8 +15,8 @@ import {
 // Variables d'environnement : RESEND_API_KEY, LEAD_TO_EMAIL, LEAD_FROM_EMAIL, LEAD_ALLOWED_ORIGINS (optionnelle),
 // LEAD_QUARANTINE_EMAIL (optionnelle : destinataire de la quarantaine, ex. adresse+verif@gmail.com ; à défaut LEAD_TO_EMAIL).
 // Activation explicite (absentes = désactivé) : LEAD_CLIENT_CONFIRMATIONS=on (e-mail de confirmation au client),
-// LEAD_SCHEDULED_REMINDERS=on (rappel interne programmé avant l'ouverture) ; LEAD_EMAIL_LOGO_MODE=cid (défaut) | https.
-// Ces envois secondaires sont toujours désactivés sur les Deploy Previews et branch deploys.
+// LEAD_SCHEDULED_REMINDERS=on (rappel interne programmé avant l'ouverture).
+// Ces envois secondaires ne sont actifs que si le contexte est explicitement « production ». Aucune pièce jointe n'est jamais envoyée.
 // Voir docs/lead-delivery.md.
 
 const RESEND_URL = "https://api.resend.com/emails";
@@ -332,10 +331,9 @@ const secondaryFeatures = (env, deploy) => {
 // ne produit jamais deux confirmations ; deux demandes distinctes, même le même jour avec la même adresse, ont chacune la leur.
 const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }) => {
   const callback = lead.priority === PRIORITY_CALLBACK;
-  const logo = String(env.LEAD_EMAIL_LOGO_MODE || "cid").trim() === "https" ? "https" : "cid";
   const content = callback
-    ? callbackConfirmation({ receivedAt, reference, sentence: hours.describe(slot).sentence, logo })
-    : devisConfirmation({ receivedAt, reference, logo });
+    ? callbackConfirmation({ receivedAt, reference, sentence: hours.describe(slot).sentence })
+    : devisConfirmation({ receivedAt, reference });
   const email = {
     from: env.LEAD_FROM_EMAIL,
     to: [lead.email],
@@ -344,7 +342,6 @@ const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, key, 
     text: content.text,
     html: content.html,
   };
-  if (logo === "cid") email.attachments = [logoAttachment()];
   const result = await resendWithRetry(email, `confirm-${callback ? "rappel" : "devis"}-${key}`, env, fetchImpl, "confirmation client", timing);
   if (result.ok) return { sent: true };
   if (result.conflict === "processed") {
