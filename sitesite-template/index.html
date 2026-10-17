@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Peintre Saint-Cyprien & Perpignan (66) | Style &amp; Déco</title>
   <meta name="description"
-    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit sous 24 h." />
+    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit, réponse sous 24 h." />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity -->
   <link rel="canonical" href="https://styleetdeco.fr/" />
@@ -15,13 +15,13 @@
   <meta property="og:site_name" content="Style &amp; Déco" />
   <meta property="og:title" content="Peintre Saint-Cyprien & Perpignan (66) | Style &amp; Déco" />
   <meta property="og:description"
-    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit sous 24 h." />
+    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit, réponse sous 24 h." />
   <meta property="og:url" content="https://styleetdeco.fr/" />
   <meta property="og:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Peintre Saint-Cyprien & Perpignan (66) | Style &amp; Déco" />
   <meta name="twitter:description"
-    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit sous 24 h." />
+    content="Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit, réponse sous 24 h." />
   <meta name="twitter:image" content="https://styleetdeco.fr/assets/images/social-preview.jpg" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
@@ -176,7 +176,7 @@
         "@id": "https://styleetdeco.fr/#webpage",
         "url": "https://styleetdeco.fr/",
         "name": "Peintre Saint-Cyprien & Perpignan (66) | Style & Déco",
-        "description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit sous 24 h.",
+        "description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit, réponse sous 24 h.",
         "inLanguage": "fr-FR",
         "isPartOf": {
           "@id": "https://styleetdeco.fr/#website"
@@ -321,7 +321,7 @@
         "name": "Quel est le délai pour démarrer le chantier à Perpignan / Saint-Cyprien ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Le démarrage des travaux intervient sous 1 à 3 semaines après validation du devis. Le délai est confirmé clairement dès le premier échange."
+          "text": "Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning. Nous le précisons dès le premier échange."
         }
       },
       {
@@ -417,7 +417,7 @@
 
           <div class="hero__cta">
             <a class="btn btn--primary btn--lg" href="#rappel30" data-rappel-intent="true"
-              data-form-mode-intent="callback">On vous rappelle en moins de 30 min</a>
+              data-form-mode-intent="callback" data-callback-text="button">Demander un rappel</a>
             <a class="btn btn--ghost btn--lg" href="#contact" data-form-mode-intent="devis">Recevoir un devis</a>
             <a class="hero__subLink" href="#realisations">Voir des réalisations</a>
           </div>
@@ -425,7 +425,7 @@
           <div class="hero__meta" aria-label="Informations de disponibilité">
             <span>Lun - Ven 8h - 18h</span>
             <span>Interlocuteur unique</span>
-            <span>Rappel &lt; 30 min</span>
+            <span data-callback-text="pill">Demande de rappel</span>
           </div>
 
           <div class="trust">
@@ -457,12 +457,12 @@
             <p class="hp-field" aria-hidden="true">
               <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
             </p>
-            <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
+            <p class="form__modeBadge js-callback-badge is-hidden" data-callback-text="pill">Demande de rappel</p>
             <h2 class="form__title js-form-title" data-title-devis="Demander un devis en 1 minute"
-              data-title-callback="Demande de rappel en moins de 30 min">Demander un devis en 1 minute</h2>
+              data-title-callback="Demande de rappel">Demander un devis en 1 minute</h2>
             <p class="form__hint form__hint--top js-form-intro"
               data-intro-devis="Réponse sous 24 h. Sans engagement."
-              data-intro-callback="Laissez votre nom et numéro, on vous rappelle rapidement pendant nos horaires d'ouverture.">
+              data-intro-callback="Laissez votre nom et votre numéro : nous vous rappelons pendant nos horaires d'ouverture.">
               Réponse sous 24 h. Sans engagement.</p>
 
             <div class="form__grid">
@@ -478,12 +478,12 @@
 
               <input type="hidden" name="lead_priority" value="STANDARD">
 
-              <label class="field field--full js-devis-only">
-                <span>E-mail</span>
+              <label class="field field--full js-email-field">
+                <span class="js-email-label" data-label-devis="E-mail" data-label-callback="E-mail (facultatif)">E-mail</span>
                 <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
               </label>
 
-              <label class="field field--full js-devis-only">
+              <label class="field field--full js-devis-required">
                 <span>Ville / Zone</span>
                 <input type="text" name="city" placeholder="Ex : Perpignan, Saint-Cyprien…"
                   autocomplete="address-level2" required />
@@ -608,16 +608,16 @@
       </div>
     </section>
 
-    <section class="callback30" id="rappel30" aria-label="Rappel sous 30 minutes">
+    <section class="callback30" id="rappel30" aria-label="Demande de rappel">
       <div class="container callback30__inner">
         <div class="callback30__content">
           <p class="callback30__kicker">Priorité contact</p>
-          <h2>On vous rappelle en moins de 30 minutes</h2>
-          <p>Laissez vos coordonnées via le formulaire et on vous recontacte rapidement pendant nos horaires d'ouverture.</p>
+          <h2 data-callback-text="heading">Demandez à être rappelé</h2>
+          <p>Laissez votre nom et votre numéro via le formulaire : nous vous recontactons pendant nos horaires d'ouverture, du lundi au vendredi de 8 h à 18 h.</p>
         </div>
         <div class="callback30__actions">
           <a class="btn btn--primary btn--lg" href="#contact" data-rappel-intent="true"
-            data-form-mode-intent="callback">On vous rappelle en moins de 30 min</a>
+            data-form-mode-intent="callback" data-callback-text="button">Demander un rappel</a>
         </div>
       </div>
     </section>
@@ -626,8 +626,8 @@
       <div class="container">
         <div class="section__head">
           <h2>Peinture intérieure & extérieure à Saint-Cyprien — un artisan local à votre service</h2>
-          <p>En tant qu'artisan peintre en bâtiment à Saint-Cyprien, je vous propose une offre simple, lisible et orientée résultat. Chaque solution est adaptée à votre support pour une tenue durable.</p>
-          <p>Je réalise aussi les enduits de préparation et de finition (dont les enduits projetés mécaniquement), les bandes et joints de plaques de plâtre, la rénovation de façades, la rénovation après dégât des eaux ainsi que la pose de sols souples et de revêtements LVT. Pour en savoir plus : <a href="./peintre-saint-cyprien/">peintre à Saint-Cyprien</a>, <a href="./perpignan.html">peintre à Perpignan</a> et <a href="./facade-saint-cyprien/">ravalement de façade à Saint-Cyprien</a>.</p>
+          <p>En tant qu'artisan peintre en bâtiment à Saint-Cyprien, nous vous proposons une offre simple, lisible et orientée résultat. Chaque solution est adaptée à votre support pour une tenue durable.</p>
+          <p>Nous réalisons aussi les enduits de préparation et de finition (dont les enduits projetés mécaniquement), les bandes et joints de plaques de plâtre, la rénovation de façades, la rénovation après dégât des eaux ainsi que la pose de sols souples et de revêtements LVT. Pour en savoir plus : <a href="./peintre-saint-cyprien/">peintre à Saint-Cyprien</a>, <a href="./perpignan.html">peintre à Perpignan</a> et <a href="./facade-saint-cyprien/">ravalement de façade à Saint-Cyprien</a>.</p>
         </div>
 
         <div class="cards">
@@ -768,8 +768,8 @@
           <article class="step">
             <div class="step__num">02</div>
             <h3>Vous recevez un devis clair</h3>
-            <p>Nous envoyons un devis détaillé avec délais annoncés, sans mauvaise surprise.</p>
-            <span class="step__time">Sous 24 h</span>
+            <p>Nous vous répondons, puis nous établissons un devis détaillé avec délais annoncés, sans mauvaise surprise.</p>
+            <span class="step__time">Réponse sous 24 h</span>
           </article>
           <article class="step">
             <div class="step__num">03</div>
@@ -821,8 +821,8 @@
           </details>
           <details class="faq__item">
             <summary>Quel est le délai pour démarrer le chantier à Perpignan / Saint-Cyprien ?</summary>
-            <p>Le démarrage des travaux intervient sous 1 à 3 semaines après validation du devis. Le délai est confirmé
-              clairement dès le premier échange.</p>
+            <p>Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning. Nous le précisons
+              dès le premier échange.</p>
           </details>
           <details class="faq__item">
             <summary>Comment est calculé le prix de la prestation (surface, préparation, finition) ?</summary>
@@ -848,8 +848,8 @@
         <div class="contact__left">
           <h2>Demander un devis</h2>
           <p class="lead">
-            Dis-moi où se trouve le chantier, la surface approximative, et le rendu souhaité.
-            Je te réponds rapidement avec une estimation et les prochaines étapes.
+            Indiquez-nous où se trouve le chantier, la surface approximative et le rendu souhaité.
+            Nous vous répondons sous 24 h avec les prochaines étapes.
           </p>
 
           <div class="contact__quick">
@@ -860,7 +860,7 @@
 
           <div class="contact__proof">
             <div class="proof">
-              <div class="proof__title">Ce que tu obtiens</div>
+              <div class="proof__title">Ce que vous obtenez</div>
               <ul class="list">
                 <li>Un devis clair (pas de surprise)</li>
                 <li>Un planning annoncé</li>
@@ -877,10 +877,10 @@
           <p class="hp-field" aria-hidden="true">
             <label>Ne pas remplir: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
           </p>
-          <p class="form__modeBadge js-callback-badge is-hidden">Priorité rappel 30 min</p>
+          <p class="form__modeBadge js-callback-badge is-hidden" data-callback-text="pill">Demande de rappel</p>
           <p class="form__hint form__hint--top js-form-intro"
             data-intro-devis="Réponse sous 24 h. Sans engagement."
-            data-intro-callback="Laissez votre nom et numéro, on vous rappelle rapidement pendant nos horaires d'ouverture.">
+            data-intro-callback="Laissez votre nom et votre numéro : nous vous rappelons pendant nos horaires d'ouverture.">
             Réponse sous 24 h. Sans engagement.</p>
           <div class="form__grid">
             <label class="field">
@@ -892,11 +892,11 @@
               <input type="tel" name="phone" placeholder="06…" autocomplete="tel" required />
             </label>
             <input type="hidden" name="lead_priority" value="STANDARD">
-            <label class="field field--full js-devis-only">
-              <span>E-mail</span>
+            <label class="field field--full js-email-field">
+              <span class="js-email-label" data-label-devis="E-mail" data-label-callback="E-mail (facultatif)">E-mail</span>
               <input type="email" name="email" placeholder="vous@exemple.fr" autocomplete="email" required />
             </label>
-            <label class="field field--full js-devis-only">
+            <label class="field field--full js-devis-required">
               <span>Ville / Zone</span>
               <input type="text" name="city" placeholder="Ex : Perpignan, Saint-Cyprien…" autocomplete="address-level2"
                 required />
@@ -920,9 +920,7 @@
 
   <nav class="mobileQuickBar" aria-label="Actions rapides mobile">
     <a class="mobileQuickBar__btn mobileQuickBar__btn--primary" href="#contact" data-rappel-intent="true"
-      data-form-mode-intent="callback">
-      On vous rappelle en moins de 30 min
-    </a>
+      data-form-mode-intent="callback" data-callback-text="button">Demander un rappel</a>
     <a class="mobileQuickBar__btn mobileQuickBar__btn--call" href="tel:+33650756242">
       Appeler
     </a>
@@ -946,8 +944,9 @@
       </div>
     </div>
   </footer>
-  <script src="./assets/js/lead-form.js?v=50e7677486"></script>
-  <script src="./assets/js/app.js?v=e48378f7f2"></script>
+  <script src="./assets/js/lead-form.js?v=11732041e2"></script>
+  <script src="./assets/js/business-hours.js?v=9743aa534c"></script>
+  <script src="./assets/js/app.js?v=f9c3ebca83"></script>
 </body>
 
 </html>

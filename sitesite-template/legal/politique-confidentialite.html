@@ -55,7 +55,7 @@
   <main class="section" aria-label="Politique de confidentialité">
     <div class="container" style="max-width: 920px;">
       <h1>Politique de confidentialité</h1>
-      <p>Dernière mise à jour : 15/02/2026</p>
+      <p>Dernière mise à jour : 16/10/2026</p>
 
       <h2>1. Responsable de traitement</h2>
       <p>
@@ -69,14 +69,12 @@
 
       <h2>2. Données collectées</h2>
       <h3>2.1 Formulaires de contact</h3>
-      <p>Le site utilise une fonction Netlify qui transmet les demandes par e-mail via le service Resend, avec trois formulaires : <code>lead_hero</code>, <code>lead_contact</code> et <code>lead_perpignan</code>.</p>
+      <p>Le site propose trois formulaires (deux sur la page d’accueil, un sur la page Perpignan). Leurs données sont transmises par une fonction Netlify, qui les envoie par e-mail à Style &amp; Déco via le service Resend.</p>
       <ul>
-        <li><code>name</code>, <code>phone</code> et <code>details</code> sont collectés par tous les formulaires.</li>
-        <li><code>email</code> est collecté uniquement pour les demandes de devis (<code>lead_hero</code> et <code>lead_contact</code> en mode devis, <code>lead_perpignan</code>) ; il sert à répondre à votre demande, aucun e-mail automatique n’est envoyé à cette adresse. Il n’est pas demandé pour les demandes de rappel en moins de 30 minutes.</li>
-        <li><code>lead_hero</code> et <code>lead_contact</code> collectent également <code>city</code> et <code>lead_priority</code> (<code>STANDARD</code> ou <code>RAPPEL_30_MIN</code>), ainsi qu'un champ technique <code>subject</code> prérempli automatiquement (non saisi par l'utilisateur).</li>
-        <li><code>lead_perpignan</code> collecte également <code>subject</code>, ici saisi par l'utilisateur pour indiquer le type de travaux souhaité.</li>
-        <li><code>form-name</code> est un champ technique identifiant le formulaire soumis, et <code>submission_id</code> un identifiant aléatoire généré par votre navigateur pour éviter les envois en double.</li>
-        <li><code>bot-field</code> est un champ anti-spam (honeypot) présent dans les formulaires, non destiné à être rempli par un utilisateur.</li>
+        <li><strong>Tous les formulaires</strong> : votre nom et votre numéro de téléphone.</li>
+        <li><strong>Demande de devis</strong> : votre adresse e-mail (obligatoire), votre ville ou zone et les détails de votre projet. L’adresse e-mail sert à répondre à votre demande.</li>
+        <li><strong>Demande de rappel</strong> : votre adresse e-mail est facultative ; votre ville ou zone n’est transmise que si elle est renseignée (sur la page Perpignan, elle est préremplie et modifiable).</li>
+        <li><strong>Données techniques d’un envoi</strong> : le formulaire utilisé, le type de demande (devis ou rappel), un identifiant aléatoire généré par votre navigateur pour éviter les envois en double, et un champ anti-spam invisible, non destiné à être rempli.</li>
       </ul>
 
       <h3>2.2 Données techniques</h3>
@@ -90,9 +88,16 @@
         À date, aucun outil de mesure d’audience (Google Tag Manager / Google Analytics) n’est actif sur le site.
       </p>
 
+      <h3>2.4 Messages envoyés automatiquement</h3>
+      <ul>
+        <li><strong>Confirmation de réception</strong> : si vous renseignez votre adresse e-mail, nous pouvons vous envoyer un message de confirmation de votre demande (devis ou rappel). Il s’agit d’un message strictement lié à votre demande : sans publicité et sans inscription à une liste d’envoi.</li>
+        <li><strong>Notifications internes</strong> : chaque demande nous est transmise par e-mail. Pour une demande de rappel reçue en dehors de nos horaires d’ouverture, un second e-mail interne est programmé auprès de notre prestataire d’envoi (Resend) quelques minutes avant la prochaine ouverture, afin de ne pas oublier de vous rappeler. Il contient votre nom, votre numéro de téléphone et, si renseignées, votre ville.</li>
+        <li><strong>Tri des demandes</strong> : un contrôle automatique repère les messages manifestement publicitaires ou automatisés. Ces messages ne sont pas supprimés : ils sont placés dans une boîte de vérification que nous consultons manuellement, et ne déclenchent aucune confirmation automatique.</li>
+      </ul>
+
       <h2>3. Finalités du traitement</h2>
       <ul>
-        <li>Répondre aux demandes de contact, de devis et de rappel.</li>
+        <li>Répondre aux demandes de contact, de devis et de rappel, et en accuser réception.</li>
         <li>Organiser le suivi commercial et opérationnel des demandes.</li>
         <li>Mesurer l’audience uniquement si un outil analytics est activé ultérieurement.</li>
       </ul>
@@ -106,7 +111,7 @@
       <h2>5. Destinataires des données</h2>
       <p>
         Les données sont destinées à EI Style et Deco et, lorsque nécessaire, à des prestataires techniques
-        indispensables au service (notamment Netlify pour l’hébergement et Resend pour l’envoi des e-mails de demande). Les données ne sont pas vendues.
+        indispensables au service (notamment Netlify pour l’hébergement et Resend pour l’envoi des e-mails de demande, de confirmation et de rappel interne). Les données ne sont pas vendues.
       </p>
 
       <h2>6. Durées de conservation</h2>
@@ -172,6 +177,6 @@
     </div>
   </footer>
 
-  <script src="../assets/js/app.js?v=e48378f7f2"></script>
+  <script src="../assets/js/app.js?v=f9c3ebca83"></script>
 </body>
 </html>

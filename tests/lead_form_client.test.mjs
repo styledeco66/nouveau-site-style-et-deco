@@ -174,3 +174,42 @@ test("le honeypot rempli est transmis tel quel : le serveur décide (pas de faux
   assert.equal(form.status.textContent, ERROR_MESSAGE);
   assert.deepEqual(deps.redirected, []);
 });
+
+// ---------------------------------------------------------------- lot 2 : destination serveur, identifiant de soumission
+test("redirection vers la page de confirmation indiquée par le serveur (devis ou rappel), jamais vers une adresse arbitraire", async () => {
+  const { bindLeadForm } = loadModule();
+  for (const [next, expected] of [
+    ["/merci-rappel.html?s=20261026", "/merci-rappel.html?s=20261026"],
+    ["/merci-rappel.html?s=30", "/merci-rappel.html?s=30"],
+    ["/merci.html", "/merci.html"],
+    ["https://evil.example/merci.html", "/merci.html"],
+    ["//evil.example", "/merci.html"],
+    ["/merci-rappel.html?s=<script>", "/merci.html"],
+    [undefined, "/merci.html"],
+  ]) {
+    const form = makeForm(baseFields);
+    const deps = makeDeps(async () => new Response(JSON.stringify({ ok: true, next }), { status: 200 }));
+    bindLeadForm(form, deps);
+    await form.submit();
+    assert.deepEqual(deps.redirected, [expected], String(next));
+  }
+});
+
+test("identifiant de soumission : conservé si la saisie ne change pas, renouvelé si le contenu a changé entre deux tentatives", async () => {
+  const { bindLeadForm } = loadModule();
+  const form = makeForm(baseFields);
+  const ids = [];
+  let attempt = 0;
+  const deps = makeDeps(async (url, init) => {
+    ids.push(JSON.parse(init.body).submission_id);
+    attempt += 1;
+    return attempt < 3 ? new Response("{}", { status: 502 }) : new Response(JSON.stringify({ ok: true }), { status: 200 });
+  });
+  bindLeadForm(form, deps);
+  await form.submit(); // échec
+  await form.submit(); // même saisie : même identifiant (Resend dédoublonne)
+  assert.equal(ids[0], ids[1]);
+  form.fields = { ...form.fields, details: "Salon et couloir" }; // modification après un échec
+  await form.submit();
+  assert.notEqual(ids[2], ids[1], "contenu modifié : nouvel identifiant, la demande n'est pas bloquée par l'ancienne clé");
+});

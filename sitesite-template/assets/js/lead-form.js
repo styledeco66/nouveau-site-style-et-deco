@@ -1,6 +1,8 @@
 (() => {
   const ENDPOINT = "/.netlify/functions/lead";
   const SUCCESS_URL = "/merci.html";
+  // Seules les pages de confirmation du site sont acceptées comme destination (la réponse du serveur est la source).
+  const SUCCESS_PATTERN = /^\/merci(?:-rappel)?\.html(?:\?s=[0-9]{2,8})?$/;
   const REQUEST_TIMEOUT_MS = 15000;
   const ERROR_MESSAGE =
     "Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.";
@@ -18,7 +20,8 @@
     return fields;
   };
 
-  // Le succès n'est reconnu que si la function confirme explicitement l'envoi.
+  // Le succès n'est reconnu que si la function confirme explicitement l'envoi ; elle indique aussi la page de confirmation
+  // (devis ou rappel) selon le résultat qu'elle a validé.
   const deliver = async (fetchImpl, payload) => {
     try {
       const response = await fetchImpl(ENDPOINT, {
@@ -28,11 +31,12 @@
         credentials: "same-origin",
         signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(REQUEST_TIMEOUT_MS) : undefined,
       });
-      if (!response.ok) return false;
+      if (!response.ok) return null;
       const result = await response.json();
-      return Boolean(result) && result.ok === true;
+      if (!result || result.ok !== true) return null;
+      return { next: typeof result.next === "string" && SUCCESS_PATTERN.test(result.next) ? result.next : SUCCESS_URL };
     } catch (error) {
-      return false;
+      return null;
     }
   };
 
@@ -65,9 +69,14 @@
         submit.setAttribute("aria-busy", "true");
       }
 
-      // Conservé entre deux tentatives : Resend dédoublonne si la première a en fait abouti.
-      form.dataset.submissionId = form.dataset.submissionId || newSubmissionId();
+      // Conservé entre deux tentatives : Resend dédoublonne si la première a en fait abouti. Si le visiteur a modifié sa saisie
+      // (ou changé de mode) depuis la tentative précédente, le contenu n'est plus le même : nouvel identifiant.
       const fields = readForm(form);
+      const fingerprint = JSON.stringify(fields);
+      if (!form.dataset.submissionId || form.dataset.submissionFingerprint !== fingerprint) {
+        form.dataset.submissionId = newSubmissionId();
+        form.dataset.submissionFingerprint = fingerprint;
+      }
       const delivered = await deliver(fetchImpl, { ...fields, submission_id: form.dataset.submissionId });
 
       if (delivered) {
@@ -76,7 +85,7 @@
           event: priority === "RAPPEL_30_MIN" ? "form_submit_callback" : "form_submit_devis",
           lead_priority: priority
         });
-        redirect(SUCCESS_URL);
+        redirect(delivered.next);
         return;
       }
 
