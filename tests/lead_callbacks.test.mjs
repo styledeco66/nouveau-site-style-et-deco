@@ -59,8 +59,12 @@ const fakeResend = ({ fail = () => null } = {}) => {
   return fn;
 };
 
-const run = async (body, { env = ENV_ON, now = MON_NOON, fetchImpl = fakeResend(), deploy = {} } = {}) => {
-  const response = await handleLead(req(body), { env, fetchImpl, now, deploy });
+// Contexte « production » par défaut (les envois secondaires ne sont actifs qu'en production explicite) ; sleep instantané ;
+// context.waitUntil simulé : les promesses prolongées sont attendues avant les vérifications.
+const run = async (body, { env = ENV_ON, now = MON_NOON, fetchImpl = fakeResend(), deploy = { context: "production" } } = {}) => {
+  const pending = [];
+  const response = await handleLead(req(body), { env, fetchImpl, now, deploy, sleep: async () => {}, waitUntil: (promise) => pending.push(promise) });
+  await Promise.all(pending);
   return { response, fetchImpl, json: await response.clone().json().catch(() => null) };
 };
 const byKind = (f, kind) => f.sent.filter((m) => m.kind === kind);
@@ -176,25 +180,29 @@ test("10. double clic : deux requêtes identiques → un seul e-mail interne, un
   assert.equal(byKind(fetchImpl, "remind").length, 1);
 });
 
-test("11. nouvelle tentative plus tard (heure de réception différente) : jamais de seconde confirmation, rappel non dupliqué, demande conservée", async () => {
+test("11. nouvelle tentative plus tard (heure de réception différente) : demande déjà reçue, aucun doublon, aucune seconde confirmation", async () => {
   const fetchImpl = fakeResend();
   await run(callback(), { now: MON_EVENING, fetchImpl });
   const retry = await run(callback(), { now: at("2026-10-19", "20:03"), fetchImpl });
-  assert.equal(retry.response.status, 200, "pas de faux échec");
-  assert.equal(byKind(fetchImpl, "confirm").length, 1, "une seule confirmation par adresse, type et jour");
+  assert.equal(retry.response.status, 200, "pas de faux échec : la demande a déjà été reçue sous cette clé");
+  assert.equal(byKind(fetchImpl, "lead").length, 1, "pas de doublon de notification");
+  assert.equal(byKind(fetchImpl, "confirm").length, 1);
   assert.equal(byKind(fetchImpl, "remind").length, 1);
-  assert.ok(byKind(fetchImpl, "lead").length >= 1, "la demande est conservée");
 });
 
-test("12. timeout puis nouvelle tentative : la demande aboutit, une seule confirmation", async () => {
+test("12. timeout transitoire absorbé par une nouvelle tentative (même clé, même contenu) ; échec définitif → erreur visible", async () => {
   let first = true;
-  const fetchImpl = fakeResend({ fail: ({ kind }) => (kind === "lead" && first ? ((first = false), "network") : null) });
-  const a = await run(callback(), { fetchImpl });
-  assert.equal(a.response.status, 502);
-  assert.equal(fetchImpl.sent.length, 0, "échec de la notification principale : ni confirmation ni rappel");
-  const b = await run(callback(), { fetchImpl });
-  assert.equal(b.response.status, 200);
-  assert.equal(byKind(fetchImpl, "confirm").length, 1);
+  const transient = fakeResend({ fail: ({ kind }) => (kind === "lead" && first ? ((first = false), "network") : null) });
+  const a = await run(callback(), { fetchImpl: transient });
+  assert.equal(a.response.status, 200);
+  assert.equal(transient.calls.filter((c) => c.kind === "lead").length, 2, "une nouvelle tentative, même clé");
+  assert.equal(new Set(transient.calls.filter((c) => c.kind === "lead").map((c) => c.key)).size, 1);
+  assert.equal(byKind(transient, "lead").length, 1);
+  assert.equal(byKind(transient, "confirm").length, 1);
+  const dead = fakeResend({ fail: ({ kind }) => (kind === "lead" ? "network" : null) });
+  const b = await run(callback(), { fetchImpl: dead });
+  assert.equal(b.response.status, 502);
+  assert.equal(dead.sent.length, 0, "échec de la notification principale : ni confirmation ni rappel");
 });
 
 test("13. échec de la confirmation client : la demande reste reçue, réponse de succès", async () => {
@@ -224,35 +232,34 @@ test("15. échec de la notification interne : erreur visible, aucun envoi second
   assert.equal(fetchImpl.sent.length, 0);
 });
 
-test("16. formulaire modifié après une tentative échouée (même clé, contenu différent) : demande renvoyée sous clé dérivée, pas perdue", async () => {
+test("16. même identifiant avec un contenu différent : traité comme déjà reçu (pas de doublon) ; le navigateur change d'identifiant si la saisie change", async () => {
   const fetchImpl = fakeResend();
   await run(callback({ phone: "0611111111" }), { fetchImpl });
   const { response } = await run(callback({ phone: "0622222222" }), { fetchImpl, now: at("2026-10-19", "12:01") });
   assert.equal(response.status, 200);
-  const mains = byKind(fetchImpl, "lead");
-  assert.equal(mains.length, 2);
-  assert.ok(mains[1].body.text.includes("0622222222"));
-  assert.ok(mains[1].key.endsWith("-b"));
+  assert.equal(byKind(fetchImpl, "lead").length, 1);
+  // avec un nouvel identifiant (ce que fait lead-form.js après une modification), la nouvelle demande part normalement
+  const fresh = await run(callback({ phone: "0622222222", submission_id: "cb-0002-cccc-dddd" }), { fetchImpl, now: at("2026-10-19", "12:02") });
+  assert.equal(fresh.response.status, 200);
+  assert.equal(byKind(fetchImpl, "lead").length, 2);
+  assert.ok(byKind(fetchImpl, "lead")[1].body.text.includes("0622222222"));
+  assert.equal(byKind(fetchImpl, "confirm").length, 2, "chaque demande distincte a sa confirmation");
 });
 
-test("17. activation explicite : sans variables, aucun envoi secondaire ; sur Deploy Preview, jamais, même activé", async () => {
+test("17. activation explicite : sans variables, aucun envoi secondaire ; une seule variable activée n'active que sa fonction", async () => {
   const off = await run(callback(), { env: ENV, now: MON_EVENING });
   assert.deepEqual(off.fetchImpl.sent.map((m) => m.kind), ["lead"]);
-  const preview = await run(callback(), { env: ENV_ON, now: MON_EVENING, deploy: { context: "deploy-preview" } });
-  assert.deepEqual(preview.fetchImpl.sent.map((m) => m.kind), ["lead"]);
-  const branch = await run(callback(), { env: { ...ENV_ON, CONTEXT: "branch-deploy" }, now: MON_EVENING });
-  assert.deepEqual(branch.fetchImpl.sent.map((m) => m.kind), ["lead"]);
   const onlyConfirm = await run(callback(), { env: { ...ENV, LEAD_CLIENT_CONFIRMATIONS: "on" }, now: MON_EVENING });
   assert.deepEqual(onlyConfirm.fetchImpl.sent.map((m) => m.kind).sort(), ["confirm", "lead"]);
+  const onlyRemind = await run(callback(), { env: { ...ENV, LEAD_SCHEDULED_REMINDERS: "on" }, now: MON_EVENING });
+  assert.deepEqual(onlyRemind.fetchImpl.sent.map((m) => m.kind).sort(), ["lead", "remind"]);
 });
 
-test("18. confirmation : au plus une par adresse, type de demande et jour (pas d'inondation d'un destinataire)", async () => {
+test("18. deux demandes légitimes distinctes le même jour avec la même adresse : chacune reçoit sa confirmation", async () => {
   const fetchImpl = fakeResend();
-  for (let i = 0; i < 4; i++) await run(devis({ submission_id: `dv-spam-${i}-aaaaaaaa`, details: `Projet ${i}` }), { fetchImpl, now: at("2026-10-19", `12:0${i}`) });
-  assert.equal(byKind(fetchImpl, "confirm").length, 1);
-  // un autre type de demande (rappel) pour la même adresse reçoit sa propre confirmation
-  await run(callback({ email: "paul@example.test", submission_id: "cb-other-aaaaaaaa" }), { fetchImpl });
-  assert.equal(byKind(fetchImpl, "confirm").length, 2);
+  for (let i = 0; i < 3; i++) await run(devis({ submission_id: `dv-multi-${i}-aaaaaaaa`, details: `Projet ${i}` }), { fetchImpl, now: at("2026-10-19", `12:0${i}`) });
+  assert.equal(byKind(fetchImpl, "confirm").length, 3);
+  assert.equal(new Set(byKind(fetchImpl, "confirm").map((m) => m.key)).size, 3, "clé = identifiant stable de la demande");
 });
 
 test("19. logo : image intégrée (CID) nommée, ou repli HTTPS sur notre domaine (LEAD_EMAIL_LOGO_MODE=https)", async () => {

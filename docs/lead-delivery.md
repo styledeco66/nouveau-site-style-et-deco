@@ -167,35 +167,42 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé.
   catégorie « Boîte de réception principale » ou libellé important) : un e-mail programmé **n'est pas** une notification push garantie. Pour être alerté de façon fiable, créer un filtre Gmail sur
   l'objet `[RAPPEL CLIENT]` / `[RAPPEL À EFFECTUER]` → « Marquer comme important » + notifications « Prioritaires » sur le smartphone.
 
-## Clés d'idempotence et doublons
+## Clés d'idempotence, conflits Resend et doublons
 
-Chaque demande a un identifiant stable (`submission_id` du navigateur, ou empreinte du contenu + fenêtre de 10 min sans JavaScript). Une **clé distincte par opération** :
+Chaque demande a un identifiant stable (`submission_id` du navigateur, ou empreinte du contenu + fenêtre de 10 min sans JavaScript). Une **clé distincte par opération, toujours liée à cet identifiant** :
 
 | Opération | Clé `Idempotency-Key` |
 |---|---|
-| Notification principale | `lead-<id>` (nouvelle tentative avec contenu différent : une seule reprise sous `lead-<id>-b`, la demande n'est jamais perdue) |
-| Confirmation client | `confirm-<devis|rappel>-<empreinte de l'adresse>-<jour de Paris>` → **au plus une confirmation par adresse, par type et par jour** (protège un destinataire contre l'inondation) |
+| Notification principale | `lead-<id>` |
+| Confirmation client | `confirm-devis-<id>` ou `confirm-rappel-<id>` (une confirmation par **demande**, jamais par adresse : deux demandes distinctes le même jour, même adresse, reçoivent chacune la leur ; une même demande répétée n'en produit qu'une) |
 | Rappel interne programmé | `remind-<id>` ; secours : `remind-fallback-<id>` |
 
-Resend conserve une clé 24 h : même clé + même contenu → même réponse sans nouvel envoi ; même clé + contenu différent → HTTP 409 `invalid_idempotent_request` (interprété selon le tableau).
 Le navigateur renouvelle l'identifiant si la saisie a changé depuis l'échec précédent. Chaque notification porte une **référence** (8 caractères, dérivée de la clé) pour le diagnostic.
 
-## Erreurs
+**Réponses Resend et stratégie de nouvelle tentative** (conforme à la documentation : une clé est conservée 24 h ; même clé + même contenu → même réponse sans nouvel envoi) :
 
-- Échec de la **notification principale** : réponse 502, message d'erreur avec le numéro de téléphone ; aucun envoi secondaire.
-- Après réception de la demande, les envois secondaires sont **indépendants et non bloquants** : un échec de confirmation ou de programmation n'efface rien et n'affiche **pas** d'erreur au visiteur.
-- Échec de **programmation** du rappel : un e-mail de secours immédiat « client à contacter dès l'ouverture » est envoyé ; la notification principale indique déjà le créneau.
-- Journaux : codes seulement (`lead: Resend a répondu HTTP 500 (…) [confirmation client]`), jamais de nom, téléphone, e-mail ni message.
-- **Resend totalement indisponible** : aucune alerte par le même service n'est possible. La demande est perdue côté site et le visiteur est invité à appeler. Surveillance raisonnable : consulter
-  chaque jour le tableau de bord Resend (Emails → statuts) et les journaux de la function Netlify (recherche « lead: ») ; en cas de panne signalée, vérifier https://resend-status.com et rappeler les visiteurs
-  qui ont téléphoné. Aucune base de données n'est ajoutée : si une garantie plus forte est souhaitée (file d'attente persistante), elle ferait l'objet d'un devis de complexité/coût préalable.
+| Réponse | Traitement |
+|---|---|
+| 2xx avec identifiant | succès |
+| Erreur réseau / timeout, 5xx, 429 | nouvelle tentative, **même clé et même contenu** (au plus 3 reprises, attentes 0,3 s / 0,9 s / 1,8 s, dans une échéance de 12 s pour la notification principale — le navigateur abandonne à 15 s — et 9 s pour les envois secondaires) |
+| 409 `concurrent_idempotent_requests` (envoi encore en cours) | **jamais compté comme un succès** : mêmes nouvelles tentatives ; si l'envoi n'est pas terminé à l'échéance → échec (502 pour la notification principale ; consigné pour un envoi secondaire) |
+| 409 `invalid_idempotent_request` (clé déjà utilisée avec un autre contenu) | **jamais rejoué** : la demande a déjà été traitée sous cette clé (réponse perdue, rechargement, double clic) → notification : « déjà reçue » (succès, aucun renvoi, aucun envoi secondaire) ; confirmation ou rappel : « déjà traité » (aucun e-mail de secours) |
+| Autre 4xx (ex. 422) | refus définitif, aucune nouvelle tentative |
+
+## Temps de réponse et `context.waitUntil()`
+
+Le visiteur n'attend que la **notification principale**. Dès que Resend l'a acceptée, la fonction répond (`{ok:true, next:…}` ou redirection 303) ; la confirmation client et le rappel programmé
+sont exécutés **après la réponse** grâce à `context.waitUntil()` de Netlify (« prolonge l'exécution de la fonction jusqu'à la fin de la promesse, sans bloquer la réponse », disponible pour les fonctions
+déployées depuis le 20 mars 2025 ; la durée de l'exécution reste soumise à la limite de la fonction). La promesse n'est jamais abandonnée : si `waitUntil` n'existe pas (ancien déploiement, tests), la fonction l'attend. Les envois secondaires ne peuvent
+donc pas provoquer un faux échec ni dépasser les 15 s du navigateur ; leurs erreurs sont journalisées (codes seulement). Risque résiduel : si la plateforme coupe l'exécution avant la fin (limite de durée de la fonction), un envoi secondaire peut ne pas partir ; la notification principale, elle, est déjà acceptée.
 
 ## Activation progressive
 
 1. Fusionner : aucun changement visible côté e-mails client tant que les variables ne sont pas définies. Les **textes de rappel dynamiques** et le **champ e-mail facultatif** sont actifs dès la publication.
 2. Netlify (projet `iridescent-twilight-cce7df`, portée Functions, contexte **Production uniquement**) : `LEAD_CLIENT_CONFIRMATIONS=on`, `LEAD_SCHEDULED_REMINDERS=on`, éventuellement `LEAD_EMAIL_LOGO_MODE=https`. Relancer un déploiement.
 3. Tests réels (à demander séparément, un par un, avec une adresse du dirigeant) : un devis, un rappel en journée avec e-mail, un rappel hors horaires (vérifier le rappel programmé dans Resend → Emails → *Scheduled*), contrôle du rendu et du logo dans Gmail et Apple Mail.
-4. Les **Deploy Previews et branch deploys n'envoient jamais** de confirmation ni de rappel programmé, même si les variables y sont définies.
+4. **Production explicite uniquement** : les confirmations et rappels programmés ne partent que si le contexte vaut exactement `production` (`context.deploy.context`, ou variable `CONTEXT`).
+   Contexte absent, vide, inconnu, ambigu (les deux sources en désaccord), `deploy-preview` ou `branch-deploy` → désactivés, même si les variables sont définies globalement.
 
 ## Vérifications
 
@@ -215,8 +222,8 @@ actuel (nombre d'e-mails par jour/mois) dans le tableau de bord avant activation
 ## Limites connues
 
 - **Limitation de débit native Netlify** : au-delà de 10 demandes par IP et domaine sur 60 secondes, Netlify réécrit la requête vers `/lead-rate-limited.html`. Cette page statique affiche le message d’échec validé, y compris sans JavaScript ; elle évite tout appel à Resend. Netlify peut mettre jusqu’à 10 secondes à appliquer cette protection après le dépassement ; quelques requêtes supplémentaires peuvent donc atteindre Resend. La règle est déclarée dans `netlify/functions/lead.mjs` et s’applique à toutes les offres Netlify.
-- **Idempotence** : dépend de la fenêtre de conservation des clés par Resend (24 h). Si une nouvelle tentative a un contenu différent (l'heure de réception change), la
-  notification principale est renvoyée une fois sous une clé dérivée : la demande n'est jamais perdue, mais le dirigeant peut, dans ce cas précis, recevoir une notification en double.
+- **Idempotence** : dépend de la fenêtre de conservation des clés par Resend (24 h). Une même clé avec un contenu différent est considérée comme « déjà traitée » (aucun renvoi) : un appel direct à la fonction qui réutiliserait un identifiant avec un autre contenu serait ignoré ; le navigateur, lui, change d'identifiant quand la saisie change.
+- **Protections contre les abus** : limitation de débit native Netlify (10 demandes/min/IP), honeypot, contrôle d'origine, quarantaine et confirmations jamais envoyées pour une demande suspecte. Il n'existe pas de plafond par adresse (cela exigerait un stockage persistant, non ajouté).
 - **Pas de copie de sauvegarde** : si Resend est indisponible, la demande est perdue côté site (le visiteur est invité à
   appeler). Netlify Forms conservait les soumissions ; ce n'est plus le cas.
 - **Livrabilité e-mail** : dépend du domaine expéditeur vérifié chez Resend (SPF/DKIM) — à configurer hors de ce dépôt.

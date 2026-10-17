@@ -239,18 +239,22 @@ const submissionKey = (raw, lead, now) => {
     .slice(0, 32);
 };
 
-// Appel Resend. Renvoie { ok, id, status, code } ; ne journalise que des codes (jamais de donnée personnelle).
-const sendWithResend = async (email, key, env, fetchImpl, label = "envoi") => {
+// ── Appels Resend : nouvelle tentative compatible avec la documentation (idempotence 24 h) ───────────────────────────
+// Une nouvelle tentative réutilise TOUJOURS la même clé ET le même contenu : Resend renvoie alors la réponse d'origine sans
+// envoyer deux fois. Sont rejouées : erreur réseau/timeout (l'envoi a pu aboutir), 5xx, 429, et 409 `concurrent_idempotent_requests`
+// (« une autre requête avec cette clé est en cours : réessayer plus tard »). Ne sont JAMAIS rejouées : les autres 4xx (refus définitif)
+// et 409 `invalid_idempotent_request` (clé déjà utilisée avec un autre contenu : la demande a déjà été traitée sous cette clé).
+// Tout est borné par une échéance (`deadline`) pour rester sous le délai du navigateur (15 s) ou de la plateforme.
+const RETRY_DELAYS_MS = [300, 900, 1800];
+const REPLAYABLE_STATUS = (status) => status === 0 || status === 429 || status >= 500;
+
+const sendOnce = async (email, key, env, fetchImpl, label, timeoutMs) => {
   try {
     const response = await fetchImpl(RESEND_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-        "Idempotency-Key": key,
-      },
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": key },
       body: JSON.stringify(email),
-      signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     const result = await response.json().catch(() => null);
     if (!response.ok) {
@@ -269,37 +273,64 @@ const sendWithResend = async (email, key, env, fetchImpl, label = "envoi") => {
   }
 };
 
-// Notification principale. Si la clé a déjà servi avec un contenu différent (nouvelle tentative : l'heure de réception
-// change), la demande est renvoyée une fois sous une clé dérivée : une demande n'est jamais perdue (au pire, un doublon
-// de notification interne). Un envoi simultané de la même clé est déjà en cours : c'est la première requête qui l'achève.
-const deliverMain = async (email, key, env, fetchImpl) => {
-  const first = await sendWithResend(email, `lead-${key}`, env, fetchImpl, "notification");
-  if (first.ok) return { ok: true };
-  if (first.status === 409 && first.code === "concurrent_idempotent_requests") return { ok: true, concurrent: true };
-  if (first.status === 409 && first.code === "invalid_idempotent_request") {
-    const retry = await sendWithResend(email, `lead-${key}-b`, env, fetchImpl, "notification (nouvelle clé)");
-    return { ok: retry.ok };
+// Renvoie { ok, id } en cas de succès, sinon { ok:false, status, code, conflict } avec
+//   conflict = "processed" (409 invalid_idempotent_request : déjà traité sous cette clé),
+//   conflict = "pending"   (409 concurrent_idempotent_requests toujours en cours après les nouvelles tentatives).
+const resendWithRetry = async (email, key, env, fetchImpl, label, { deadline, sleep }) => {
+  let last = { ok: false, status: 0, code: "deadline" };
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    const remaining = deadline - Date.now();
+    if (remaining < 500) break;
+    last = await sendOnce(email, key, env, fetchImpl, label, Math.min(RESEND_TIMEOUT_MS, remaining));
+    if (last.ok) return last;
+    if (last.status === 409 && last.code === "invalid_idempotent_request") return { ...last, conflict: "processed" };
+    const concurrent = last.status === 409 && last.code === "concurrent_idempotent_requests";
+    if (!concurrent && !REPLAYABLE_STATUS(last.status)) break;
+    if (attempt === RETRY_DELAYS_MS.length) break;
+    await sleep(Math.min(RETRY_DELAYS_MS[attempt], Math.max(0, deadline - Date.now() - 500)));
+  }
+  return last.status === 409 && last.code === "concurrent_idempotent_requests" ? { ...last, conflict: "pending" } : last;
+};
+
+const MAIN_BUDGET_MS = 12000; // < 15 s (délai du navigateur) : la notification principale décide seule du succès affiché
+const SECONDARY_BUDGET_MS = 9000;
+
+// Notification principale. « Déjà traitée sous cette clé » (conflit définitif) = la demande a déjà été reçue (réponse perdue,
+// double clic, rechargement) : succès, sans renvoi. Une requête encore EN COURS n'est jamais comptée comme réussie : si elle
+// ne se termine pas dans le délai, la demande est signalée en échec (le visiteur peut renvoyer : même clé, aucun doublon).
+const deliverMain = async (email, key, env, fetchImpl, timing) => {
+  const result = await resendWithRetry(email, `lead-${key}`, env, fetchImpl, "notification", timing);
+  if (result.ok) return { ok: true };
+  if (result.conflict === "processed") {
+    console.warn("lead: demande déjà reçue sous cette clé (doublon évité)");
+    return { ok: true, replay: true };
   }
   return { ok: false };
 };
 
 const flagOn = (value) => ["on", "true", "1", "yes", "oui"].includes(String(value || "").trim().toLowerCase());
 
-// Envois secondaires (confirmation client, rappel programmé) : activés explicitement, jamais sur Deploy Preview / branch deploy.
-const secondaryFeatures = (env, deployContext) => {
-  const context = String(env.CONTEXT || deployContext || "").trim();
-  const blocked = context === "deploy-preview" || context === "branch-deploy";
+// Envois secondaires (confirmation client, rappel programmé) : désactivés SAUF contexte explicitement « production ».
+// Contexte absent, inconnu, ambigu (variable et contexte d'exécution en désaccord) ou preview/branch deploy → désactivé,
+// même si les variables d'activation sont définies globalement.
+const resolveDeployContext = (env, deploy) => {
+  const fromEnv = String((env && env.CONTEXT) || "").trim();
+  const fromRuntime = String((deploy && deploy.context) || "").trim();
+  if (fromEnv && fromRuntime && fromEnv !== fromRuntime) return "ambiguous";
+  return fromEnv || fromRuntime || "";
+};
+
+const secondaryFeatures = (env, deploy) => {
+  const production = resolveDeployContext(env, deploy) === "production";
   return {
-    confirmations: !blocked && flagOn(env.LEAD_CLIENT_CONFIRMATIONS),
-    reminders: !blocked && flagOn(env.LEAD_SCHEDULED_REMINDERS),
+    confirmations: production && flagOn(env.LEAD_CLIENT_CONFIRMATIONS),
+    reminders: production && flagOn(env.LEAD_SCHEDULED_REMINDERS),
   };
 };
 
-const parisDay = (instant) => hours.parisParts(instant).date.replace(/-/g, "");
-
-// Confirmation au client : au plus une par adresse, par type de demande et par jour (clé d'idempotence dédiée) — un même
-// destinataire ne peut pas être inondé ; un double clic ou une nouvelle tentative ne produit pas de second message.
-const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, env, fetchImpl }) => {
+// Confirmation au client : clé liée à l'identifiant stable de la demande → une même soumission (double clic, nouvelle tentative)
+// ne produit jamais deux confirmations ; deux demandes distinctes, même le même jour avec la même adresse, ont chacune la leur.
+const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }) => {
   const callback = lead.priority === PRIORITY_CALLBACK;
   const logo = String(env.LEAD_EMAIL_LOGO_MODE || "cid").trim() === "https" ? "https" : "cid";
   const content = callback
@@ -314,19 +345,19 @@ const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, env, 
     html: content.html,
   };
   if (logo === "cid") email.attachments = [logoAttachment()];
-  const digest = createHash("sha256").update(lead.email.toLowerCase()).digest("hex").slice(0, 24);
-  const key = `confirm-${callback ? "rappel" : "devis"}-${digest}-${parisDay(receivedAt)}`;
-  const result = await sendWithResend(email, key, env, fetchImpl, "confirmation client");
-  if (!result.ok && result.status === 409 && result.code === "invalid_idempotent_request") {
-    console.warn("lead: confirmation client déjà envoyée aujourd'hui (doublon évité)");
+  const result = await resendWithRetry(email, `confirm-${callback ? "rappel" : "devis"}-${key}`, env, fetchImpl, "confirmation client", timing);
+  if (result.ok) return { sent: true };
+  if (result.conflict === "processed") {
+    console.warn("lead: confirmation client déjà envoyée pour cette demande (doublon évité)");
     return { sent: false, duplicate: true };
   }
-  return { sent: result.ok };
+  console.error(`lead: confirmation client non envoyée${result.conflict === "pending" ? " (envoi précédent toujours en cours)" : ""}`);
+  return { sent: false };
 };
 
 // Rappel interne programmé avec Resend (`scheduled_at`, instant UTC calculé côté serveur), sans pièce jointe.
-// En cas d'échec de programmation : message de secours immédiat au dirigeant (si Resend répond encore).
-const scheduleReminder = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl }) => {
+// Échec de programmation : message de secours immédiat au dirigeant (si Resend répond encore), une seule fois (clé dédiée).
+const scheduleReminder = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }) => {
   const build = (fallback) => {
     const content = reminderEmail({ lead, receivedAt, reference, origin: ORIGIN_LABELS[lead.form], fallback });
     return { from: env.LEAD_FROM_EMAIL, to: splitRecipients(env.LEAD_TO_EMAIL), subject: SUBJECT_REMINDER, text: content.text, html: content.html, ...(lead.email ? { reply_to: lead.email } : {}) };
@@ -335,13 +366,30 @@ const scheduleReminder = async ({ lead, receivedAt, reference, slot, key, env, f
   if (when.getTime() - receivedAt.getTime() > MAX_SCHEDULE_AHEAD_MS) {
     console.error("lead: rappel interne non programmé (échéance au-delà de la limite Resend)");
   } else {
-    const scheduled = await sendWithResend({ ...build(false), scheduled_at: when.toISOString() }, `remind-${key}`, env, fetchImpl, "rappel programmé");
-    if (scheduled.ok || (scheduled.status === 409 && scheduled.code === "concurrent_idempotent_requests")) return { scheduled: true };
-    if (scheduled.status === 409 && scheduled.code === "invalid_idempotent_request") return { scheduled: true, duplicate: true };
+    const scheduled = await resendWithRetry({ ...build(false), scheduled_at: when.toISOString() }, `remind-${key}`, env, fetchImpl, "rappel programmé", timing);
+    if (scheduled.ok) return { scheduled: true };
+    if (scheduled.conflict === "processed") {
+      console.warn("lead: rappel déjà programmé pour cette demande (doublon évité)");
+      return { scheduled: true, duplicate: true };
+    }
   }
-  const fallback = await sendWithResend(build(true), `remind-fallback-${key}`, env, fetchImpl, "rappel de secours");
-  if (!fallback.ok) console.error("lead: rappel interne ni programmé ni envoyé (action manuelle : voir la notification principale)");
-  return { scheduled: false, fallback: fallback.ok };
+  const fallback = await resendWithRetry(build(true), `remind-fallback-${key}`, env, fetchImpl, "rappel de secours", timing);
+  if (!fallback.ok && fallback.conflict !== "processed") console.error("lead: rappel interne ni programmé ni envoyé (action manuelle : voir la notification principale)");
+  return { scheduled: false, fallback: fallback.ok || fallback.conflict === "processed" };
+};
+
+// Envois secondaires : indépendants, jamais bloquants pour le visiteur. Ne rejette jamais (erreurs journalisées sous forme de codes).
+const runSecondary = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, features, sleep }) => {
+  const timing = { deadline: Date.now() + SECONDARY_BUDGET_MS, sleep };
+  const jobs = [];
+  if (features.confirmations && lead.email) {
+    jobs.push(sendClientConfirmation({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }));
+  }
+  if (features.reminders && lead.priority === PRIORITY_CALLBACK && slot.reminderAt) {
+    jobs.push(scheduleReminder({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }));
+  }
+  const results = await Promise.allSettled(jobs);
+  for (const result of results) if (result.status === "rejected") console.error("lead: opération secondaire interrompue");
 };
 
 const parseBody = (text, contentType) => {
@@ -360,7 +408,7 @@ const parseBody = (text, contentType) => {
   return data;
 };
 
-export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = () => new Date(), deploy = {} } = {}) => {
+export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = () => new Date(), deploy = {}, waitUntil = null, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) => {
   const contentType = (request.headers.get("content-type") || "").toLowerCase();
   const isForm = contentType.startsWith("application/x-www-form-urlencoded");
   const fail = (status, code, headers) => errorResponse(status, code, isForm, headers);
@@ -417,16 +465,20 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   const reference = trackingReference(key);
 
   const email = buildEmail(lead, receivedAt.toISOString(), env, review, { slot, reference });
-  const main = await deliverMain(email, key, env, fetchImpl);
+  const main = await deliverMain(email, key, env, fetchImpl, { deadline: Date.now() + MAIN_BUDGET_MS, sleep });
   if (!main.ok) return fail(502, "delivery_failed");
 
-  // Envois secondaires : indépendants, jamais bloquants (la demande est déjà reçue), jamais pour une demande suspecte.
-  if (!main.concurrent && !review) {
-    const features = secondaryFeatures(env, deploy && deploy.context);
-    const jobs = [];
-    if (features.confirmations && lead.email) jobs.push(sendClientConfirmation({ lead, receivedAt, reference, slot, env, fetchImpl }).catch(() => console.error("lead: confirmation client interrompue")));
-    if (features.reminders && isCallback && slot.reminderAt) jobs.push(scheduleReminder({ lead, receivedAt, reference, slot, key, env, fetchImpl }).catch(() => console.error("lead: programmation du rappel interrompue")));
-    await Promise.all(jobs);
+  // La notification principale est acceptée : le visiteur reçoit SA confirmation tout de suite. Les envois secondaires
+  // (confirmation client, rappel programmé) ne le retardent pas et ne peuvent pas provoquer de faux échec : ils continuent après la
+  // réponse via context.waitUntil() de Netlify (exécution prolongée jusqu'à la fin de la promesse, réponse déjà partie). Jamais pour
+  // une demande suspecte, ni pour une demande déjà traitée (rejeu).
+  if (!main.replay && !review) {
+    const features = secondaryFeatures(env, deploy);
+    if (features.confirmations || features.reminders) {
+      const work = runSecondary({ lead, receivedAt, reference, slot, key, env, fetchImpl, features, sleep });
+      if (typeof waitUntil === "function") waitUntil(work);
+      else await work; // environnement sans waitUntil (anciens déploiements, tests) : on attend, jamais de promesse abandonnée
+    }
   }
 
   // Page de confirmation selon le résultat validé ICI (pas selon un paramètre du navigateur) ; le code de créneau n'est qu'un affichage.
@@ -449,4 +501,9 @@ export const config = {
   },
 };
 
-export default (request, context) => handleLead(request, { env: process.env, deploy: context && context.deploy });
+export default (request, context) =>
+  handleLead(request, {
+    env: process.env,
+    deploy: context && context.deploy,
+    waitUntil: context && typeof context.waitUntil === "function" ? (promise) => context.waitUntil(promise) : null,
+  });
