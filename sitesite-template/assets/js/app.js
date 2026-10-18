@@ -3,6 +3,16 @@
   const FORM_SELECTOR = ".js-lead-form";
   const DEFAULT_MODE = "devis";
   const MOBILE_CONTACT_OFFSET = 170;
+  const QUICK_BAR_GAP = 12;
+
+  // Position du formulaire de rappel après défilement : haut du formulaire à MOBILE_CONTACT_OFFSET sous le bord de
+  // l'écran, ou plus haut si le bouton d'envoi passerait sous la barre de contact fixe (petits écrans).
+  const callbackFormOffset = (formRect, submitRect) => {
+    const quickBar = document.querySelector(".mobileQuickBar");
+    const visibleBottom = quickBar ? quickBar.getBoundingClientRect().top : window.innerHeight;
+    const submitBottomInForm = submitRect.bottom - formRect.top;
+    return Math.min(MOBILE_CONTACT_OFFSET, visibleBottom - QUICK_BAR_GAP - submitBottomInForm);
+  };
   const SUBJECT_DEVIS = "📩 DEMANDE DE DEVIS - Style & Deco";
   const SUBJECT_CALLBACK = "[RAPPEL CLIENT] Nouveau rappel à effectuer";
 
@@ -670,7 +680,8 @@
         window.requestAnimationFrame(() => {
           if (submitButton) {
             const rect = contact.getBoundingClientRect();
-            const targetY = window.scrollY + rect.top - MOBILE_CONTACT_OFFSET;
+            const offset = callbackFormOffset(rect, submitButton.getBoundingClientRect());
+            const targetY = window.scrollY + rect.top - offset;
             window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
           } else {
             contact.scrollIntoView({ behavior: "smooth", block: "start" });
