@@ -108,7 +108,7 @@ test("Façades : deux photos authentiques du chantier de Perpignan, légendées 
   assert.ok(existsSync(join(SITE, "realisations/ravalement-facade-immeuble-perpignan/index.html")));
 });
 
-test("accueil : « Derniers chantiers » annonce de vraies réalisations ; seule la carte de façade renvoie vers sa fiche", () => {
+test("accueil : « Derniers chantiers » annonce de vraies réalisations ; seules les cartes de façade et de maison de standing renvoient vers leur fiche", () => {
   const html = read(HOME);
   const section = html.match(/<section class="section" id="realisations"[\s\S]*?<\/section>/)[0];
   assert.match(section, /<h2>Nos dernières réalisations dans les Pyrénées-Orientales<\/h2>/);
@@ -118,11 +118,13 @@ test("accueil : « Derniers chantiers » annonce de vraies réalisations ; seule
   const cards = section.match(/<article class="shot[\s\S]*?<\/article>/g);
   assert.equal(cards.length, 4, "toujours les quatre chantiers existants");
   const linked = cards.filter((c) => /href="[^"]*realisations\//.test(c));
-  assert.equal(linked.length, 1, "un seul lien : aucune autre carte n'est reliée à une fiche");
-  // Correspondance vérifiée : la photo de la carte montre l'immeuble de la fiche (même point de vue que la photo « avant », mêmes hublots, mêmes balcons et bâtiment voisin).
-  assert.match(linked[0], /facade-immeuble-balcons-enduit-creme-bande-grise/);
-  assert.match(linked[0], /<a class="shot__link" href="\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Mise en peinture de façade — immeuble à Perpignan<\/a>/);
-  assert.ok(existsSync(join(SITE, "realisations/ravalement-facade-immeuble-perpignan/index.html")));
+  assert.equal(linked.length, 2, "deux cartes seulement ont une fiche détaillée");
+  // Correspondance vérifiée : la photo de la carte de façade montre l'immeuble de la fiche (même point de vue que la photo « avant », mêmes hublots, mêmes balcons et bâtiment voisin).
+  const facade = linked.find((c) => /facade-immeuble-balcons-enduit-creme-bande-grise/.test(c));
+  assert.match(facade, /<a class="shot__link" href="\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Mise en peinture de façade — immeuble à Perpignan<\/a>/);
+  const maison = linked.find((c) => /interieur-sejour-murs-blancs-baie-vitree/.test(c));
+  assert.match(maison, /<a class="shot__link" href="\.\/realisations\/peinture-interieure-maison-standing-perpignan\/">Mise en peinture complète — maison de standing à Perpignan<\/a>/);
+  for (const dir of ["ravalement-facade-immeuble-perpignan", "peinture-interieure-maison-standing-perpignan"]) assert.ok(existsSync(join(SITE, "realisations", dir, "index.html")));
 });
 
 test("Saint-Cyprien : chantier existant conservé, légende factuelle, aucun résultat ni photographie ajoutés", () => {
@@ -130,7 +132,7 @@ test("Saint-Cyprien : chantier existant conservé, légende factuelle, aucun ré
   assert.equal((html.match(/class="local-photo"/g) || []).length, 1);
   assert.match(html, /src="\.\.\/assets\/images\/chantier-st-cyprien\.webp"/);
   assert.match(html, /<p class="local-photo-caption">Chantier à Saint-Cyprien : état du support pendant la préparation, avant l'application des finitions\.<\/p>/);
-  assert.match(html, /<a href="\.\.\/realisations\/ravalement-facade-immeuble-perpignan\/">notre ravalement de façade réalisé à Perpignan<\/a>/);
+  assert.match(html, /<a href="\.\.\/realisations\/peinture-interieure-maison-standing-perpignan\/">notre chantier de peinture intérieure réalisé à Perpignan<\/a>, dans une maison de 300 m²/);
   assert.match(html, /Cas réel traité en secteur Saint-Cyprien/);
 });
 

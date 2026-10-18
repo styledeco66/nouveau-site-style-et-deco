@@ -25,7 +25,7 @@
   </url>
   <url>
     <loc>https://styleetdeco.fr/perpignan.html</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <image:image>
@@ -55,7 +55,7 @@
   </url>
   <url>
     <loc>https://styleetdeco.fr/realisations/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
@@ -99,6 +99,56 @@
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-balcons-1600.webp</image:loc>
       <image:title>Balcons de l'immeuble après ravalement</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp</image:loc>
+      <image:title>Grand séjour d'une maison de standing après la mise en peinture</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/volume-avant-travaux-1200.webp</image:loc>
+      <image:title>Grand volume avant travaux, plaques de plâtre et bandes de joints</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/murs-placo-joints-avant-travaux-1200.webp</image:loc>
+      <image:title>Murs en plaques de plâtre aux joints apparents avant préparation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/ratissage-sejour-niche-1200.webp</image:loc>
+      <image:title>Séjour après ratissage, avant carrelage</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/ratissage-sejour-volume-1200.webp</image:loc>
+      <image:title>Grand volume du séjour après ratissage, avant carrelage</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-application-1200.webp</image:loc>
+      <image:title>Application d'un enduit décoratif Marmorino</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-lustrage-1200.webp</image:loc>
+      <image:title>Lustrage d'un mur en Marmorino à la machine</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-clair-resultat-1600.webp</image:loc>
+      <image:title>Mur en Marmorino de teinte claire</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-brun-resultat-1200.webp</image:loc>
+      <image:title>Mur en Marmorino de teinte brune</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/papier-peint-feuillages-1600.webp</image:loc>
+      <image:title>Papier peint panoramique à motif de feuillages</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/papier-peint-plumes-1600.webp</image:loc>
+      <image:title>Papier peint panoramique à motif de plumes</image:title>
     </image:image>
   </url>
   <url>
