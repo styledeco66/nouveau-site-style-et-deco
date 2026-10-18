@@ -2608,6 +2608,28 @@ button{ font-family: inherit; font-size: inherit; }
   }
 }
 
+/* Petits écrans (320 × 568, iPhone SE de première génération) : le formulaire de rappel est compacté pour que son titre,
+   ses champs et son bouton d'envoi tiennent entre l'en-tête fixe et la barre de contact fixe. */
+@media (max-width: 720px) and (max-height: 600px){
+  .form--callback-mode .js-callback-badge{ display: none; }
+  .form--callback-mode .form__hint--top{ margin-bottom: 8px; }
+  .form--callback-mode .form__grid{ gap: 8px; }
+  .form--callback-mode .field{ gap: 4px; }
+  .form--callback-mode .form__grid + .js-form-submit{ margin-top: 12px; }
+}
+/* Pendant la saisie dans un formulaire, la barre de contact fixe s'efface : aucun champ ne peut passer dessous. */
+@media (max-width: 720px){
+  .mobileQuickBar{ transition: transform .18s ease, visibility 0s linear 0s; }
+  .mobileQuickBar.is-away{
+    transform: translateY(120%);
+    visibility: hidden;
+    transition: transform .18s ease, visibility 0s linear .18s;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .mobileQuickBar, .mobileQuickBar.is-away{ transition: none; }
+}
+
 @media (prefers-reduced-motion: reduce){
   .reveal-item{
     opacity: 1 !important;

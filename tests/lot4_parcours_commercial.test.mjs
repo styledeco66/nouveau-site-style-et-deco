@@ -102,13 +102,17 @@ test("Façades : deux photos authentiques du chantier de Perpignan, légendées 
   assert.equal(captions.length, 2);
   for (const c of captions) assert.match(c, /Chantier réalisé à Perpignan \(66\)/);
   assert.match(block, /<a href="\.\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir notre chantier de façade réalisé à Perpignan<\/a>/);
-  assert.match(block, /et non à Saint-Cyprien/);
+  assert.match(block, /Découvrez notre savoir-faire à travers un chantier de ravalement de façade réalisé à Perpignan, dans les Pyrénées-Orientales/);
+  assert.doesNotMatch(block, /et non à|pas à Saint-Cyprien/, "formulation positive");
+  assert.doesNotMatch(block.replace(/<img[^>]*>/g, ""), /Saint-Cyprien/, "aucune mention laissant croire à un chantier local");
   assert.ok(existsSync(join(SITE, "realisations/ravalement-facade-immeuble-perpignan/index.html")));
 });
 
 test("accueil : « Derniers chantiers » annonce de vraies réalisations ; seule la carte de façade renvoie vers sa fiche", () => {
   const html = read(HOME);
   const section = html.match(/<section class="section" id="realisations"[\s\S]*?<\/section>/)[0];
+  assert.match(section, /<h2>Nos dernières réalisations dans les Pyrénées-Orientales<\/h2>/);
+  assert.doesNotMatch(section, /à Saint-Cyprien et environs/);
   assert.match(section, /<p>Chantiers réels réalisés par Style &amp; Déco : surfaces propres, lignes nettes, finitions contrôlées\.<\/p>/);
   assert.doesNotMatch(section, /rendu attendu|aperçu/i);
   const cards = section.match(/<article class="shot[\s\S]*?<\/article>/g);
@@ -147,6 +151,21 @@ test("barre mobile : conservée (une seule, sur l'accueil), zone de sécurité i
   const css = read("assets/css/style.css");
   assert.match(css, /padding: 10px 12px calc\(10px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(css, /html\{ scroll-padding-top: 118px; scroll-padding-bottom: 92px; \}/);
+});
+
+test("petits écrans : formulaire de rappel compacté (320 × 568) et barre fixe effacée pendant la saisie", () => {
+  const css = read("assets/css/style.css");
+  const short = css.match(/@media \(max-width: 720px\) and \(max-height: 600px\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(short, /\.form--callback-mode \.js-callback-badge\{ display: none; \}/);
+  assert.match(short, /\.form--callback-mode \.form__grid\{ gap: 8px; \}/);
+  assert.doesNotMatch(short, /display: none[^}]*(name|phone|email|submit)/, "aucun champ ni bouton masqué");
+  assert.match(css, /\.mobileQuickBar\.is-away\{[\s\S]*?visibility: hidden;/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\{\s*\.mobileQuickBar, \.mobileQuickBar\.is-away\{ transition: none; \}/);
+  const app = read("assets/js/app.js");
+  assert.match(app, /const initQuickBarAwayWhileTyping = \(\) =>/);
+  assert.match(app, /quickBar\.classList\.add\("is-away"\)/);
+  assert.match(app, /quickBar\.classList\.remove\("is-away"\)/);
+  assert.ok(app.includes("initQuickBarAwayWhileTyping();"), "initialisé au chargement");
 });
 
 // Contraste WCAG des lignes de réassurance (texte --muted sur le fond le plus clair possible de la page).

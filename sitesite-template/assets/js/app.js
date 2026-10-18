@@ -639,8 +639,23 @@
     }, 1400);
   };
 
+  // Barre de contact fixe : elle s'efface tant que le focus est dans un formulaire (saisie, clavier visuel, tabulation),
+  // pour qu'aucun champ ni bouton d'envoi ne passe dessous ; elle réapparaît dès que le focus en sort.
+  const initQuickBarAwayWhileTyping = () => {
+    const quickBar = document.querySelector(".mobileQuickBar");
+    if (!quickBar) return;
+    const inForm = (el) => Boolean(el && el.closest && el.closest("form"));
+    document.addEventListener("focusin", (event) => {
+      if (inForm(event.target)) quickBar.classList.add("is-away");
+    });
+    document.addEventListener("focusout", (event) => {
+      if (!inForm(event.relatedTarget)) quickBar.classList.remove("is-away");
+    });
+  };
+
   document.addEventListener("DOMContentLoaded", () => {
     moveHeroFormBelowReviewsOnMobile();
+    initQuickBarAwayWhileTyping();
 
     document.querySelectorAll(FORM_SELECTOR).forEach((form) => {
       bindFormPrioritySync(form);
