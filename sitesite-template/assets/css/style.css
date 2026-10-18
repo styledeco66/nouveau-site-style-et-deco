@@ -3310,6 +3310,7 @@ button{ font-family: inherit; font-size: inherit; }
   background: linear-gradient(90deg, var(--accent), rgba(215,181,109,0));
 }
 .rx-chapter__text p{ margin: 0 0 12px; max-width: 58ch; color: rgba(255,255,255,.78); line-height: 1.7; }
+.rx-chapter--text{ grid-template-columns: minmax(0, 1fr); }
 .rx-chapter__media{ display: grid; gap: 16px; }
 .rx-chapter__media--pair{ grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 .rx-chapter__media--narrow{ max-width: 520px; }
