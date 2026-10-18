@@ -97,7 +97,7 @@ test("accueil mobile : aucun texte courant sous 13 px dans les blocs corrigés",
 test("en-tête compact : logo réduit sur mobile (≈ 95–110 px de haut) et tablette, décalages d'ancres alignés", () => {
   const mobile = css.slice(css.indexOf("@media (max-width: 720px){"));
   assert.match(mobile, /\.brand__logo\{\s*width: clamp\(118px, 34vw, 140px\);/);
-  assert.match(mobile, /html\{ scroll-padding-top: 118px; \}/);
+  assert.match(mobile, /html\{ scroll-padding-top: 118px; scroll-padding-bottom: 92px; \}/);
   assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1099px\)\{\s*\.brand__logo\{ width: 142px; \}/);
   for (const sel of ["#services .section__head p", "#services .card p", "#services .list--checks li"]) {
     const m = mobile.match(new RegExp(sel.replace(/[.#]/g, "\\$&") + "\\{[^}]*font-size: ([\\d.]+)px"));

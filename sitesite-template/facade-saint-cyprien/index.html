@@ -78,7 +78,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="../assets/css/style.css?v=f165b4f26b" />
+  <link rel="stylesheet" href="../assets/css/style.css?v=64041008b9" />
   <style>
     .local-page main {
       overflow: clip;
@@ -266,6 +266,41 @@
     .local-page .section p {
       max-width: 900px;
       color: rgba(255, 255, 255, .76);
+    }
+
+    .local-example-photos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 0;
+      max-width: 900px;
+    }
+
+    .local-example-photos figure {
+      margin: 0;
+    }
+
+    .local-example-photos img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .local-example-photos figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: rgba(255, 255, 255, .72);
+    }
+
+    @media (max-width: 720px) {
+      .local-example-photos {
+        grid-template-columns: 1fr;
+      }
     }
 
     .local-example {
@@ -516,6 +551,8 @@
           <a class="btn btn--primary btn--lg" href="../#contact" data-form-mode-intent="devis">Obtenir mon devis gratuit</a>
           <a class="btn btn--ghost btn--lg" href="tel:+33650756242">Appeler maintenant</a>
         </div>
+        <p class="trustNote"><a href="https://www.google.com/maps?cid=3698755901832647189" target="_blank" rel="noopener noreferrer"><strong><span data-google-rating>4,9</span>/5 sur Google</strong> · <span data-google-count>16</span> avis clients<span class="sr-only"> (s'ouvre dans un nouvel onglet)</span></a></p>
+        <p class="trustNote">Assurés en responsabilité civile professionnelle et en décennale, pour les activités déclarées à nos contrats. Attestations sur demande.</p>
       </div>
     </section>
 
@@ -592,8 +629,24 @@
           <p class="local-diff__promise">Un protocole complet pour une tenue durable — pas de raccourci sur la
             préparation.</p>
         </div>
-        <p class="local-example">Ce protocole est illustré par un chantier réalisé à Perpignan :
-          <a href="../realisations/ravalement-facade-immeuble-perpignan/">Découvrir notre chantier de ravalement de façade à Perpignan</a>.</p>
+        <div class="local-example-photos">
+          <figure>
+            <img src="../assets/images/realisations/ravalement-facade-perpignan/etat-initial-720.webp"
+              alt="Chantier de Perpignan : immeuble avant travaux, façade beige ternie et balcons aux rives grises abîmées, garde-corps blancs"
+              width="720" height="400" loading="lazy" decoding="async" />
+            <figcaption>Chantier réalisé à Perpignan (66) : l'immeuble avant travaux.</figcaption>
+          </figure>
+          <figure>
+            <img src="../assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-960.webp"
+              srcset="../assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-960.webp 960w, ../assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp 1600w"
+              sizes="(max-width: 720px) calc(100vw - 40px), 440px"
+              alt="Chantier de Perpignan : immeuble de trois niveaux après ravalement, façades beige clair, bande grise percée de deux hublots et balcons à garde-corps blancs"
+              width="960" height="720" loading="lazy" decoding="async" />
+            <figcaption>Chantier réalisé à Perpignan (66) : le même immeuble après ravalement.</figcaption>
+          </figure>
+        </div>
+        <p class="local-example">Découvrez notre savoir-faire à travers un chantier de ravalement de façade réalisé à Perpignan, dans les Pyrénées-Orientales :
+          <a href="../realisations/ravalement-facade-immeuble-perpignan/">Découvrir notre chantier de façade réalisé à Perpignan</a>.</p>
       </div>
     </section>
 
@@ -700,7 +753,7 @@
     </div>
   </footer>
 
-  <script src="../assets/js/app.js?v=f9c3ebca83"></script>
+  <script src="../assets/js/app.js?v=7aa863cb4a"></script>
 </body>
 
 </html>

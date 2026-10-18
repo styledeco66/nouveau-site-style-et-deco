@@ -377,8 +377,8 @@ test("horaires de la fiche Google (lundi-vendredi 8 h-18 h, week-end fermé) ide
 
 test("note Google 4,9/5 et 16 avis affichés ; aucune note balisée", () => {
   const home = read("index.html");
-  assert.match(home, /<strong>4,9\/5<\/strong>\s*<span>sur Google \(16 avis\)<\/span>/);
-  assert.match(home, /data-value="4\.9"[^>]*>4,9\/5<\/div>\s*<div class="trust__label">16 avis Google<\/div>/);
+  assert.match(home, /<strong><span data-google-rating>4,9<\/span>\/5<\/strong>\s*<span>sur Google \(<span data-google-count>16<\/span> avis\)<\/span>/);
+  assert.match(home, /data-google-rating-kpi data-value="4\.9"[^>]*>4,9\/5<\/div>\s*<div class="trust__label"><a [^>]*><span data-google-count>16<\/span> avis Google/);
   assert.doesNotMatch(JSON.stringify(allNodes()), /aggregateRating|ratingValue|reviewCount/);
 });
 
@@ -420,7 +420,7 @@ test("carrousel des avis : structure accessible, 6 avis, commandes manuelles et 
   assert.doesNotMatch(carousel, /\son[a-z]+=|javascript:/i, "aucun gestionnaire en ligne (CSP)");
   assert.equal((carousel.match(/<svg[^>]*aria-hidden="true"/g) || []).length, 4, "icônes décoratives masquées aux lecteurs d'écran");
   // la note globale et le lien vers la fiche restent en dehors du carrousel, inchangés
-  assert.match(html, /<strong>4,9\/5<\/strong>\s*<span>sur Google \(16 avis\)<\/span>/);
+  assert.match(html, /<strong><span data-google-rating>4,9<\/span>\/5<\/strong>\s*<span>sur Google \(<span data-google-count>16<\/span> avis\)<\/span>/);
 });
 
 test("feuille de style du carrousel : reflet doré bref et ponctuel, animations réduites, focus visible, lisibilité mobile", () => {
