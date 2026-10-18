@@ -112,23 +112,27 @@
     </image:image>
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/volume-avant-travaux-1200.webp</image:loc>
-      <image:title>Grand volume à l'état initial, plaques de plâtre et bandes de joints</image:title>
+      <image:title>Grand volume avant travaux, plaques de plâtre et bandes de joints</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/etat-initial-sejour-echafaudage-1200.webp</image:loc>
-      <image:title>Séjour à l'état initial, parois en plaques de plâtre</image:title>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/murs-placo-joints-avant-travaux-1200.webp</image:loc>
+      <image:title>Murs en plaques de plâtre aux joints apparents avant préparation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/ratissage-sejour-niche-1200.webp</image:loc>
+      <image:title>Séjour après ratissage, avant carrelage</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/ratissage-sejour-volume-1200.webp</image:loc>
+      <image:title>Grand volume du séjour après ratissage, avant carrelage</image:title>
     </image:image>
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/cuisine-grand-volume-1200.webp</image:loc>
       <image:title>Cuisine et grand volume avec sols carrelés</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/baie-vitree-volume-1200.webp</image:loc>
-      <image:title>Grand volume après la pose du carrelage</image:title>
-    </image:image>
-    <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/finitions-murales-piece-1200.webp</image:loc>
-      <image:title>Murs et plafond terminés dans une pièce</image:title>
+      <image:title>Murs et plafond terminés après l'application des peintures</image:title>
     </image:image>
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-application-1200.webp</image:loc>
@@ -139,12 +143,12 @@
       <image:title>Lustrage d'un mur en Marmorino à la machine</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-brun-resultat-1200.webp</image:loc>
-      <image:title>Mur en Marmorino de teinte brune</image:title>
-    </image:image>
-    <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-clair-resultat-1600.webp</image:loc>
       <image:title>Mur en Marmorino de teinte claire</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/marmorino-brun-resultat-1200.webp</image:loc>
+      <image:title>Mur en Marmorino de teinte brune</image:title>
     </image:image>
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-interieure-maison-perpignan/papier-peint-feuillages-1600.webp</image:loc>

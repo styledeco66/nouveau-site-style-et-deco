@@ -3310,7 +3310,14 @@ button{ font-family: inherit; font-size: inherit; }
   background: linear-gradient(90deg, var(--accent), rgba(215,181,109,0));
 }
 .rx-chapter__text p{ margin: 0 0 12px; max-width: 58ch; color: rgba(255,255,255,.78); line-height: 1.7; }
-.rx-chapter--text{ grid-template-columns: minmax(0, 1fr); }
+.rx-chapter--steps{ grid-template-columns: minmax(0, 1fr); gap: clamp(30px, 4vw, 48px); }
+.rx-chapter--steps .rx-chapter__intro{ order: 0 !important; }
+.rx-chapter__text h3{ margin: 0 0 10px; font-size: clamp(1.1rem, 1.7vw, 1.3rem); line-height: 1.25; letter-spacing: -0.005em; color: var(--accent); text-wrap: balance; }
+.rx-step{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(22px, 4vw, 52px); align-items: start; padding-top: clamp(24px, 3vw, 34px); border-top: 1px solid rgba(255,255,255,.10); }
+.rx-step--text{ grid-template-columns: minmax(0, 1fr); }
+.rx-step .rx-chapter__text p{ max-width: 58ch; }
+.rx-chapter--steps .rx-step .rx-chapter__text{ order: 0; }
+.rx-step .rx-chapter__media--narrow{ max-width: 420px; }
 .rx-chapter__media{ display: grid; gap: 16px; }
 .rx-chapter__media--pair{ grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 .rx-chapter__media--narrow{ max-width: 520px; }
@@ -3394,6 +3401,7 @@ button{ font-family: inherit; font-size: inherit; }
 
 @media (max-width: 900px){
   .rx-chapter,
+  .rx-step,
   .rx-outro__inner{ grid-template-columns: minmax(0, 1fr); }
   .rx-chapter:nth-child(even) .rx-chapter__text{ order: 0; }
   .rx-chapter__media--narrow{ max-width: none; }
