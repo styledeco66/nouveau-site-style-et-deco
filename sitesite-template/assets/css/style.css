@@ -1384,6 +1384,24 @@ h1{
 }
 .shot__meta h3{ margin: 0 0 6px; font-size: 16px; }
 .shot__meta p{ margin:0; color: var(--muted); font-size: 14px; }
+.shot--link{ position: relative; }
+.shot--link:hover{ border-color: rgba(215,181,109,.45); }
+.shot--link:focus-within{ outline: 2px solid var(--accent); outline-offset: 2px; }
+.shot__link{ color: inherit; text-decoration: none; }
+.shot__link::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.shot__more{
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 /* Abstract “matières” (sans photos) */
 .shot__media--a{ --shot-glow: radial-gradient(300px 220px at 30% 40%, rgba(215,181,109,.09), transparent 70%); }
@@ -1533,6 +1551,50 @@ h1{
 }
 .quote p{ margin:0 0 8px; font-size: 16px; }
 .quote span{ color: var(--muted2); font-size: 13px; }
+.quote--engagement p{ margin:0; line-height: 1.55; }
+.quote--engagement strong{ color: var(--accent); font-weight: 700; }
+
+/* Lignes de réassurance discrètes : note Google et assurances, sous les boutons de contact. */
+.trustNote{
+  margin: 12px 0 0;
+  max-width: 56ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.trustNote + .trustNote{ margin-top: 4px; }
+.trustNote strong{ color: var(--text); font-weight: 650; }
+.trustNote a{
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(215,181,109,.65);
+  text-underline-offset: 3px;
+}
+.trustNote a:hover,
+.trustNote a:focus-visible{
+  color: var(--accent);
+}
+.trust__label a{
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(215,181,109,.55);
+  text-underline-offset: 3px;
+}
+.trust__label a:hover,
+.trust__label a:focus-visible{ color: var(--accent); }
+.sr-only{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* La note Google des grands écrans est dans les compteurs du héros : la ligne ne sert qu'en mobile. */
+.trustNote--mobile{ display: none; }
 
 /* =========================
    FAQ
@@ -2347,7 +2409,9 @@ button{ font-family: inherit; font-size: inherit; }
     overflow: hidden;
     transform: none;
     min-height: 0;
-    aspect-ratio: 16 / 11;
+    /* 16 / 9,1 au lieu de 16 / 11 : la ligne de note Google ajoutée sous le texte d'introduction (≈ 33 px) est compensée et
+       les deux boutons du héros tiennent au-dessus de la barre de contact fixe sur un écran de 390 × 844 */
+    aspect-ratio: 16 / 9.1;
     background-image: url("../images/banniere-2.webp");
     background-size: 120%;
     background-position: 74% 40%;
@@ -2453,7 +2517,8 @@ button{ font-family: inherit; font-size: inherit; }
     padding: 10px 12px;
   }
   .typeCards{ grid-template-columns: 1fr; }
-  html{ scroll-padding-top: 118px; }
+  html{ scroll-padding-top: 118px; scroll-padding-bottom: 92px; }
+  .trustNote--mobile{ display: block; }
   #rappel30,
   .callback30{ scroll-margin-top: 150px; }
   #contact{ scroll-margin-top: 196px; }

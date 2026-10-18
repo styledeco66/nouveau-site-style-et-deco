@@ -112,6 +112,6 @@ test("galerie sans annonce superflue ; page Façades renvoie vers la fiche de Pe
   const f = read("facade-saint-cyprien/index.html");
   const m = f.match(/<p class="local-example">([\s\S]*?)<\/p>/)[1];
   assert.match(m, /réalisé à Perpignan/);
-  assert.match(m, /href="\.\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir notre chantier de ravalement de façade à Perpignan<\/a>/);
+  assert.match(m, /href="\.\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir notre chantier de façade réalisé à Perpignan<\/a>/);
   assert.ok(existsSync(join(SITE, "realisations/ravalement-facade-immeuble-perpignan/index.html")));
 });
