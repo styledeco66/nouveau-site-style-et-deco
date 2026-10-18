@@ -50,10 +50,10 @@ test("structure : fil d'Ariane visible = fil d'Ariane balisé, une seule WebPage
   assert.equal(image.height, 1024);
 });
 
-test("photographies : 13 images, fichiers présents, dimensions explicites, alt descriptifs, une seule image prioritaire", () => {
+test("photographies : 11 images, fichiers présents, dimensions explicites, alt descriptifs, une seule image prioritaire", () => {
   const html = read(FICHE);
   const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]).filter((t) => !/rx-lightbox__img|brand__logo/.test(t));
-  assert.equal(imgs.length, 13);
+  assert.equal(imgs.length, 11);
   for (const tag of imgs) {
     const alt = tag.match(/alt="([^"]+)"/)[1];
     assert.ok(alt.length >= 40 && alt.length <= 200, alt);
@@ -63,10 +63,10 @@ test("photographies : 13 images, fichiers présents, dimensions explicites, alt 
     }
   }
   assert.equal(imgs.filter((t) => /fetchpriority="high"/.test(t)).length, 1, "image d'ouverture seule prioritaire");
-  assert.equal(imgs.filter((t) => /loading="lazy"/.test(t)).length, 12, "les autres sont à chargement différé");
+  assert.equal(imgs.filter((t) => /loading="lazy"/.test(t)).length, 10, "les autres sont à chargement différé");
   assert.ok(imgs[0].includes("interieur-sejour-murs-blancs-baie-vitree-960.webp"), "image d'ouverture = première carte de l'accueil");
   const zooms = [...html.matchAll(/<a class="rx-zoom" href="([^"]+)" data-rx-photo>/g)].map((m) => m[1]);
-  assert.equal(zooms.length, 13);
+  assert.equal(zooms.length, 11);
   for (const z of zooms) assert.ok(existsSync(join(SITE, "realisations", SLUG, z)), z);
   assert.equal((html.match(/<img\b[^>]*rx-lightbox__img/g) || []).length, 1);
   assert.match(html, /assets\/js\/gallery\.js\?v=[0-9a-f]{10}/);
@@ -75,7 +75,7 @@ test("photographies : 13 images, fichiers présents, dimensions explicites, alt 
 test("images optimisées : WebP sans métadonnées, deux largeurs par photographie, poids maîtrisé", () => {
   const dir = join(SITE, IMG_DIR);
   const files = readdirSync(dir);
-  assert.equal(files.length, 24, "12 photographies × 2 largeurs");
+  assert.equal(files.length, 20, "10 photographies × 2 largeurs");
   for (const f of files) {
     assert.match(f, /^[a-z0-9-]+-(720|1200|960|1600)\.webp$/);
     const buf = readFileSync(join(dir, f));
@@ -153,7 +153,7 @@ test("sitemap : nouvelle fiche listée avec ses photographies, aucune URL en dou
   assert.equal(new Set(locs).size, locs.length);
   const block = sm.match(new RegExp(`<url>\\s*<loc>${URL_FICHE}</loc>[\\s\\S]*?</url>`))[0];
   assert.match(block, /<lastmod>2026-10-18<\/lastmod>/);
-  assert.equal((block.match(/<image:image>/g) || []).length, 13);
+  assert.equal((block.match(/<image:image>/g) || []).length, 11);
   for (const m of block.matchAll(/<image:loc>https:\/\/styleetdeco\.fr\/([^<]+)<\/image:loc>/g)) assert.ok(existsSync(join(SITE, m[1])), m[1]);
 });
 
@@ -207,10 +207,13 @@ test("correspondance photos / travaux : état initial, ratissage, coordination, 
     assert.match(cap, /en cours de préparation/, "surfaces encore en préparation signalées");
     assert.doesNotMatch(cap, /peint|peinture/i, "le ratissage n'est pas présenté comme une peinture");
   }
-  assert.deepEqual(b.coordination.files, ["cuisine-grand-volume"], "IMG_4635");
-  assert.deepEqual(b.protections.files, [], "protections : texte seul");
-  assert.deepEqual(b.peintures.files, ["finitions-murales-piece"], "IMG_4645");
-  assert.match(b.peintures.caps[0], /après l&#x27;application des peintures/);
+  for (const k of ["coordination", "protections", "peintures"]) {
+    assert.deepEqual(b[k].files, [], `${k} : présentation textuelle, aucune photographie`);
+    assert.doesNotMatch(b[k].html, /<figure|<img/);
+  }
+  const row = read(FICHE).match(/<div class="rx-steps-row">[\s\S]*?<\/article>/)[0];
+  assert.equal((row.match(/class="rx-step rx-step--mini/g) || []).length, 3, "trois étapes compactes sur une ligne");
+  assert.ok(!/cuisine-grand-volume|finitions-murales-piece|IMG_4635|IMG_4645/.test(read(FICHE)), "ni cuisine aménagée ni pièce terminée dans les phases techniques");
   assert.deepEqual(b.marmorino.files, ["marmorino-application", "marmorino-lustrage", "marmorino-clair-resultat", "marmorino-brun-resultat"]);
   assert.match(b.marmorino.caps[0], /^Application du Marmorino/);
   assert.match(b.marmorino.caps[1], /^Lustrage du Marmorino/);
