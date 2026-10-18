@@ -3321,6 +3321,7 @@ button{ font-family: inherit; font-size: inherit; }
   gap: clamp(22px, 4vw, 52px);
   align-items: center;
 }
+.rx-outro__inner--single{ grid-template-columns: minmax(0, 1fr); }
 .rx-outro h2{ margin: 0 0 14px; font-size: clamp(1.35rem, 2.3vw, 1.9rem); line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
 .rx-outro p{ margin: 0 0 12px; max-width: 58ch; color: rgba(255,255,255,.78); line-height: 1.7; }
 .rx-cta{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
@@ -3328,7 +3329,7 @@ button{ font-family: inherit; font-size: inherit; }
 .rx-links{ margin-top: 16px; font-size: 14.5px; color: var(--muted); }
 .rx-links a{ color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 
-/* Galerie principale : une carte par chantier (la première, mise en avant, occupe toute la largeur) */
+/* Galerie principale : une carte par chantier ; la grille s'adapte au nombre de chantiers (2 ou 3 colonnes) */
 .rx-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; padding-top: 10px; }
 .rx-card{
   position: relative;
@@ -3395,11 +3396,6 @@ button{ font-family: inherit; font-size: inherit; }
   .rx-outro__inner{ grid-template-columns: minmax(0, 1fr); }
   .rx-chapter:nth-child(even) .rx-chapter__text{ order: 0; }
   .rx-chapter__media--narrow{ max-width: none; }
-}
-@media (min-width: 901px){
-  .rx-card--feature{ flex-direction: row; grid-column: 1 / -1; }
-  .rx-card--feature .rx-card__media{ flex: 1.45 1 0; min-width: 0; }
-  .rx-card--feature .rx-card__body{ flex: 1 1 0; justify-content: center; padding: 34px; }
 }
 @media (max-width: 720px){
   .rx-hero{ padding: 28px 0 14px; }
