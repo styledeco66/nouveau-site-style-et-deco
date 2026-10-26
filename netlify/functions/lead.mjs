@@ -46,7 +46,9 @@ const PRIORITY_CALLBACK = "RAPPEL_30_MIN";
 
 const FORMS = new Set(["lead_hero", "lead_contact", "lead_perpignan"]);
 // Blocage côté serveur, commun aux trois formulaires, avant tout envoi Resend.
-const BLOCKED_EMAILS = new Set(["boutrevor@outlook.com"]);
+const BLOCKED_EMAILS = new Set(["boutrevor@outlook.com", "vinceweis@hotmail.com", "jdisanto@aexgroup.net"]);
+// Signature exacte observée dans la campagne : reste bloquée si le robot change d'adresse.
+const BLOCKED_NAMES = new Set(["robertjal"]);
 const MAX_LENGTH = { name: 100, email: 254, city: 100, subject: 150, details: 3000 };
 const EMAIL_PATTERN = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 const SUBMISSION_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -427,6 +429,11 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
 
   if (BLOCKED_EMAILS.has(lead.email.toLowerCase())) {
     console.warn("lead: demande écartée (code: blocked_email)");
+    return fail(400, "invalid_request");
+  }
+
+  if (BLOCKED_NAMES.has(lead.name.toLowerCase())) {
+    console.warn("lead: demande écartée (code: blocked_name)");
     return fail(400, "invalid_request");
   }
 
