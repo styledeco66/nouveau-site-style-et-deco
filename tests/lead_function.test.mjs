@@ -55,7 +55,7 @@ const run = (request, { env = ENV, fetchImpl = makeFetch() } = {}) =>
 test("adresse bloquée : aucun envoi sur les trois formulaires, en devis et rappel, JSON et sans JavaScript", async () => {
   for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
     for (const priority of ["STANDARD", "RAPPEL_30_MIN"]) {
-      for (const email of ["boutrevor@outlook.com", "  BOUTREVOR@OUTLOOK.COM  "]) {
+      for (const email of ["boutrevor@outlook.com", "  BOUTREVOR@OUTLOOK.COM  ", "vinceweis@hotmail.com", "  VINCEWEIS@HOTMAIL.COM  ", "jdisanto@aexgroup.net", "  JDISANTO@AEXGROUP.NET  "]) {
         for (const html of [false, true]) {
           const payload = validDevis({ "form-name": form, lead_priority: priority, email });
           const request = html
@@ -78,6 +78,36 @@ test("adresse bloquée : aucun envoi sur les trois formulaires, en devis et rapp
       }
     }
   }
+});
+
+test("signature de campagne : refus avec une nouvelle adresse et en rappel sans e-mail", async () => {
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    for (const name of ["RobertJal", "  ROBERTJAL  "]) {
+      for (const mode of ["devis", "rappel", "rappel_sans_email"]) {
+        const payload = validDevis({
+          "form-name": form,
+          name,
+          email: mode === "rappel_sans_email" ? "" : "nouvelle-adresse@example.test",
+          lead_priority: mode === "devis" ? "STANDARD" : "RAPPEL_30_MIN",
+        });
+        const fetchImpl = makeFetch();
+        const response = await handleLead(jsonRequest(payload), {
+          env: { ...ENV, CONTEXT: "production", LEAD_CLIENT_CONFIRMATIONS: "on", LEAD_SCHEDULED_REMINDERS: "on" },
+          fetchImpl,
+          now: NOW,
+        });
+        assert.equal(response.status, 400);
+        assert.deepEqual(await response.json(), { ok: false, error: "invalid_request" });
+        assert.equal(fetchImpl.calls.length, 0);
+      }
+    }
+  }
+});
+
+test("le blocage du nom reste exact : un vrai prospect nommé Robert peut envoyer sa demande", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ name: "Robert Martin" })));
+  assert.equal(response.status, 200);
+  assert.equal(fetchImpl.calls.length, 1);
 });
 
 test("le blocage exact laisse passer une autre adresse du même fournisseur", async () => {

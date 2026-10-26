@@ -75,6 +75,12 @@ avant tout appel à Resend : aucune notification, confirmation client ou program
 l'erreur générique de validation ; les journaux contiennent uniquement le code `blocked_email`. Ce contrôle porte sur
 l'adresse déclarée, sans authentifier la personne ; les rappels sans e-mail restent autorisés.
 
+La liste `BLOCKED_NAMES` refuse aussi la signature exacte `RobertJal` observée sur plusieurs spams avec des adresses
+différentes (comparaison sans distinction de casse, espaces en début/fin ignorés). Ce refus porte également sur les rappels
+sans e-mail, avant tout envoi, avec le code de journal `blocked_name`. Les trois adresses connues de cette campagne sont
+bloquées indépendamment du nom. Ces listes ciblent une campagne identifiée ; elles ne remplacent pas un contrôle antirobots
+et peuvent être contournées en changeant à la fois le nom et l'adresse.
+
 Refus (aucun e-mail, réponse d'erreur générique avec le numéro de téléphone) :
 1. **Origine** : `Origin`/`Referer` doit être le site (ou le preview Netlify en contexte `deploy-preview`).
 2. **Honeypot** serveur (`bot-field`, invisible, hors écran, `aria-hidden`), valable aussi pour les appels directs à la function.
