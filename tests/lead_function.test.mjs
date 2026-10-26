@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { config, handleLead } from "../netlify/functions/lead.mjs";
 
-// Toutes les valeurs ci-dessous sont factices : aucune vraie clé ni adresse.
+// Configuration et prospects factices ; seule l'adresse de blocage correspond à la règle du serveur.
 const ENV = {
   RESEND_API_KEY: "re_test_fake_key",
   LEAD_TO_EMAIL: "destinataire@example.test",
@@ -51,6 +51,40 @@ const makeFetch = (response = () => new Response(JSON.stringify({ id: "email_1" 
 
 const run = (request, { env = ENV, fetchImpl = makeFetch() } = {}) =>
   handleLead(request, { env, fetchImpl, now: NOW }).then((response) => ({ response, fetchImpl }));
+
+test("adresse bloquée : aucun envoi sur les trois formulaires, en devis et rappel, JSON et sans JavaScript", async () => {
+  for (const form of ["lead_hero", "lead_contact", "lead_perpignan"]) {
+    for (const priority of ["STANDARD", "RAPPEL_30_MIN"]) {
+      for (const email of ["boutrevor@outlook.com", "  BOUTREVOR@OUTLOOK.COM  "]) {
+        for (const html of [false, true]) {
+          const payload = validDevis({ "form-name": form, lead_priority: priority, email });
+          const request = html
+            ? new Request(`${ORIGIN}/.netlify/functions/lead`, {
+                method: "POST",
+                headers: { origin: ORIGIN, "content-type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(payload),
+              })
+            : jsonRequest(payload);
+          const fetchImpl = makeFetch();
+          const response = await handleLead(request, {
+            env: { ...ENV, CONTEXT: "production", LEAD_CLIENT_CONFIRMATIONS: "on", LEAD_SCHEDULED_REMINDERS: "on" },
+            fetchImpl,
+            now: NOW,
+          });
+          assert.equal(response.status, 400);
+          if (!html) assert.deepEqual(await response.json(), { ok: false, error: "invalid_request" });
+          assert.equal(fetchImpl.calls.length, 0, "ni notification, ni confirmation, ni rappel");
+        }
+      }
+    }
+  }
+});
+
+test("le blocage exact laisse passer une autre adresse du même fournisseur", async () => {
+  const { response, fetchImpl } = await run(jsonRequest(validDevis({ email: "autre-prospect@outlook.com" })));
+  assert.equal(response.status, 200);
+  assert.equal(fetchImpl.calls.length, 1);
+});
 
 test("succès : envoie un e-mail via Resend et répond ok", async () => {
   const { response, fetchImpl } = await run(jsonRequest(validDevis()));

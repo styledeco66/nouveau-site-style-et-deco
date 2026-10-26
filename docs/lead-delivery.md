@@ -67,7 +67,13 @@ refusé (403) et le formulaire affichait l'erreur générique. Corrigé par la l
 
 ## Protection antispam (sans CAPTCHA) et quarantaine
 
-**Principe : seuls des blocages TECHNIQUES refusent une demande ; l'analyse de contenu ne supprime jamais rien.**
+**Principe : les contrôles techniques et la liste d'adresses bloquées peuvent refuser une demande ; l'analyse de contenu ne supprime jamais rien.**
+
+La liste `BLOCKED_EMAILS` dans `netlify/functions/lead.mjs` bloque les adresses explicitement interdites sur les trois
+formulaires, en devis comme en rappel. La comparaison ignore la casse et les espaces en début/fin. Le refus intervient
+avant tout appel à Resend : aucune notification, confirmation client ou programmation de rappel. Le visiteur reçoit
+l'erreur générique de validation ; les journaux contiennent uniquement le code `blocked_email`. Ce contrôle porte sur
+l'adresse déclarée, sans authentifier la personne ; les rappels sans e-mail restent autorisés.
 
 Refus (aucun e-mail, réponse d'erreur générique avec le numéro de téléphone) :
 1. **Origine** : `Origin`/`Referer` doit être le site (ou le preview Netlify en contexte `deploy-preview`).

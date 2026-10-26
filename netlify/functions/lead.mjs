@@ -45,6 +45,8 @@ const REVIEW_PREFIX = "[À VÉRIFIER] ";
 const PRIORITY_CALLBACK = "RAPPEL_30_MIN";
 
 const FORMS = new Set(["lead_hero", "lead_contact", "lead_perpignan"]);
+// Blocage côté serveur, commun aux trois formulaires, avant tout envoi Resend.
+const BLOCKED_EMAILS = new Set(["boutrevor@outlook.com"]);
 const MAX_LENGTH = { name: 100, email: 254, city: 100, subject: 150, details: 3000 };
 const EMAIL_PATTERN = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 const SUBMISSION_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -423,8 +425,13 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   const { lead, invalid } = validateLead(raw);
   if (invalid) return fail(400, "invalid_request");
 
+  if (BLOCKED_EMAILS.has(lead.email.toLowerCase())) {
+    console.warn("lead: demande écartée (code: blocked_email)");
+    return fail(400, "invalid_request");
+  }
+
   // Analyse du contenu (voir netlify/lib/lead-spam.mjs) : elle ne refuse JAMAIS une demande. Une demande suspecte part en
-  // quarantaine (e-mail séparé, voir LEAD_QUARANTINE_EMAIL) ; les seuls refus sont le honeypot et les validations invalides.
+  // quarantaine (e-mail séparé, voir LEAD_QUARANTINE_EMAIL). Le blocage d'adresse est traité avant cette analyse.
   const assessment = assessLead(lead);
   const review = assessment.level === "review" ? assessment : null;
   if (review) console.warn(`lead: demande mise en quarantaine (score ${review.score}, indices: ${review.reasons.join(",")})`);
