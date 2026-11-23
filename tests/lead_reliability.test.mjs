@@ -245,7 +245,8 @@ test("sans context.waitUntil : les envois secondaires sont attendus (jamais de p
   assert.equal(kinds(fetchImpl), "confirm,lead,remind");
 });
 
-test("le gestionnaire Netlify transmet context.waitUntil à la fonction (promesse prolongée, réponse immédiate)", async () => {
+test("le gestionnaire Netlify transmet context.waitUntil à la fonction (promesse prolongée, réponse immédiate)", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: EVENING().getTime() });
   const saved = { fetch: globalThis.fetch, env: { ...process.env } };
   const f = fakeResend();
   const extended = [];

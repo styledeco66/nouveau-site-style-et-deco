@@ -132,7 +132,7 @@ test("maillage : sortants (galerie, page Perpignan, devis) et entrants (accueil,
   assert.match(p, new RegExp(`<a href="\\./realisations/${SLUG}/">ratissage mécanisé, peintures à l'airless et enduits décoratifs Marmorino</a>`));
   assert.match(p, /href="\.\/realisations\/ravalement-facade-immeuble-perpignan\/">Découvrir ce chantier de façade à Perpignan/, "chantier de façade conservé");
   const sc = read("peintre-saint-cyprien/index.html");
-  assert.match(sc, new RegExp(`href="\\.\\./realisations/${SLUG}/">notre chantier de peinture intérieure réalisé à Perpignan</a>`));
+  assert.match(sc, new RegExp(`href="\\.\\./realisations/${SLUG}/">Peinture intérieure d’une maison à Perpignan</a>`));
   assert.doesNotMatch(read("facade-saint-cyprien/index.html"), new RegExp(SLUG), "Façades ne renvoie pas vers le chantier intérieur");
   assert.match(read("facade-saint-cyprien/index.html"), /ravalement-facade-immeuble-perpignan\//, "Façades garde son lien vers la façade");
 });

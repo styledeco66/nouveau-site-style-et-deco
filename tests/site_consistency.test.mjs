@@ -197,8 +197,10 @@ test("le nom commercial est écrit « Style & Déco » dans les titres, métadon
   }
 });
 
-test("les titres stratégiques de la page Saint-Cyprien et les canoniques restent inchangés", () => {
-  assert.ok(read("peintre-saint-cyprien/index.html").includes("<title>Peintre à Saint-Cyprien (66750) | Intérieur, Façade &amp; Devis 24 h</title>"));
+test("le titre et le H1 de Saint-Cyprien ciblent la peinture intérieure", () => {
+  const saintCyprien = read("peintre-saint-cyprien/index.html");
+  assert.ok(saintCyprien.includes("<title>Peintre à Saint-Cyprien (66750) | Peinture intérieure | Style &amp; Déco</title>"));
+  assert.ok(saintCyprien.includes("<h1>Peinture intérieure à Saint-Cyprien (66750)</h1>"));
   assert.ok(read("index.html").includes("<title>Peintre Saint-Cyprien & Perpignan (66) | Style &amp; Déco</title>"));
 });
 
@@ -275,6 +277,9 @@ test("maillage : les pages locales et prestations se renvoient des liens descrip
   const link = (file, href, textPattern) =>
     assert.match(body(file), new RegExp(`<a href="${href.replace(/[./]/g, "\\$&")}">${textPattern}</a>`), `${file} → ${href}`);
   link("index.html", "./peintre-saint-cyprien/", "peintre à Saint-Cyprien");
+  const interiorCard = body("index.html").match(/<article class="card card--service1">[\s\S]*?<\/article>/)?.[0];
+  assert.ok(interiorCard, "carte Peinture intérieure sur l’accueil");
+  assert.match(interiorCard, /<a\b[^>]*\shref="(?:\.\/|\/)peintre-saint-cyprien\/"[^>]*>\s*Peinture intérieure à Saint-Cyprien\s*<\/a>/);
   link("index.html", "./perpignan.html", "peintre à Perpignan");
   link("index.html", "./facade-saint-cyprien/", "ravalement de façade à Saint-Cyprien");
   link("perpignan.html", "./peintre-saint-cyprien/", "Saint-Cyprien");
