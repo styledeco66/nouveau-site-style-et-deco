@@ -127,13 +127,22 @@ test("accueil : « Derniers chantiers » annonce de vraies réalisations ; seule
   for (const dir of ["ravalement-facade-immeuble-perpignan", "peinture-interieure-maison-standing-perpignan"]) assert.ok(existsSync(join(SITE, "realisations", dir, "index.html")));
 });
 
-test("Saint-Cyprien : chantier existant conservé, légende factuelle, aucun résultat ni photographie ajoutés", () => {
+test("Saint-Cyprien : la galerie distingue la préparation de l’appartement et les finitions de la maison à Perpignan", () => {
   const html = read(SAINT_CYPRIEN);
-  assert.equal((html.match(/class="local-photo"/g) || []).length, 1);
-  assert.match(html, /src="\.\.\/assets\/images\/chantier-st-cyprien\.webp"/);
-  assert.match(html, /<p class="local-photo-caption">Chantier à Saint-Cyprien : état du support pendant la préparation, avant l'application des finitions\.<\/p>/);
-  assert.match(html, /<a href="\.\.\/realisations\/peinture-interieure-maison-standing-perpignan\/">notre chantier de peinture intérieure réalisé à Perpignan<\/a>, dans une maison de 300 m²/);
-  assert.match(html, /Cas réel traité en secteur Saint-Cyprien/);
+  const projects = html.match(/<section class="section sc-projects"[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(projects, "section des deux chantiers de peinture intérieure");
+  assert.match(projects, /<div class="gallery">/);
+  const cards = [...projects.matchAll(/<article class="shot(?: shot--link)?">[\s\S]*?<\/article>/g)].map(([card]) => card);
+  assert.equal(cards.length, 2);
+  const [saintCyprien, perpignan] = cards;
+  assert.equal((projects.match(/<img\b/g) || []).length, 2);
+  assert.match(saintCyprien, /<img\b[^>]*src="\.\.\/assets\/images\/chantier-st-cyprien\.webp"[^>]*alt="[^"]*préparation des supports[^"]*Saint-Cyprien"/);
+  assert.match(saintCyprien, /<h3>Appartement à Saint-Cyprien<\/h3>/);
+  assert.match(saintCyprien, /<p>Préparation des murs avant la remise en peinture\./);
+  assert.match(perpignan, /<img\b[^>]*src="\.\.\/assets\/images\/interieur-sejour-murs-blancs-baie-vitree-960\.webp"[^>]*alt="Séjour terminé[^"]*Perpignan"/);
+  assert.match(perpignan, /href="\.\.\/realisations\/peinture-interieure-maison-standing-perpignan\/"/);
+  assert.match(perpignan, /<p>Peinture des murs et plafonds et finitions du séjour après préparation des supports\.<\/p>/);
+  assert.match(html, /<figure class="sc-hero-photo">[\s\S]*?<figcaption>Illustration d’ambiance<\/figcaption>\s*<\/figure>/);
 });
 
 test("accueil : la citation signée devient un engagement de l'entreprise, au pluriel, sans faux témoignage", () => {
