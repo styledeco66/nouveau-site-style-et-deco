@@ -269,7 +269,7 @@
         clearTimeout(depart);
         dossier.classList.toggle("en-pause", !visible);
         /* la boucle commence une fois les feuilles déployées */
-        if (visible && !dossier.classList.contains("is-anime")) depart = setTimeout(function(){ dossier.classList.add("is-anime"); }, 1100);
+        if (visible && !dossier.classList.contains("is-anime")) depart = setTimeout(function(){ dossier.classList.add("is-anime"); }, 650);
       }, {threshold:.35}).observe(dossier);
     }
   }
