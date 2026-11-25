@@ -48,3 +48,11 @@ test("Saint-Nazaire : dans le plan du site et la galerie", () => {
   assert.ok(read("sitemap.xml").includes(`<loc>${URL_FICHE}</loc>`));
   assert.ok(read("realisations/index.html").includes(`href="/realisations/${SLUG}/"`));
 });
+
+test("la carte « Peinture intérieure » de l'accueil mène au chantier de Saint-Nazaire et garde le lien Saint-Cyprien", () => {
+  const home = read("index.html");
+  const debut = home.indexOf("<h3>Peinture intérieure</h3>");
+  const carte = home.slice(debut, home.indexOf("</article>", debut));
+  assert.match(carte, new RegExp(`<a class="lien" href="/realisations/${SLUG}/">Voir un chantier</a>`));
+  assert.match(carte, /<a class="lien" href="\/peintre-saint-cyprien\/">Peinture intérieure à Saint-Cyprien<\/a>/);
+});
