@@ -114,15 +114,18 @@ test("mesure Ads : consentement limité à la mesure et devis transmis une fois 
   assert.equal(command[2].ad_personalization, "denied");
   assert.equal(command[2].analytics_storage, "denied");
   assert.deepEqual(page.scripts, [`https://www.googletagmanager.com/gtag/js?id=${TAG}`]);
-  const options = { pathname: "/merci.html", localStorage: page.localStorage, sessionStorage: page.sessionStorage };
-  assert.equal(conversions(load(options)).length, 0, "visite directe");
-  page.registerQuote(QUOTE_ID);
-  const received = conversions(load(options));
-  assert.equal(received.length, 1);
-  assert.deepEqual(JSON.parse(JSON.stringify(received[0][2])), {
-    send_to: `${TAG}/${QUOTE}`, transaction_id: QUOTE_ID, user_data: {},
-  });
-  assert.equal(conversions(load(options)).length, 0, "actualisation après le premier envoi");
+  const options = { localStorage: page.localStorage, sessionStorage: page.sessionStorage };
+  for (const pathname of ["/merci.html", "/merci", "/merci/"]) {
+    const landing = { ...options, pathname };
+    assert.equal(conversions(load(landing)).length, 0, "visite directe");
+    page.registerQuote(QUOTE_ID);
+    const received = conversions(load(landing));
+    assert.equal(received.length, 1);
+    assert.deepEqual(JSON.parse(JSON.stringify(received[0][2])), {
+      send_to: `${TAG}/${QUOTE}`, transaction_id: QUOTE_ID, user_data: {},
+    });
+    assert.equal(conversions(load(landing)).length, 0, "actualisation après le premier envoi");
+  }
 });
 
 test("mesure Ads : seul le transfert Google remplace le numéro et le retrait restaure la version sans balise", () => {

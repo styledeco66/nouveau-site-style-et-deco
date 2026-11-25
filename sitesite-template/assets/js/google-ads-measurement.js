@@ -55,7 +55,7 @@
   };
 
   const reportPendingQuote = () => {
-    if (window.location.pathname !== "/merci.html" || !validLabel(QUOTE_LABEL)) return;
+    if (!/^\/merci(?:\.html|\/)?$/.test(window.location.pathname) || !validLabel(QUOTE_LABEL)) return;
     const quote = read("sessionStorage", QUOTE_KEY);
     removeQuote();
     if (!validSubmission(quote?.id) || !Number.isFinite(quote.expires) || quote.expires <= Date.now()) return;
@@ -90,7 +90,7 @@
 
   const clearSiteAdsStorage = () => {
     try { window.localStorage.removeItem("_gcl_ls"); } catch (_) { /* stockage désactivé */ }
-    document.cookie.split(";").map((part) => part.trim().split("=")[0]).filter((key) => /^_gcl_\w+$/.test(key)).forEach((key) => {
+    document.cookie.split(";").map((part) => part.trim().split("=")[0]).filter((key) => /^_gcl_\w+$/.test(key) || key === "gwcc").forEach((key) => {
       document.cookie = `${key}=; Max-Age=0; Path=/; Secure; SameSite=Lax`;
       document.cookie = `${key}=; Max-Age=0; Path=/; Domain=styleetdeco.fr; Secure; SameSite=Lax`;
     });
