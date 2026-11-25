@@ -39,5 +39,13 @@
   "Illustration d'ambiance, non issue d'un chantier réalisé.",
   "4,9 /5 sur Google · 16 avis clients (s'ouvre dans un nouvel onglet)",
   "Assurés en responsabilité civile professionnelle et en décennale, pour les activités déclarées à nos contrats. Attestations sur demande."
+ ],
+ "legal/politique-confidentialite.html": [
+  "À date, aucun outil de mesure d’audience (Google Tag Manager / Google Analytics) n’est actif sur le site.",
+  "Mesurer l’audience uniquement si un outil analytics est activé ultérieurement.",
+  "Analytics: sans objet à date (pas d’outil de mesure d’audience actif).",
+  "À date, aucun cookie de mesure d’audience non essentiel n’est activé sur ce site.",
+  "Si un outil analytics (ex. Google Analytics via Google Tag Manager) est activé ultérieurement, son déclenchement sera conditionné au recueil du consentement préalable de l’utilisateur.",
+  "Le consentement pourra être retiré à tout moment via l’outil de gestion du consentement qui sera mis en place, ainsi que via les paramètres du navigateur."
  ]
 }

@@ -409,7 +409,7 @@
     var b = this;
     function ok(){ b.textContent = "Numéro copié"; setTimeout(function(){ b.textContent = "Copier le numéro"; }, 2000); }
     function choisir(){ var r = document.createRange(); r.selectNodeContents($(".dlg .numero")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
-    try { navigator.clipboard.writeText("06 50 75 62 42").then(ok, choisir); } catch(_){ choisir(); }
+    try { navigator.clipboard.writeText($(".dlg .numero").textContent.trim()).then(ok, choisir); } catch(_){ choisir(); }
   });
   }
 

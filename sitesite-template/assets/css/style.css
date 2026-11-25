@@ -1115,3 +1115,49 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
 .dossier.is-anime .feuille__sceau{animation:tampon 8s cubic-bezier(.2,.9,.3,1.3) infinite}
 @keyframes tampon{0%,56%{opacity:0;transform:rotate(-18deg) scale(2.6)}61%{opacity:1;transform:rotate(-6deg) scale(.92)}64%,88%{opacity:1;transform:rotate(-6deg) scale(1.25)}95%,100%{opacity:0;transform:rotate(-6deg) scale(1)}}
 .dossier.en-pause .feuille,.dossier.en-pause .feuille *,.dossier.en-pause .feuille__ligne i::after{animation-play-state:paused!important}
+
+.ads-consent {
+  position: fixed;
+  z-index: 45;
+  inset: auto max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) auto;
+  width: min(400px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid var(--trait);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--nuit);
+  box-shadow: 0 6px 26px rgb(11 35 68 / 18%);
+  font-size: 14px;
+}
+.ads-consent h2 { margin: 0 0 6px; font-size: 18px; }
+.ads-consent p { margin: 0 0 14px; }
+.ads-consent__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.ads-consent__actions button {
+  min-height: 44px;
+  padding: 6px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--nuit);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ads-consent a { color: inherit; text-decoration: underline; }
+.ads-consent-settings {
+  align-self: center;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ads-consent button:focus-visible, .ads-consent a:focus-visible, .ads-consent-settings:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
