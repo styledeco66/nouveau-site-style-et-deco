@@ -133,11 +133,21 @@ class LeadFormMarkupTests(unittest.TestCase):
         app = (SITE / "assets" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertNotIn("form_submit_", app)
 
-    def test_csp_still_restricts_form_actions_and_connections_to_same_origin(self):
+    def test_csp_restricts_form_actions_and_limits_connections_to_google_ads(self):
         headers = (SITE / "_headers").read_text(encoding="utf-8")
         self.assertIn("form-action 'self'", headers)
         self.assertIn("default-src 'self'", headers)
-        self.assertNotIn("connect-src", headers)  # repli sur default-src 'self'
+        source = headers.split("connect-src ", 1)[1].split(";", 1)[0].split()
+        self.assertEqual(set(source), {
+            "'self'",
+            "https://www.googletagmanager.com",
+            "https://www.googleadservices.com",
+            "https://googleads.g.doubleclick.net",
+            "https://pagead2.googlesyndication.com",
+            "https://www.google.com",
+            "https://www.google.fr",
+            "https://ad.doubleclick.net",
+        })
 
 
 class LeadDeliveryConfigTests(unittest.TestCase):

@@ -77,7 +77,7 @@ test("accueil : les neuf questions de la FAQ d'origine sont présentes et les se
   }
 });
 
-test("sécurité : aucune ressource externe ni script incorporé (la politique CSP du site n'autorise que 'self')", () => {
+test("sécurité : aucune ressource externe dans les pages ni script incorporé, CSP restreinte", () => {
   for (const page of [...PAGES, "merci.html", "merci-rappel.html", "lead-rate-limited.html"]) {
     const html = read(page);
     assert.doesNotMatch(html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, ""), /<script(?![^>]*\bsrc=)[^>]*>/, `${page} : script incorporé`);
@@ -93,11 +93,14 @@ test("sécurité : aucune ressource externe ni script incorporé (la politique C
   assert.doesNotMatch(css, /@import/, "CSS : aucun @import");
   for (const f of ["plus-jakarta-sans-latin.woff2", "plus-jakarta-sans-latin-ext.woff2"]) assert.ok(existsSync(path.join(SITE, "assets/fonts", f)), f);
   const headers = read("_headers");
-  assert.match(headers, /Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self'/);
+  const csp = headers.match(/Content-Security-Policy: (.+)/)[1];
+  assert.match(csp, /^default-src 'self';/);
+  assert.match(csp, /; script-src 'self' https:\/\/www\.googletagmanager\.com https:\/\/www\.googleadservices\.com https:\/\/www\.google\.com https:\/\/www\.gstatic\.com;/);
+  assert.match(csp, /; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none';/);
 });
 
 test("JavaScript : app.js, lead-form.js et business-hours.js sont du code valide", () => {
-  for (const f of ["app.js", "lead-form.js", "business-hours.js", "merci.js"]) new vm.Script(read(`assets/js/${f}`), { filename: f });
+  for (const f of ["app.js", "lead-form.js", "business-hours.js", "merci.js", "google-ads-measurement.js"]) new vm.Script(read(`assets/js/${f}`), { filename: f });
 });
 
 const FORMS_SERVEUR = new Set([...readFileSync(path.join(ROOT, "netlify/functions/lead.mjs"), "utf8").match(/const ORIGIN_LABELS = \{([\s\S]*?)\};/)[1].matchAll(/^\s*(lead_[a-z_]+):/gm)].map((m) => m[1]));
@@ -122,7 +125,7 @@ test("formulaires : chaque formulaire envoie à la fonction « lead » avec un n
     }
     if (/<form\b/.test(html)) {
       const order = [...html.matchAll(/<script src="[^"]*assets\/js\/([a-z-]+)\.js\?v=[0-9a-f]{10}"/g)].map((m) => m[1]);
-      assert.deepEqual(order, ["lead-form", "business-hours", "app"], `${page} : scripts dans l'ordre`);
+      assert.deepEqual(order, ["lead-form", "business-hours", "app", "google-ads-measurement"], `${page} : scripts dans l'ordre`);
     }
   }
   assert.ok(total >= 20, `formulaires trouvés : ${total}`);

@@ -34,7 +34,10 @@
       if (!response.ok) return null;
       const result = await response.json();
       if (!result || result.ok !== true) return null;
-      return { next: typeof result.next === "string" && SUCCESS_PATTERN.test(result.next) ? result.next : SUCCESS_URL };
+      return {
+        kind: result.kind,
+        next: typeof result.next === "string" && SUCCESS_PATTERN.test(result.next) ? result.next : SUCCESS_URL,
+      };
     } catch (error) {
       return null;
     }
@@ -85,6 +88,9 @@
           event: priority === "RAPPEL_30_MIN" ? "form_submit_callback" : "form_submit_devis",
           lead_priority: priority
         });
+        if (delivered.kind === "devis" && delivered.next === SUCCESS_URL) {
+          window.StyleDecoAds?.registerQuote(form.dataset.submissionId);
+        }
         redirect(delivered.next);
         return;
       }

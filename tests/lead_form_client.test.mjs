@@ -7,8 +7,8 @@ const SOURCE = new URL("../sitesite-template/assets/js/lead-form.js", import.met
 const ERROR_MESSAGE =
   "Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.";
 
-const loadModule = () => {
-  const window = {};
+const loadModule = (ads) => {
+  const window = { StyleDecoAds: ads };
   vm.runInNewContext(readFileSync(SOURCE, "utf8"), { window, crypto: globalThis.crypto, AbortSignal });
   return window.StyleDecoLeadForm;
 };
@@ -83,6 +83,23 @@ test("rappel : événement form_submit_callback", async () => {
   bindLeadForm(form, deps);
   await form.submit();
   assert.deepEqual(plain(deps.dataLayer), [{ event: "form_submit_callback", lead_priority: "RAPPEL_30_MIN" }]);
+});
+
+test("mesure Ads : seul un devis dont l’envoi est confirmé transmet l’identifiant aléatoire", async () => {
+  const adsIds = [];
+  const { bindLeadForm } = loadModule({ registerQuote(id) { adsIds.push(id); } });
+  for (const [status, result] of [
+    [502, { ok: false }],
+    [200, { ok: true, kind: "callback", next: "/merci-rappel.html?s=30" }],
+    [200, { ok: true, kind: "devis", next: "/merci.html" }],
+  ]) {
+    const form = makeForm(baseFields);
+    const deps = makeDeps(async () => new Response(JSON.stringify(result), { status }));
+    bindLeadForm(form, deps);
+    await form.submit();
+    if (result.kind === "devis") assert.deepEqual(adsIds, [form.dataset.submissionId]);
+    else assert.deepEqual(adsIds, []);
+  }
 });
 
 const failures = {
