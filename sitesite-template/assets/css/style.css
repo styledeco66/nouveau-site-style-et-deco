@@ -1067,3 +1067,6 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
   .avap{gap:30px;margin-bottom:64px}
   .avap__paire{grid-template-columns:minmax(0,1fr);gap:6px}
 }
+
+/* Défilé enrichi (12 photos au lieu de 7) : durée allongée pour garder la même vitesse */
+.piste.piste--longue{animation-duration:62s}

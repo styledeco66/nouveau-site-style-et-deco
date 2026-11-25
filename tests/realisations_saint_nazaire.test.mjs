@@ -56,3 +56,21 @@ test("la carte « Peinture intérieure » de l'accueil mène au chantier de Sain
   assert.match(carte, new RegExp(`<a class="lien" href="/realisations/${SLUG}/">Voir un chantier</a>`));
   assert.match(carte, /<a class="lien" href="\/peintre-saint-cyprien\/">Peinture intérieure à Saint-Cyprien<\/a>/);
 });
+
+test("défilé de photos : les trois nouveaux chantiers y figurent, avec une copie masquée pour la boucle (Perpignan gelée)", () => {
+  for (const page of ["index.html", "peintre-saint-cyprien/index.html", "facade-saint-cyprien/index.html", "realisations/index.html"]) {
+    const html = read(page);
+    const debut = html.indexOf('<div class="piste piste--longue">');
+    assert.ok(debut > 0, page);
+    const piste = html.slice(debut, html.indexOf("</div>", debut));
+    const figures = [...piste.matchAll(/<figure( aria-hidden="true")?><img[^>]*src="([^"]+)"/g)];
+    const visibles = figures.filter((f) => !f[1]).map((f) => f[2]);
+    const copies = figures.filter((f) => f[1]).map((f) => f[2]);
+    assert.equal(visibles.length, 12, page);
+    assert.deepEqual(copies, visibles, `${page} : copie identique`);
+    for (const dossier of ["peinture-local-saint-nazaire", "sol-maison-estagel", "sol-aspect-parquet-local-perpignan"]) {
+      assert.ok(visibles.some((s) => s.includes(dossier)), `${page} : ${dossier}`);
+    }
+    for (const src of visibles) assert.ok(existsSync(path.join(SITE, path.dirname(page), src)), `${page} : ${src}`);
+  }
+});
