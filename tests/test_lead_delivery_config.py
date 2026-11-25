@@ -8,9 +8,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "sitesite-template"
 ENDPOINT = "/.netlify/functions/lead"
+# Pages contenant un formulaire de contact complet (devis / rappel) et, avec lui, la carte de rappel du haut de page et la
+# fenêtre d'appel (formulaires de rappel seul : nom et téléphone, e-mail absent).
 FORMS = {
     "index.html": {"lead_hero", "lead_contact"},
     "perpignan.html": {"lead_perpignan"},
+    "peintre-saint-cyprien/index.html": {"lead_saint_cyprien"},
+    "facade-saint-cyprien/index.html": {"lead_facades"},
+    "realisations/index.html": {"lead_realisations"},
 }
 ENV_VARIABLES = ["RESEND_API_KEY", "LEAD_TO_EMAIL", "LEAD_FROM_EMAIL", "LEAD_ALLOWED_ORIGINS"]
 
@@ -76,6 +81,9 @@ class LeadFormMarkupTests(unittest.TestCase):
             for form in parse(page).forms:
                 name = form["attrs"].get("name")
                 emails = [i for i in form["inputs"] if i.get("name") == "email"]
+                if "data-fixed-mode" in form["attrs"]:
+                    self.assertEqual(emails, [], name)  # rappel seul : nom et téléphone
+                    continue
                 self.assertEqual(len(emails), 1, name)
                 email = emails[0]
                 self.assertEqual(email.get("type"), "email", name)

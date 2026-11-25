@@ -39,12 +39,16 @@ const ORIGIN_LABELS = {
   lead_hero: "Accueil (formulaire du haut de page)",
   lead_contact: "Accueil (formulaire de contact)",
   lead_perpignan: "Page Perpignan",
+  lead_saint_cyprien: "Page Peintre Saint-Cyprien",
+  lead_facades: "Page Façades Saint-Cyprien",
+  lead_realisations: "Pages Réalisations",
+  lead_autres_pages: "Autres pages (mentions légales, confidentialité)",
 };
 const SUBJECT_DEVIS_PERPIGNAN = "📩 DEMANDE DE DEVIS - Perpignan";
 const REVIEW_PREFIX = "[À VÉRIFIER] ";
 const PRIORITY_CALLBACK = "RAPPEL_30_MIN";
 
-const FORMS = new Set(["lead_hero", "lead_contact", "lead_perpignan"]);
+const FORMS = new Set(Object.keys(ORIGIN_LABELS));
 // Blocage côté serveur, commun aux trois formulaires, avant tout envoi Resend.
 const BLOCKED_EMAILS = new Set(["boutrevor@outlook.com", "vinceweis@hotmail.com", "jdisanto@aexgroup.net"]);
 // Signature exacte observée dans la campagne : reste bloquée si le robot change d'adresse.

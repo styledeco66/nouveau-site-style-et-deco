@@ -96,7 +96,12 @@ test("l'empreinte change quand le contenu change, et seules les pages concernée
 
     const updated = run({ siteRoot: site, write: true });
     assert.deepEqual(updated.problems, []);
-    assert.deepEqual(updated.changed.sort(), ["index.html", "perpignan.html"]);
+    const loading = [
+      "index.html", "perpignan.html", "peintre-saint-cyprien/index.html", "facade-saint-cyprien/index.html", "realisations/index.html",
+      "realisations/ravalement-facade-immeuble-perpignan/index.html", "realisations/peinture-interieure-maison-standing-perpignan/index.html",
+      "legal/mentions-legales.html", "legal/politique-confidentialite.html",
+    ];
+    assert.deepEqual(updated.changed.sort(), loading.sort(), "toutes les pages qui chargent lead-form.js (formulaire ou fenêtre d'appel), et elles seules");
     assert.match(read(path.join(site, "index.html")), new RegExp(`lead-form\\.js\\?v=${fingerprint(lead)}`));
     assert.match(read(path.join(site, "index.html")), new RegExp(`style\\.css\\?v=${cssBefore}`));
     assert.deepEqual(run({ siteRoot: site }).problems, []);
