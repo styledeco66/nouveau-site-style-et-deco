@@ -235,10 +235,10 @@
     o.observe(liste);
   });
 
-  /* Assurances : le titre se surligne et les documents s'animent en boucle tant qu'ils sont à l'écran.
-     La page Perpignan reste inchangée (mesure SEO en cours). */
+  /* Assurances : le titre se surligne et les documents s'animent en boucle tant qu'ils sont à l'écran,
+     de la même façon sur toutes les pages qui ont cette section. */
   var assur = document.getElementById("assurances");
-  if (assur && !reduit && "IntersectionObserver" in window && !/\/perpignan(\.html)?\/?$/.test(location.pathname)){
+  if (assur && !reduit && "IntersectionObserver" in window){
     var titre = document.getElementById("titre-assurances"), cible = "nous vous le prouvons";
     var texte = titre ? titre.textContent : "", ou = texte.indexOf(cible);
     if (ou >= 0 && !titre.children.length){
