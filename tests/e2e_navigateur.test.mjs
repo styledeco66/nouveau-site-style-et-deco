@@ -115,7 +115,7 @@ const attr = (dom, name) => (dom.match(new RegExp(`data-${name}="([^"]*)"`)) || 
 
 const PAGES = [
   "/", "/peintre-saint-cyprien/", "/facade-saint-cyprien/", "/perpignan.html", "/realisations/",
-  "/realisations/ravalement-facade-immeuble-perpignan/", "/realisations/peinture-interieure-maison-standing-perpignan/",
+  "/realisations/ravalement-facade-immeuble-perpignan/", "/realisations/peinture-interieure-maison-standing-perpignan/", "/realisations/pose-parquet-local-commercial-perpignan/", "/realisations/pose-sol-maison-estagel/",
   "/legal/mentions-legales.html", "/legal/politique-confidentialite.html", "/merci.html", "/merci-rappel.html?s=30",
 ];
 
