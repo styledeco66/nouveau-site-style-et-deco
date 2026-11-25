@@ -383,16 +383,9 @@
     if ($("#contact")) new IntersectionObserver(function(es){ dansContact = es[0].isIntersecting; majFlottants(); }, {threshold:.2}).observe($("#contact"));
   } else { horsHeros = true; majFlottants(); }
   /* Mur d'avis : une seule série d'avis dans la page ; la boucle continue est créée ici (le texte n'est pas dupliqué dans le HTML) */
-  var etroit = window.matchMedia("(max-width: 720px)").matches;
   var rangees = $$(".rangee");
-  if (etroit && rangees.length > 1){
-    /* Téléphone : les six avis dans une seule rangée, à faire glisser du doigt */
-    $$(".carte-avis", rangees[1]).forEach(function(c){ rangees[0].appendChild(c); });
-    rangees[1].hidden = true;
-    rangees = [rangees[0]];
-  }
   rangees.forEach(function(r){
-    if (reduit || etroit) return;
+    if (reduit) return;
     $$(".carte-avis", r).forEach(function(c){ var k = c.cloneNode(true); k.setAttribute("aria-hidden", "true"); $$("a", k).forEach(function(a){ a.tabIndex = -1; }); r.appendChild(k); });
     r.classList.add("is-boucle");
   });
