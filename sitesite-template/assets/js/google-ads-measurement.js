@@ -2,7 +2,10 @@
   const ADS_TAG_ID = "AW-18396032487";
   const QUOTE_LABEL = "DFs4CJqrvr8dEOfb9MNE";
   const CALL_LABEL = "";
-  const CONSENT_KEY = "styledeco-ads-consent-v1";
+  const CONSENT_KEY = "styledeco-ads-consent-v2";
+  const LEGACY_CONSENT_KEY = "styledeco-ads-consent-v1";
+  const PAID_VISIT_KEY = "styledeco-ads-paid-visit";
+  const PAID_VISIT_DURATION = 30 * 60 * 1000;
   const QUOTE_KEY = "styledeco-ads-quote-v1";
   const CONSENT_DURATION = 180 * 24 * 60 * 60 * 1000;
   const QUOTE_DURATION = 5 * 60 * 1000;
@@ -24,18 +27,43 @@
     try { window[storageName].setItem(key, JSON.stringify(data)); } catch (_) { /* stockage désactivé */ }
   };
 
-  const removeQuote = () => {
-    try { window.sessionStorage.removeItem(QUOTE_KEY); } catch (_) { /* stockage désactivé */ }
+  const remove = (storageName, key) => {
+    try { window[storageName].removeItem(key); } catch (_) { /* stockage désactivé */ }
   };
 
-  const getConsent = () => {
-    const preference = read("localStorage", CONSENT_KEY);
+  const endPaidVisit = () => {
+    remove("sessionStorage", PAID_VISIT_KEY);
+    remove("sessionStorage", QUOTE_KEY);
+  };
+
+  const getPreference = (key) => {
+    const preference = read("localStorage", key);
     if (!preference || !["granted", "denied"].includes(preference.choice)) return null;
     if (!Number.isFinite(preference.expires) || preference.expires <= Date.now()) return null;
     return preference.choice;
   };
 
+  // Un ancien refus reste valable. Un ancien accord ne suffit pas pour ce nouveau parcours.
+  const getConsent = () => getPreference(CONSENT_KEY) || (getPreference(LEGACY_CONSENT_KEY) === "denied" ? "denied" : null);
   let consent = getConsent();
+  const hasPriorChoice = consent !== null || getPreference(LEGACY_CONSENT_KEY) === "granted";
+
+  if ((!production && !preview) || !configured) return;
+
+  // La présence d'un identifiant plausible permet de proposer le choix. Google vérifie l'attribution.
+  const query = new URLSearchParams(window.location.search);
+  const paidLanding = ["gclid", "gbraid", "wbraid"].some((key) => {
+    const values = query.getAll(key);
+    return values.length === 1 && /^[A-Za-z0-9_-]{6,512}$/.test(values[0]);
+  });
+  const hasActivePaidVisit = () => {
+    const expires = read("sessionStorage", PAID_VISIT_KEY);
+    return Number.isFinite(expires) && expires > Date.now();
+  };
+  // Le référent ne peut que prolonger une visite déjà établie dans cet onglet après accord.
+  const continuesPaidVisit = consent === "granted" && document.referrer.startsWith(window.location.origin + "/") && hasActivePaidVisit();
+  const paidPath = paidLanding || continuesPaidVisit;
+  if (paidLanding || !continuesPaidVisit) endPaidVisit();
 
   const setPhone = (formatted, plain) => {
     if (consent !== "granted" || typeof formatted !== "string" || typeof plain !== "string") return;
@@ -57,14 +85,15 @@
   const reportPendingQuote = () => {
     if (!/^\/merci(?:\.html|\/)?$/.test(window.location.pathname) || !validLabel(QUOTE_LABEL)) return;
     const quote = read("sessionStorage", QUOTE_KEY);
-    removeQuote();
+    remove("sessionStorage", QUOTE_KEY);
     if (!validSubmission(quote?.id) || !Number.isFinite(quote.expires) || quote.expires <= Date.now()) return;
     window.gtag("event", "conversion", { send_to: `${ADS_TAG_ID}/${QUOTE_LABEL}`, transaction_id: quote.id, user_data: {} });
   };
 
   const startTag = () => {
-    if (!production || !configured || consent !== "granted" || tagStarted) return;
+    if (!production || !paidPath || consent !== "granted" || tagStarted) return;
     tagStarted = true;
+    write("sessionStorage", PAID_VISIT_KEY, Date.now() + PAID_VISIT_DURATION);
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
     window.gtag("consent", "default", DENIED);
@@ -98,12 +127,12 @@
 
   window.StyleDecoAds = {
     registerQuote(id) {
-      if (!tagStarted || consent !== "granted" || !validLabel(QUOTE_LABEL) || !validSubmission(id)) return;
+      if (!tagStarted || consent !== "granted" || !hasActivePaidVisit() || !validLabel(QUOTE_LABEL) || !validSubmission(id)) return;
       write("sessionStorage", QUOTE_KEY, { id, expires: Date.now() + QUOTE_DURATION });
     },
   };
 
-  if ((!production && !preview) || !configured) return;
+  if (!paidPath && !hasPriorChoice) return;
 
   const settings = document.createElement("button");
   settings.type = "button";
@@ -115,16 +144,24 @@
   panel.className = "ads-consent";
   panel.setAttribute("aria-labelledby", "ads-consent-title");
   const actions = validLabel(CALL_LABEL) ? "les devis et les appels" : "les demandes de devis";
-  panel.innerHTML = `
+  panel.innerHTML = paidPath ? `
     <h2 id="ads-consent-title">Mesure publicitaire</h2>
-    <p>Avec votre accord, Google Ads mesure ${actions} que génèrent nos annonces. Vous pouvez changer votre choix à tout moment.</p>
+    <p>Vous arrivez depuis un lien de nos annonces. Avec votre accord, Google Ads mesure ${actions} pendant cette visite. Vous pouvez changer votre choix à tout moment.</p>
     <div class="ads-consent__actions">
       <button type="button" data-choice="denied">Refuser</button>
       <button type="button" data-choice="granted">Accepter</button>
     </div>
     <a href="/legal/politique-confidentialite.html#cookies">Politique de confidentialité</a>
+  ` : `
+    <h2 id="ads-consent-title">Gestion des cookies</h2>
+    <p>Vous pouvez retirer un accord enregistré pour les visites issues de nos annonces.</p>
+    <div class="ads-consent__actions">
+      <button type="button" data-choice="denied">Retirer mon accord</button>
+      <button type="button" data-dismiss>Fermer</button>
+    </div>
+    <a href="/legal/politique-confidentialite.html#cookies">Politique de confidentialité</a>
   `;
-  panel.hidden = consent !== null;
+  panel.hidden = !paidLanding || consent !== null;
   document.body.append(panel);
 
   let trigger;
@@ -138,31 +175,37 @@
     button.hidden = false;
     button.addEventListener("click", openPanel);
   });
+  const closePanel = () => {
+    panel.hidden = true;
+    trigger?.focus();
+    trigger = undefined;
+  };
+  panel.querySelector("[data-dismiss]")?.addEventListener("click", closePanel);
   panel.querySelectorAll("[data-choice]").forEach((button) => button.addEventListener("click", () => {
+    if (button.dataset.choice === "granted" && !paidPath) return;
     consent = button.dataset.choice;
     write("localStorage", CONSENT_KEY, { choice: consent, expires: Date.now() + CONSENT_DURATION });
+    remove("localStorage", LEGACY_CONSENT_KEY);
     if (consent === "granted") startTag();
     if (consent === "denied") {
-      removeQuote();
+      endPaidVisit();
       if (production) clearSiteAdsStorage();
       // Un nouveau document décharge le code Google et rétablit les numéros d’origine.
       if (tagStarted) window.location.reload();
     }
-    panel.hidden = true;
-    trigger?.focus();
-    trigger = undefined;
+    closePanel();
   }));
 
   const refreshConsent = () => {
-    if (tagStarted && getConsent() !== "granted") {
-      consent = "denied";
-      removeQuote();
-      clearSiteAdsStorage();
-      window.location.reload();
-    }
+    if (!tagStarted) return;
+    consent = getConsent();
+    if (consent === "granted" && hasActivePaidVisit()) return;
+    endPaidVisit();
+    if (consent !== "granted") clearSiteAdsStorage();
+    window.location.reload();
   };
   window.addEventListener("storage", (event) => {
-    if (event.key === CONSENT_KEY || event.key === null) refreshConsent();
+    if (event.key === CONSENT_KEY || event.key === LEGACY_CONSENT_KEY || event.key === null) refreshConsent();
   });
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) refreshConsent();
