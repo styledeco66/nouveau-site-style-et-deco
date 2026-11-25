@@ -218,6 +218,12 @@
     </image:image>
   </url>
   <url>
+    <loc>https://styleetdeco.fr/en-bref/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://styleetdeco.fr/legal/mentions-legales.html</loc>
     <lastmod>2026-10-13</lastmod>
     <changefreq>yearly</changefreq>

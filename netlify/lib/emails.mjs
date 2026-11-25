@@ -26,7 +26,7 @@ export const BRAND = {
   siteLabel: "styleetdeco.fr",
   // Preuves affichées dans les e-mails clients : mêmes valeurs que scripts/google-reviews.json (un test vérifie l'égalité).
   googleRating: "4,9",
-  googleCount: 16,
+  googleCount: 17,
 };
 
 const C = {

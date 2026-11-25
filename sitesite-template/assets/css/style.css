@@ -303,6 +303,7 @@ button,input,textarea{font:inherit;color:inherit}
 .final .btn--ligne{color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
 .pied{background:var(--nuit-fonce);color:var(--brume);font-size:14px}
 .pied .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-block:28px 120px}
+.pied__activite{flex-basis:100%;margin:0 0 6px;max-width:none;color:#fff}
 
 /* Flottants */
 .flottant{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:40;transform:translateY(160%);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
