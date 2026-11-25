@@ -989,3 +989,11 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
   .h-suite{font-size:.58em;margin-top:.35em}
   h3 .h-suite{font-size:.82em}
 }
+
+/* Boutons « Voir sur Google », « Vérifier sur Google », « Lire les autres avis » : même effet que « laisser un avis » (l'orange arrive des deux côtés vers le centre) */
+.verifier,.avis-heros__lien{display:inline-flex;align-items:center;text-decoration:none;border-radius:999px;padding:6px 14px;border:1.5px solid var(--orange);color:var(--orange-fonce);
+  background:linear-gradient(var(--orange),var(--orange)) left center/0 100% no-repeat, linear-gradient(var(--orange),var(--orange)) right center/0 100% no-repeat, transparent;
+  transition:background-size .4s cubic-bezier(.2,.8,.2,1), color .2s ease .2s}
+.avis-heros__lien{color:#fff;border-color:rgba(255,255,255,.55)}
+.verifier:hover,.verifier:active,.verifier:focus-visible,.avis-heros__lien:hover,.avis-heros__lien:active,.avis-heros__lien:focus-visible{background-size:51% 100%,51% 100%,auto;color:#fff;border-color:var(--orange)}
+@media (prefers-reduced-motion: reduce){ .verifier,.avis-heros__lien{transition:none} }

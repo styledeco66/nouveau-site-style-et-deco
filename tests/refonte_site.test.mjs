@@ -282,3 +282,10 @@ test("titres : le complément après un tiret passe sur une seconde ligne sans t
   assert.match(home, /<span class="h-suite"><span class="h-tiret" aria-hidden="true">— <\/span>un artisan local à votre service<\/span>/);
   assert.ok(plain(home).includes("Saint-Cyprien — un artisan local à votre service"));
 });
+
+test("boutons d'avis : tous les boutons Google (laisser un avis, voir sur Google, vérifier) ont l'effet de remplissage orange", () => {
+  const css = read("assets/css/style.css");
+  assert.match(css, /\.laisser-avis__lien:hover \.laisser-avis__btn/);
+  assert.match(css, /\.verifier,\.avis-heros__lien\{[^}]*background:linear-gradient/);
+  assert.match(css, /\.verifier:hover[^{]*\{background-size:51% 100%/);
+});
