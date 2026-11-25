@@ -15,7 +15,7 @@ const decode = (t) => t.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&g
 
 const FICHES = [
   { slug: "pose-parquet-local-commercial-perpignan", dir: "pose-parquet-local-perpignan", lieu: "Perpignan", photos: 10 },
-  { slug: "pose-sol-maison-estagel", dir: "sol-maison-estagel", lieu: "Estagel", photos: 12 },
+  { slug: "pose-sol-maison-estagel", dir: "sol-maison-estagel", lieu: "Estagel", photos: 22 },
 ];
 
 /** Largeur et hauteur d'un WebP (VP8 / VP8L / VP8X). */
