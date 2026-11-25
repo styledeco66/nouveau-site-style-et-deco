@@ -998,14 +998,16 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
 .verifier:hover,.verifier:active,.verifier:focus-visible,.avis-heros__lien:hover,.avis-heros__lien:active,.avis-heros__lien:focus-visible{background-size:51% 100%,51% 100%,auto;color:#fff;border-color:var(--orange)}
 @media (prefers-reduced-motion: reduce){ .verifier,.avis-heros__lien{transition:none} }
 
-/* ---------- Téléphone et tablette : avis à faire glisser, étape par étape avec photo fixe ---------- */
+/* ---------- Téléphone : mêmes avis qui défilent, en cartes plus petites ---------- */
 @media (max-width: 720px){
-  .avis .rangee{flex-wrap:nowrap;justify-content:flex-start;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px;padding:4px 16px 18px;margin-bottom:0;scrollbar-width:none}
-  .avis .rangee::-webkit-scrollbar{display:none}
-  .avis .carte-avis{flex:0 0 86%;width:86%;scroll-snap-align:center;padding:24px 22px;gap:14px}
-  .avis .carte-avis p{display:block;overflow:visible;-webkit-line-clamp:unset;font-size:17px;line-height:1.55}
-  .avis .carte-avis .etoiles{font-size:20px}
-  .avis .carte-avis[aria-hidden="true"]{display:none}
+  .avis .carte-avis{width:252px;padding:16px 16px 14px;gap:8px;border-radius:12px}
+  .avis .carte-avis p{font-size:14px;line-height:1.45;-webkit-line-clamp:7}
+  .avis .carte-avis .etoiles{font-size:15px}
+  .avis .carte-avis footer{flex-wrap:wrap;gap:6px 8px;font-size:13px}
+  .avis .carte-avis footer span{width:28px;height:28px;font-size:11px}
+  .avis .carte-avis footer small{font-size:12px}
+  .avis .carte-avis .verifier{margin-left:0;font-size:11px;padding:4px 10px}
+  .avis .rangee{gap:12px;margin-bottom:12px}
 }
 @media (max-width: 1000px){
   /* La photo reste en haut de l'écran et change à chaque étape, comme sur ordinateur */

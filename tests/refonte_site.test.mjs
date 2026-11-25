@@ -290,12 +290,12 @@ test("boutons d'avis : tous les boutons Google (laisser un avis, voir sur Google
   assert.match(css, /\.verifier:hover[^{]*\{background-size:51% 100%/);
 });
 
-test("téléphone : avis à faire glisser (une rangée, pas de défilement automatique) et photo fixe de l'étape par étape", () => {
+test("téléphone : les avis défilent comme sur ordinateur, en cartes plus petites ; photo fixe de l'étape par étape", () => {
   const css = read("assets/css/style.css");
-  assert.match(css, /\.avis \.rangee\{[^}]*overflow-x:auto;scroll-snap-type:x mandatory/);
-  assert.match(css, /\.avis \.carte-avis p\{[^}]*-webkit-line-clamp:unset/);
+  assert.match(css, /\.avis \.carte-avis\{width:252px/);
+  assert.doesNotMatch(css, /\.avis \.rangee\{[^}]*scroll-snap-type/, "plus de rangée à faire glisser");
   assert.match(css, /\.etapes__visuel\{display:block;position:sticky;top:84px/);
   const js = read("assets/js/app.js");
-  assert.match(js, /rangees\[1\]\.hidden = true/);
+  assert.doesNotMatch(js, /rangees\[1\]\.hidden/);
   assert.match(js, /function majEtapeEtroit/);
 });
