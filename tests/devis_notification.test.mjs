@@ -47,17 +47,16 @@ test("les trois formulaires (accueil, contact, Perpignan) : notification premium
   }
 });
 
-test("nom complet très lisible, téléphone et e-mail cliquables, boutons « Appeler le client » et « Répondre par e-mail »", async () => {
+test("nom complet très lisible, e-mail cliquable, boutons « Appeler le 06… » (orange) et « Répondre par e-mail »", async () => {
   const { main } = await run(lead());
   const { html } = main.body;
-  assert.match(html, /font-size:26px;font-weight:600;color:#ffffff;line-height:1\.25[^>]*>Marie Exemple-Durand</, "nom du client à 26 px");
+  assert.match(html, /font-size:34px;font-weight:800;color:#0B2341;[^"]*"[^>]*>Marie Exemple-Durand</, "nom du client à 34 px");
   assert.match(html, />Perpignan</, "commune");
-  assert.match(html, /font-size:28px;font-weight:600[^"]*"><a href="tel:0612345678"[^>]*>06 12 34 56 78<\/a>/, "téléphone 28 px, cliquable");
   assert.match(html, /<a href="mailto:marie\.exemple@example\.com"[^>]*>marie\.exemple@example\.com<\/a>/, "e-mail cliquable");
-  assert.match(html, /<a href="tel:0612345678"[^>]*>Appeler le client<\/a>/);
+  assert.match(html, /<a href="tel:0612345678"[^>]*>Appeler le 06 12 34 56 78<\/a>/);
   assert.match(html, /<a href="mailto:marie\.exemple@example\.com"[^>]*>Répondre par e-mail<\/a>/);
-  assert.match(html, /background:#d7b56d[^>]*>\s*<a href="tel:0612345678"/, "bouton d'appel doré");
-  const order = ["Nouvelle demande de devis", "Marie Exemple-Durand", "tel:0612345678", "mailto:marie.exemple@example.com", "Appeler le client", "Répondre par e-mail", "Description des travaux", "Informations de suivi"].map((v) => html.indexOf(v));
+  assert.match(html, /bgcolor="#F2611D"[^>]*>\s*<a href="tel:0612345678"/, "bouton d'appel orange");
+  const order = ["Nouvelle demande de devis", "Marie Exemple-Durand", "mailto:marie.exemple@example.com", "tel:0612345678", "Répondre par e-mail", "Description des travaux", "Informations de suivi"].map((v) => html.indexOf(v));
   assert.ok(order.every((i, k) => i > 0 && (k === 0 || i > order[k - 1])), `ordre de présentation : ${order}`);
 });
 
@@ -98,11 +97,10 @@ test("injection HTML : nom, commune, message, e-mail échappés ; aucune balise 
   assert.ok(main.body.text.includes("<script>alert(2)</script>"), "texte brut : valeurs d'origine, sans HTML interprété");
 });
 
-test("logo officiel en HTTPS, aucune pièce jointe, aucun CID, structure compatible messageries, texte alternatif", async () => {
+test("notification interne : aucune image ni pièce jointe, aucun CID, structure compatible messageries", async () => {
   const { sent, main } = await run(lead());
   const { html } = main.body;
-  assert.ok(html.includes(`<img src="${LOGO}" width="150" alt="Style &amp; Déco — Le Reflet de vos Envies"`));
-  assert.equal((html.match(/<img\b/g) || []).length, 1);
+  assert.equal((html.match(/<img\b/g) || []).length, 0, "aucune image dans la notification interne");
   for (const m of sent) { assert.equal(m.body.attachments, undefined); assert.ok(!/cid:|base64|data:image|noname/i.test(JSON.stringify(m.body))); }
   assert.match(html, /<html lang="fr" dir="ltr">/);
   assert.match(html, /<div lang="fr" dir="ltr">/);
@@ -110,8 +108,6 @@ test("logo officiel en HTTPS, aucune pièce jointe, aucun CID, structure compati
   for (const table of html.match(/<table\b[^>]*>/g)) assert.match(table, /role="presentation"/);
   assert.doesNotMatch(html, /<script|position:|float:|background-image|calc\(|var\(|rgba?\(|grid|flex|<svg|<form/i);
   assert.ok(Buffer.byteLength(html) < 100 * 1024);
-  assert.doesNotMatch(html, /background(?:-color)?:\s*(?:#fff\b|#ffffff|white)/i, "aucun fond blanc");
-  assert.doesNotMatch(html, /font-weight:(7|8|9)00|text-transform:uppercase/i);
   for (const href of html.match(/href="[^"]+"/g)) assert.match(href, /^href="(tel:\d+|mailto:[^"]+)"$/, "liens : téléphone et e-mail du client uniquement");
 });
 
@@ -143,8 +139,8 @@ test("demande suspecte : quarantaine intacte (destinataire, préfixe [À VÉRIFI
 test("pas de régression des rappels : alerte de rappel inchangée (design B, bouton Appeler), aucune section devis", async () => {
   const { main } = await run({ "form-name": "lead_hero", submission_id: "dvn-cb-0001-abcd", name: "Paul Martin", phone: "0612345678", lead_priority: "RAPPEL_30_MIN", "bot-field": "" });
   assert.equal(main.body.subject.startsWith("[RAPPEL CLIENT] Nouveau rappel à effectuer"), true);
-  assert.ok(main.body.html.includes("Nouvelle demande de rappel") && main.body.html.includes(">Appeler</a>"));
-  assert.ok(!main.body.html.includes("Description des travaux") && !main.body.html.includes("Appeler le client"));
+  assert.ok(main.body.html.includes("Nouvelle demande de rappel") && main.body.html.includes("Appeler le 0612345678"));
+  assert.ok(!main.body.html.includes("Description des travaux") && !main.body.html.includes("Répondre par e-mail"));
 });
 
 test("idempotence et reprise : une même demande renvoyée ne produit pas de seconde notification (même clé)", async () => {

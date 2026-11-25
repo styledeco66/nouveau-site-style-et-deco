@@ -77,13 +77,13 @@ test("1. devis normal : notification interne + confirmation client (e-mail oblig
   const [main, confirm] = [byKind(fetchImpl, "lead")[0], byKind(fetchImpl, "confirm")[0]];
   assert.deepEqual(main.body.to, ["dirigeant@example.test"]);
   assert.deepEqual(confirm.body.to, ["paul@example.test"]);
-  assert.equal(confirm.body.subject, "Votre demande de devis a bien été reçue — Style & Déco");
+  assert.equal(confirm.body.subject, "Votre demande de devis est bien arrivée | Style & Déco");
   assert.equal(confirm.body.reply_to, "style.deco66@gmail.com");
   assert.equal(confirm.body.from, ENV.LEAD_FROM_EMAIL);
-  assert.ok(confirm.body.text.includes("reviendrons vers vous sous 24 heures"));
-  assert.ok(confirm.body.html.includes("sous 24 heures"));
+  assert.ok(confirm.body.text.includes("Nous revenons vers vous sous 24 h"));
+  assert.ok(confirm.body.html.includes("sous 24"));
   for (const forbidden of ["devis est établi", "chantier est programmé", "date d'intervention"]) assert.ok(!confirm.body.text.includes(forbidden));
-  assert.ok(!confirm.body.text.includes("Paul Martin"), "aucune donnée saisie n'est recopiée dans la confirmation");
+  assert.ok(confirm.body.text.includes("Bonjour Paul Martin,"), "le nom saisi sert à saluer le client (nettoyé)");
 });
 
 test("2. rappel avec e-mail, en journée : alerte immédiate + confirmation « sous 30 minutes », aucun rappel programmé", async () => {
@@ -97,7 +97,7 @@ test("2. rappel avec e-mail, en journée : alerte immédiate + confirmation « s
   assert.ok(alert.text.includes("Page d'accueil") || alert.text.includes("Accueil"), "origine du formulaire");
   assert.equal(alert.scheduled_at, undefined);
   assert.ok(byKind(fetchImpl, "confirm")[0].body.text.includes("Nous vous rappelons sous 30 minutes."));
-  assert.equal(byKind(fetchImpl, "confirm")[0].body.subject, "Votre demande de rappel — Style & Déco");
+  assert.equal(byKind(fetchImpl, "confirm")[0].body.subject, "Votre demande de rappel est bien arrivée | Style & Déco");
 });
 
 test("3. rappel sans e-mail : demande enregistrée normalement, aucune confirmation, aucun blocage", async () => {
