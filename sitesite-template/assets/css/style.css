@@ -963,9 +963,12 @@ main.section p{margin:0;color:var(--ardoise)}
 /* Défilements un peu plus rapides (photos du haut, mur d'avis) */
 .piste{animation-duration:36s}
 
-/* Bouton « laisser un avis » : orange en permanence, blanc quand on appuie dessus */
-.laisser-avis__btn{background:var(--orange);color:#fff;box-shadow:0 12px 28px -12px rgba(242,97,29,.7)}
-.laisser-avis__g{background:#fff;color:var(--orange-fonce)}
-.laisser-avis__lien:hover .laisser-avis__btn{background:var(--orange-fonce)}
-.laisser-avis__lien:active .laisser-avis__btn,.laisser-avis__lien:focus-visible .laisser-avis__btn{background:#fff;color:var(--orange-fonce);transform:none;box-shadow:0 0 0 2px var(--orange)}
-.laisser-avis__lien:active .laisser-avis__g{background:var(--orange);color:#fff}
+/* Bouton « laisser un avis » : blanc au repos ; au survol, au toucher ou au clavier, l'orange arrive des deux côtés vers le centre */
+.laisser-avis__btn{position:relative;color:var(--nuit);box-shadow:none;
+  background:linear-gradient(var(--orange),var(--orange)) left center/0 100% no-repeat, linear-gradient(var(--orange),var(--orange)) right center/0 100% no-repeat, var(--blanc);
+  transition:background-size .45s cubic-bezier(.2,.8,.2,1), color .2s ease .24s, transform .15s}
+.laisser-avis__lien:hover .laisser-avis__btn,.laisser-avis__lien:active .laisser-avis__btn,.laisser-avis__lien:focus-visible .laisser-avis__btn{
+  background-size:51% 100%, 51% 100%, auto;color:#fff;transform:none;box-shadow:none}
+.laisser-avis__g{background:var(--nuit);color:#fff;transition:background .2s ease .24s, color .2s ease .24s}
+.laisser-avis__lien:hover .laisser-avis__g,.laisser-avis__lien:active .laisser-avis__g,.laisser-avis__lien:focus-visible .laisser-avis__g{background:#fff;color:var(--orange-fonce)}
+@media (prefers-reduced-motion: reduce){ .laisser-avis__btn,.laisser-avis__g{transition:none} }
