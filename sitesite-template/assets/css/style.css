@@ -1052,3 +1052,18 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
   .recit--grand .recit__photos figure,.recit--grand .recit__photos figure:first-child:nth-last-child(n),.recit--grand .recit__photos figure:first-child:nth-last-child(n) ~ figure{grid-column:1 / -1;grid-row:auto}
   .recit--grand .recit__photos figure img,.recit--grand .recit__photos figure:first-child:nth-last-child(n) img{flex:none;height:auto;aspect-ratio:4/3}
 }
+
+/* ---------- Fiche : paires avant / après du même angle ---------- */
+.avap{display:grid;gap:36px;margin-bottom:104px}
+.avap__tete h2{margin:0 0 10px;font-size:clamp(28px,3.4vw,40px);line-height:1.12;letter-spacing:-.025em;text-wrap:balance}
+.avap__tete p{margin:0;max-width:62ch}
+.avap__paire{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.avap__vue{position:relative;min-width:0}
+.avap__vue img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px}
+.avap__tag{position:absolute;top:12px;left:12px;padding:5px 12px;border-radius:999px;background:var(--nuit);color:#fff;font-weight:800;font-size:13px;line-height:1.3}
+.avap__tag--apres{background:var(--orange)}
+.avap__paire figcaption{grid-column:1 / -1;font-size:15px}
+@media (max-width: 640px){
+  .avap{gap:30px;margin-bottom:64px}
+  .avap__paire{grid-template-columns:minmax(0,1fr);gap:6px}
+}
