@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import os from "node:os";
 import http from "node:http";
 import path from "node:path";
 import { test, before, after } from "node:test";
@@ -98,12 +99,15 @@ after(() => server && server.close());
 // Asynchrone : le serveur de contrôle tourne dans ce même processus et doit pouvoir répondre pendant que le navigateur charge la page.
 const dump = (pathAndQuery, width = 1280) =>
   new Promise((resolve) => {
-    const child = spawn(CHROME, ["--headless=new", "--disable-gpu", "--no-sandbox", `--window-size=${width},900`, "--virtual-time-budget=9000", "--dump-dom", base + pathAndQuery], { stdio: ["ignore", "pipe", "ignore"] });
+    // Un profil Chrome propre à chaque lancement : deux navigateurs lancés en même temps (autres fichiers de test) ne se gênent pas.
+    const profile = mkdtempSync(path.join(os.tmpdir(), "sd-chrome-"));
+    const child = spawn(CHROME, ["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${profile}`, `--window-size=${width},900`, "--virtual-time-budget=9000", "--dump-dom", base + pathAndQuery], { stdio: ["ignore", "pipe", "ignore"] });
     let out = "";
     child.stdout.on("data", (c) => (out += c));
     const timer = setTimeout(() => child.kill("SIGKILL"), 60000);
     child.on("close", () => {
       clearTimeout(timer);
+      rmSync(profile, { recursive: true, force: true });
       resolve(out);
     });
   });

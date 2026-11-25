@@ -244,9 +244,9 @@ button,input,textarea{font:inherit;color:inherit}
 .note-g .etoiles{font-size:20px;display:block}
 .note-g a{font-size:14px;font-weight:600}
 .rangee{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-bottom:16px;padding-inline:20px}
-.rangee.is-boucle{flex-wrap:nowrap;justify-content:flex-start;width:max-content;padding-inline:0;animation:file 50s linear infinite}
-.rangee--inverse.is-boucle{animation-direction:reverse;animation-duration:60s}
-.avis:hover .rangee{animation-play-state:paused}
+.rangee.is-boucle{flex-wrap:nowrap;justify-content:flex-start;width:max-content;padding-inline:0;animation:file 32s linear infinite}
+.rangee--inverse.is-boucle{animation-direction:reverse;animation-duration:40s}
+
 .carte-avis{width:380px;flex:none;background:var(--blanc);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;margin:0}
 .carte-avis p{margin:0;font-size:16px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:9;overflow:hidden}
 .carte-avis footer{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;margin-top:auto}
