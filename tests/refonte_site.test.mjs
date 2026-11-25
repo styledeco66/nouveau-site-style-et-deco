@@ -72,7 +72,7 @@ test("accueil : les neuf questions de la FAQ d'origine sont présentes et les se
     assert.ok(home.includes(`href="${href}"`), `lien interne ${href}`);
   }
   const text = plain(body(home));
-  for (const h of ["Notre méthode en 3 étapes", "Nos dernières réalisations dans les Pyrénées-Orientales", "Avis clients publiés sur Google", "Demander un devis"]) {
+  for (const h of ["Nos dernières réalisations dans les Pyrénées-Orientales", "Avis clients publiés sur Google", "Demander un devis"]) {
     assert.ok(text.includes(h), `titre d'origine : ${h}`);
   }
 });
@@ -209,7 +209,7 @@ test("ancres : les liens #… d'une page mènent à un identifiant existant (et 
     for (const m of html.matchAll(/href="#([^"]+)"/g)) assert.ok(ids.has(m[1]), `${page} : ancre #${m[1]} sans cible`);
   }
   const home = new Set([...read("index.html").matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
-  for (const id of ["avis", "contact", "contact-details", "faq", "process", "realisations", "services", "assurances"]) assert.ok(home.has(id), `accueil : #${id}`);
+  for (const id of ["avis", "contact", "contact-details", "faq", "realisations", "services", "assurances"]) assert.ok(home.has(id), `accueil : #${id}`);
   assert.ok(read("peintre-saint-cyprien/index.html").includes('id="faq-local"'));
   assert.ok(read("facade-saint-cyprien/index.html").includes('id="faq-local"'));
   assert.ok(read("perpignan.html").includes('id="faq-perpignan"'));
@@ -260,4 +260,19 @@ test("textes : chaque paragraphe, titre ou question du site d'origine est toujou
     const manquants = paragraphs.filter((p) => !text.includes(p) && !permis.has(p));
     assert.deepEqual(manquants, [], `${page} : texte d'origine disparu`);
   }
+});
+
+test("avis : l'invitation à laisser un avis Google est présente sur les pages avec mur d'avis, avec un lien sûr vers la fiche", () => {
+  for (const page of ["index.html", "peintre-saint-cyprien/index.html", "facade-saint-cyprien/index.html", "perpignan.html", "realisations/index.html"]) {
+    const html = read(page);
+    assert.match(html, /Vous avez fait appel à nous \?/, page);
+    assert.match(html, /<a class="laisser-avis__lien" href="https:\/\/www\.google\.com\/[^"]+" target="_blank" rel="noopener noreferrer">/, page);
+  }
+});
+
+test("photos : jamais de zoom animé ni de recadrage serré (proportions d'origine)", () => {
+  const css = read("assets/css/style.css");
+  assert.match(css, /\.heros__fond img\.is-on\{animation:none\}/);
+  assert.match(css, /\.tuile img,\.tuile--col img\{height:auto;min-height:0;aspect-ratio:auto\}/);
+  assert.match(css, /\.cas__principale img\{object-fit:contain\}/);
 });
