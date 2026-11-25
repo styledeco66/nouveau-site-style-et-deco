@@ -997,3 +997,20 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
 .avis-heros__lien{color:#fff;border-color:rgba(255,255,255,.55)}
 .verifier:hover,.verifier:active,.verifier:focus-visible,.avis-heros__lien:hover,.avis-heros__lien:active,.avis-heros__lien:focus-visible{background-size:51% 100%,51% 100%,auto;color:#fff;border-color:var(--orange)}
 @media (prefers-reduced-motion: reduce){ .verifier,.avis-heros__lien{transition:none} }
+
+/* ---------- Téléphone et tablette : avis à faire glisser, étape par étape avec photo fixe ---------- */
+@media (max-width: 720px){
+  .avis .rangee{flex-wrap:nowrap;justify-content:flex-start;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px;padding:4px 16px 18px;margin-bottom:0;scrollbar-width:none}
+  .avis .rangee::-webkit-scrollbar{display:none}
+  .avis .carte-avis{flex:0 0 86%;width:86%;scroll-snap-align:center;padding:24px 22px;gap:14px}
+  .avis .carte-avis p{display:block;overflow:visible;-webkit-line-clamp:unset;font-size:17px;line-height:1.55}
+  .avis .carte-avis .etoiles{font-size:20px}
+  .avis .carte-avis[aria-hidden="true"]{display:none}
+}
+@media (max-width: 1000px){
+  /* La photo reste en haut de l'écran et change à chaque étape, comme sur ordinateur */
+  .etapes{gap:0}
+  .etapes__visuel{display:block;position:sticky;top:84px;z-index:3;height:min(38vh, 300px);min-height:190px;border-radius:16px;margin:0 0 6px;box-shadow:0 16px 30px -18px rgba(11,35,65,.65)}
+  .etape-bloc img{display:none}
+  .etape-bloc{min-height:46vh;padding-top:26px}
+}
