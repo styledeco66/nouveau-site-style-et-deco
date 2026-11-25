@@ -273,3 +273,12 @@ test("avis : l'invitation à laisser un avis Google est présente sur les pages 
 test("photos : la hauteur affichée n'est jamais fixée par les attributs width/height (cadrages de la maquette conservés)", () => {
   assert.match(read("assets/css/style.css"), /(^|\n)img\{height:auto\}/);
 });
+
+test("titres : le complément après un tiret passe sur une seconde ligne sans tiret visible, le texte du titre reste identique", () => {
+  const css = read("assets/css/style.css");
+  assert.match(css, /\.h-tiret\{display:none\}/);
+  assert.match(css, /\.h-suite\{display:block/);
+  const home = read("index.html");
+  assert.match(home, /<span class="h-suite"><span class="h-tiret" aria-hidden="true">— <\/span>un artisan local à votre service<\/span>/);
+  assert.ok(plain(home).includes("Saint-Cyprien — un artisan local à votre service"));
+});
