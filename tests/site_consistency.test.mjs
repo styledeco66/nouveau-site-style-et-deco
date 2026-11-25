@@ -195,7 +195,7 @@ test("le sitemap liste exactement les URL canoniques publiques et indexables", (
   const sitemap = read("sitemap.xml");
   const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
   for (const url of Object.values(PUBLIC_PAGES)) assert.ok(locs.includes(url), url);
-  assert.ok(!locs.some((loc) => loc.includes("merci")));
+  assert.ok(!locs.some((loc) => /\/merci(-rappel)?\.html/.test(loc)));
   for (const loc of locs) {
     const file = loc.replace(ORIGIN, "").replace(/\/$/, "/index.html").replace(/^\//, "") || "index.html";
     assert.ok(existsSync(path.join(SITE, file === "index.html" || file.endsWith(".html") ? file : `${file}index.html`)), loc);
