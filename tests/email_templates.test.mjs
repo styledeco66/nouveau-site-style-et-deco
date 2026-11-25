@@ -5,7 +5,7 @@ import { test } from "node:test";
 
 import { handleLead } from "../netlify/functions/lead.mjs";
 import hours from "../sitesite-template/assets/js/business-hours.js";
-import { BRAND, callbackAlert, callbackConfirmation, devisAlert, devisConfirmation, reminderEmail, safeExcerpt, safeName } from "../netlify/lib/emails.mjs";
+import { BRAND, callbackAlert, callbackConfirmation, devisAlert, devisConfirmation, reminderEmail, safeCity, safeExcerpt, safeName } from "../netlify/lib/emails.mjs";
 
 // Nouveau design des e-mails (bleu nuit et orange du site) : palette, structure compatible messageries, accessibilité,
 // images HTTPS, nettoyage des données saisies, génération depuis le code réel.
@@ -150,19 +150,22 @@ test("échappement HTML de toutes les données saisies", () => {
   }
 });
 
-test("anti-abus : le nom, la ville et le message repris dans la confirmation client n'ont ni lien ni adresse e-mail, et sont limités", () => {
+test("anti-abus : le nom, la ville et le message repris dans la confirmation client n'ont ni lien, ni domaine, ni adresse e-mail, ni numéro, et sont limités", () => {
   const abuse = {
     name: "Cliquez https://evil.example/pay maintenant",
     city: "Voir www.evil.example",
-    details: `Écrivez à pirate@evil.example ou visitez http://evil.example/x ${"mot ".repeat(200)}`,
+    details: `Écrivez à pirate@evil.example ou visitez http://evil.example/x ou evil.com/pay, appelez le 0899 12 34 56 ou +33 8 99 12 34 56 ${"mot ".repeat(200)}`,
   };
   const { html, text } = devisConfirmation({ receivedAt: fri, reference: "R", lead: abuse });
   for (const output of [html, text]) {
-    assert.doesNotMatch(output, /evil\.example|pirate@|https?:\/\/evil/i);
+    assert.doesNotMatch(output, /evil\.|pirate@|https?:\/\/evil|0899|899 12/i);
   }
   assert.ok(safeExcerpt(abuse.details).length <= 281);
-  assert.equal(safeName("Marie 0612345678"), "", "un nom contenant un numéro n'est pas repris");
-  assert.equal(safeName("A".repeat(200)).length, 40);
+  assert.equal(safeExcerpt("Salon de 30 m² à repeindre, disponible en 2027."), "Salon de 30 m² à repeindre, disponible en 2027.", "un message normal n'est pas altéré");
+  assert.equal(safeName("Marie-Claire d'Aubigné"), "Marie-Claire d'Aubigné");
+  for (const bad of ["Marie 0612345678", "Marie.com", "Marie <b>", "A".repeat(41), "M@rie", "Marie: https://x.y", ""]) assert.equal(safeName(bad), "", `nom refusé : ${bad}`);
+  assert.equal(safeCity("Saint-Cyprien (66750)"), "Saint-Cyprien (66750)");
+  for (const bad of ["Voir www.evil.example", "Perpignan https://x.y", "0612345678901"]) assert.equal(safeCity(bad), "", `ville refusée : ${bad}`);
   assert.match(devisConfirmation({ receivedAt: fri, reference: "R", lead: { name: "Marie 0612345678" } }).text, /^Bonjour,$/m, "salutation neutre sans nom exploitable");
   assert.match(devisConfirmation({ receivedAt: fri, reference: "R" }).text, /^Bonjour,$/m, "confirmation générique sans données");
 });

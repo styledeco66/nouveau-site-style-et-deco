@@ -80,20 +80,27 @@ const nb = (value) => escapeHtml(String(value ?? "").replace(/(\d) h (\d{2})(?!\
 // ou une adresse à un tiers depuis notre domaine (liens, adresses e-mail), les caractères de contrôle, et on limite la longueur.
 const stripLinks = (value) =>
   String(value ?? "")
-    .replace(/(?:https?:\/\/|www\.)\S*/gi, " ")
-    .replace(/\S+@\S+\.\S+/g, " ")
+    .replace(/(?:https?:\/\/|www\.)\S*/gi, " ") // liens
+    .replace(/\S+@\S+\.\S+/g, " ") // adresses e-mail
+    .replace(/\b[\w-]+(?:\.[a-z]{2,})+\b/gi, " ") // noms de domaine sans http (rendus cliquables par les messageries)
+    .replace(/\+?\d(?:[\s.()-]?\d){6,}/g, " ") // numéros de téléphone (7 chiffres ou plus)
     .replace(/[\u0000-\u001f\u007f<>]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+// Nom : lettres, espaces, apostrophe et trait d'union uniquement ; tout autre caractère = salutation neutre (« Bonjour, »).
 export const safeName = (name) => {
-  const n = stripLinks(name).slice(0, 40).trim();
-  return /\d{4,}/.test(n) ? "" : n;
+  const n = String(name ?? "").replace(/\s+/g, " ").trim();
+  return /^[\p{L}' -]{1,40}$/u.test(n) ? n : "";
 };
 export const safeExcerpt = (text, max = 280) => {
   const s = stripLinks(text);
   return s.length > max ? `${s.slice(0, max).replace(/\s+\S*$/, "")}…` : s;
 };
-export const safeCity = (city) => stripLinks(city).slice(0, 60);
+// Ville : lettres, chiffres (code postal), espaces, apostrophe, trait d'union, parenthèses.
+export const safeCity = (city) => {
+  const c = String(city ?? "").replace(/\s+/g, " ").trim();
+  return /^[\p{L}\d' ()-]{1,60}$/u.test(c) && !/\d{6,}/.test(c) ? c : "";
+};
 
 const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
 
