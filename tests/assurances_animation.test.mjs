@@ -15,17 +15,12 @@ test("le titre des assurances reste du texte simple dans les pages (le surlignag
   }
 });
 
-test("animations : désactivées si mouvement réduit, page Perpignan exclue, pause hors écran", () => {
+test("animations : désactivées si mouvement réduit, identiques sur toutes les pages, pause hors écran", () => {
   const js = read("assets/js/app.js");
-  assert.match(js, /if \(assur && !reduit && "IntersectionObserver" in window && !\/\\\/perpignan/);
+  assert.match(js, /if \(assur && !reduit && "IntersectionObserver" in window\)\{/);
+  assert.doesNotMatch(js, /location\.pathname/, "aucune page exclue des animations");
   assert.match(js, /classList\.toggle\("en-pause", !visible\)/);
   const css = read("assets/css/style.css");
   assert.match(css, /\.dossier\.is-anime \.feuille--rc\{animation:feuille-rc 4s/);
   assert.match(css, /\.dossier\.en-pause[^{]*\{animation-play-state:paused!important\}/);
-});
-
-test("le filtre « Perpignan » reconnaît ses adresses et elles seules", () => {
-  const motif = /\/perpignan(\.html)?\/?$/;
-  for (const oui of ["/perpignan.html", "/perpignan"]) assert.match(oui, motif);
-  for (const non of ["/", "/peintre-saint-cyprien/", "/facade-saint-cyprien/", "/realisations/ravalement-facade-immeuble-perpignan/"]) assert.doesNotMatch(non, motif);
 });

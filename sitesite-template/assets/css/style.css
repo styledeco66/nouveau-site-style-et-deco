@@ -502,6 +502,9 @@ html,body{margin:0}
 .photo-une img{width:100%;max-height:640px;object-fit:cover;border-radius:18px}
 .photo-une figcaption,.recit figcaption{margin-top:10px;font-size:14px;color:var(--ardoise)}
 .recit{display:flex;flex-direction:column;gap:72px}
+.recit-fin{margin-top:72px}
+.recit-fin h2{margin:6px 0 20px;font-size:clamp(26px, 2.8vw, 36px);font-weight:800;letter-spacing:-.03em;line-height:1.12}
+.recit-fin .photo-une img{max-height:none;height:auto}
 .recit__etape{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:48px;align-items:start}
 .recit__etape:nth-child(even) .recit__photos{order:-1}
 .recit__etape--texte{grid-template-columns:minmax(0,1fr);max-width:780px}
