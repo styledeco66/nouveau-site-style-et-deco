@@ -14,7 +14,7 @@ const ORIGIN = "https://styleetdeco.fr";
 const decode = (t) => t.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'");
 
 const FICHES = [
-  { slug: "pose-parquet-local-commercial-perpignan", dir: "pose-parquet-local-perpignan", lieu: "Perpignan", photos: 10 },
+  { slug: "sol-aspect-parquet-local-commercial-perpignan", dir: "sol-aspect-parquet-local-perpignan", lieu: "Perpignan", photos: 10 },
   { slug: "pose-sol-maison-estagel", dir: "sol-maison-estagel", lieu: "Estagel", photos: 22 },
 ];
 
@@ -96,12 +96,12 @@ test("la carte « Parquet & revêtements de sol » de l'accueil mène au chantie
   const carte = home.slice(home.indexOf("<h3>Parquet &amp; revêtements de sol</h3>"));
   const lien = carte.slice(0, carte.indexOf("</article>")).match(/<a class="lien" href="([^"]+)">Voir un chantier<\/a>/);
   assert.ok(lien, "lien « Voir un chantier » de la carte Parquet");
-  assert.equal(lien[1], "/realisations/pose-parquet-local-commercial-perpignan/");
+  assert.equal(lien[1], "/realisations/sol-aspect-parquet-local-commercial-perpignan/");
 });
 
 test("les deux fiches se renvoient l'une vers l'autre", () => {
-  assert.match(read("realisations/pose-parquet-local-commercial-perpignan/index.html"), /class="autre-real" href="\/realisations\/pose-sol-maison-estagel\/"/);
-  assert.match(read("realisations/pose-sol-maison-estagel/index.html"), /class="autre-real" href="\/realisations\/pose-parquet-local-commercial-perpignan\/"/);
+  assert.match(read("realisations/sol-aspect-parquet-local-commercial-perpignan/index.html"), /class="autre-real" href="\/realisations\/pose-sol-maison-estagel\/"/);
+  assert.match(read("realisations/pose-sol-maison-estagel/index.html"), /class="autre-real" href="\/realisations\/sol-aspect-parquet-local-commercial-perpignan\/"/);
 });
 
 test("les fiches parquet parlent de sol : ni formules toutes faites (finition nette, coupes nettes…), ni murs", () => {
