@@ -46,7 +46,7 @@
   // Un ancien refus reste valable. Un ancien accord ne suffit pas pour ce nouveau parcours.
   const getConsent = () => getPreference(CONSENT_KEY) || (getPreference(LEGACY_CONSENT_KEY) === "denied" ? "denied" : null);
   let consent = getConsent();
-  const hasPriorChoice = consent !== null || getPreference(LEGACY_CONSENT_KEY) === "granted";
+  const hasRecordedGrant = consent === "granted" || (consent === null && getPreference(LEGACY_CONSENT_KEY) === "granted");
 
   if ((!production && !preview) || !configured) return;
 
@@ -132,7 +132,14 @@
     },
   };
 
-  if (!paidPath && !hasPriorChoice) return;
+  // Une page directe restaurée peut précéder dans l'historique le clic Ads qui a créé la preuve.
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    if (paidPath) refreshConsent();
+    else endPaidVisit();
+  });
+
+  if (!paidPath && !hasRecordedGrant) return;
 
   const settings = document.createElement("button");
   settings.type = "button";
@@ -196,20 +203,16 @@
     closePanel();
   }));
 
-  const refreshConsent = () => {
+  function refreshConsent() {
     if (!tagStarted) return;
     consent = getConsent();
     if (consent === "granted" && hasActivePaidVisit()) return;
     endPaidVisit();
     if (consent !== "granted") clearSiteAdsStorage();
     window.location.reload();
-  };
+  }
   window.addEventListener("storage", (event) => {
     if (event.key === CONSENT_KEY || event.key === LEGACY_CONSENT_KEY || event.key === null) refreshConsent();
   });
-  window.addEventListener("pageshow", (event) => {
-    if (event.persisted) refreshConsent();
-  });
-
   startTag();
 })();

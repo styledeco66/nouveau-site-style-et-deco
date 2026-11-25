@@ -165,6 +165,12 @@ test("mesure Ads : l’ancien accord ne démarre aucune balise et l’ancien ref
   const denied = load({ localStorage: local, search: CAMPAIGN_QUERY });
   assert.equal(denied.panel.hidden, true);
   assert.deepEqual(denied.scripts, []);
+  for (const key of [LEGACY_PREF, CURRENT_PREF]) {
+    savePreference(local, key, "denied");
+    const directAfterRefusal = load({ localStorage: local });
+    assert.equal(directAfterRefusal.rendered, false);
+    assert.equal(directAfterRefusal.settings, undefined);
+  }
 });
 
 test("mesure Ads : la visite continue dans le même onglet et un devis confirmé compte une fois", () => {
@@ -214,6 +220,17 @@ test("mesure Ads : une nouvelle arrivée directe ou organique coupe la visite et
     landing.changes.pageshow({ persisted: true });
     assert.equal(landing.reloads(), 1);
   }
+});
+
+test("mesure Ads : une ancienne page directe restaurée coupe une preuve Ads plus récente", () => {
+  const earlierDirect = load();
+  const tab = { localStorage: earlierDirect.localStorage, sessionStorage: earlierDirect.sessionStorage };
+  const laterAd = load({ ...tab, search: CAMPAIGN_QUERY });
+  laterAd.granted.click();
+  assert.ok(laterAd.sessionStorage.getItem(PAID_VISIT));
+  earlierDirect.changes.pageshow({ persisted: true });
+  assert.equal(laterAd.sessionStorage.getItem(PAID_VISIT), null);
+  assert.deepEqual(load({ ...tab, referrer: SITE + "/" }).scripts, []);
 });
 
 test("mesure Ads : le choix enregistré s’applique à un nouveau clic Ads et son retrait est accessible en visite directe", () => {
