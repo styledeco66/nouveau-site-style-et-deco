@@ -319,8 +319,8 @@ const secondaryFeatures = (env, deploy) => {
 const sendClientConfirmation = async ({ lead, receivedAt, reference, slot, key, env, fetchImpl, timing }) => {
   const callback = lead.priority === PRIORITY_CALLBACK;
   const content = callback
-    ? callbackConfirmation({ receivedAt, reference, sentence: hours.describe(slot).sentence })
-    : devisConfirmation({ receivedAt, reference });
+    ? callbackConfirmation({ receivedAt, reference, sentence: hours.describe(slot).sentence, lead })
+    : devisConfirmation({ receivedAt, reference, lead });
   const email = {
     from: env.LEAD_FROM_EMAIL,
     to: [lead.email],
