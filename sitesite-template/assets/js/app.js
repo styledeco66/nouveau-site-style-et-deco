@@ -235,6 +235,45 @@
     o.observe(liste);
   });
 
+  /* Assurances : le titre se surligne et les documents s'animent en boucle tant qu'ils sont à l'écran.
+     La page Perpignan reste inchangée (mesure SEO en cours). */
+  var assur = document.getElementById("assurances");
+  if (assur && !reduit && "IntersectionObserver" in window && !/\/perpignan(\.html)?\/?$/.test(location.pathname)){
+    var titre = document.getElementById("titre-assurances"), cible = "nous vous le prouvons";
+    var texte = titre ? titre.textContent : "", ou = texte.indexOf(cible);
+    if (ou >= 0 && !titre.children.length){
+      var bloc = document.createElement("span");
+      bloc.className = "prouve";
+      cible.split(" ").forEach(function(mot, i, mots){
+        var m = document.createElement("span");
+        m.className = "prouve__mot";
+        m.style.setProperty("--i", i);
+        m.textContent = mot + (i < mots.length - 1 ? " " : "");
+        bloc.appendChild(m);
+      });
+      var coche = document.createElement("span");
+      coche.className = "prouve__coche";
+      coche.setAttribute("aria-hidden", "true");
+      bloc.appendChild(coche);
+      titre.textContent = texte.slice(0, ou);
+      titre.appendChild(bloc);
+      titre.appendChild(document.createTextNode(texte.slice(ou + cible.length)));
+      /* rejoue à chaque retour à l'écran */
+      new IntersectionObserver(function(es){ bloc.classList.toggle("is-prouve", es[0].isIntersecting); }, {threshold:.6}).observe(bloc);
+    }
+    var dossier = assur.querySelector(".js-dossier"), depart;
+    if (dossier){
+      dossier.classList.add("dossier--vivant");
+      new IntersectionObserver(function(es){
+        var visible = es[0].isIntersecting;
+        clearTimeout(depart);
+        dossier.classList.toggle("en-pause", !visible);
+        /* la boucle commence une fois les feuilles déployées */
+        if (visible && !dossier.classList.contains("is-anime")) depart = setTimeout(function(){ dossier.classList.add("is-anime"); }, 1100);
+      }, {threshold:.35}).observe(dossier);
+    }
+  }
+
   /* Photos de chantiers en fond du héros */
   var fonds = $$(".js-fond img"), iFond = 0;
   if (!reduit && fonds.length > 1){

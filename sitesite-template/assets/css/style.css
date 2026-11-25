@@ -1071,6 +1071,50 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
 /* Défilé enrichi (11 photos au lieu de 7) : durée allongée pour garder la même vitesse */
 .piste.piste--longue{animation-duration:57s}
 
+/* ---------- Assurances : « nous vous le prouvons » se surligne, les documents vivent ---------- */
+.prouve{display:block;margin-top:.1em;line-height:1.38}
+.prouve__mot{background:linear-gradient(var(--orange),var(--orange)) left center / 0% 100% no-repeat;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-size .3s cubic-bezier(.5,0,.2,1) calc(.2s + var(--i) * .26s), color .18s linear calc(.32s + var(--i) * .26s)}
+.prouve__mot:first-child{padding-left:.14em;margin-left:-.02em}
+.prouve__mot:nth-last-child(2){padding-right:.14em}
+.prouve.is-prouve .prouve__mot{background-size:100% 100%;color:#fff;animation:prouve-onde 4.2s ease-in-out calc(2.2s + var(--i) * .13s) infinite}
+@keyframes prouve-onde{0%,14%,100%{filter:none}6%{filter:brightness(1.22) saturate(1.15)}}
+@media (max-width: 420px){ .prouve{font-size:.92em} }
+.prouve__coche{display:inline-block;position:relative;width:.78em;height:.78em;margin-left:.2em;vertical-align:-.04em;border-radius:50%;background:var(--nuit);transform:scale(0);transition:transform .5s cubic-bezier(.3,1.7,.5,1) 1.35s}
+.prouve__coche::after{content:"";position:absolute;left:28%;top:26%;width:40%;height:22%;border-left:.09em solid #fff;border-bottom:.09em solid #fff;transform:rotate(-45deg)}
+.prouve__coche::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--orange);opacity:0}
+.prouve.is-prouve .prouve__coche{transform:scale(1)}
+.prouve.is-prouve .prouve__coche::before{animation:prouve-halo 2.1s ease-out 1.9s infinite}
+@keyframes prouve-halo{0%{opacity:.9;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.9)}}
+
+/* Boucle de 8 s : le devis se coche ligne à ligne, puis l'attestation passe devant et reçoit son tampon */
+.dossier{--devis-a:translate(-72%,-34%) rotate(-5deg);--rc-a:translate(-46%,-62%) rotate(2deg);--devis-m:translate(-96%,-30%) rotate(-12deg);--rc-m:translate(-10%,-60%) rotate(9deg);--devis-b:translate(-70%,-27%) rotate(-9deg) scale(.94);--rc-b:translate(-47%,-50%) rotate(1deg) scale(1.05)}
+/* Téléphone : documents un peu plus petits, entièrement visibles, sans recouvrir le bouton */
+@media (max-width: 720px){
+  .dossier.dossier--vivant{height:500px;margin-top:20px;--devis-a:translate(-66%,-34%) rotate(-5deg);--devis-m:translate(-76%,-30%) rotate(-10deg);--rc-m:translate(-28%,-61%) rotate(8deg);--devis-b:translate(-62%,-31%) rotate(-8deg) scale(.92)}
+  .dossier.dossier--vivant .feuille{width:min(280px, 72%)}
+  .dossier.dossier--vivant .feuille--devis{transform:var(--devis-a)}
+  .dossier.dossier--vivant.attente:not(.is-vu) .feuille--rc{transform:var(--devis-a)}
+}
+.dossier.is-anime .feuille{transition:none}
+.dossier.is-anime .feuille--devis{animation:feuille-devis 8s cubic-bezier(.45,0,.25,1) infinite}
+.dossier.is-anime .feuille--rc{animation:feuille-rc 8s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes feuille-devis{0%,40%{transform:var(--devis-a);z-index:3}47%{transform:var(--devis-m);z-index:3}48%{z-index:2}55%,88%{transform:var(--devis-b);z-index:2}94%{transform:var(--devis-m);z-index:2}95%{z-index:3}100%{transform:var(--devis-a);z-index:3}}
+@keyframes feuille-rc{0%,40%{transform:var(--rc-a);z-index:2}47%{transform:var(--rc-m);z-index:2}48%{z-index:4}55%,88%{transform:var(--rc-b);z-index:4}94%{transform:var(--rc-m);z-index:4}95%{z-index:1}100%{transform:var(--rc-a);z-index:2}}
+.feuille__ligne i{position:relative}
+.dossier.is-anime .feuille__ligne i{overflow:hidden}
+.dossier.is-anime .feuille__ligne i::after{content:"";position:absolute;inset:0;border-radius:4px;background:var(--ok);transform:scaleX(0);transform-origin:left;animation:ligne-1 8s ease-out infinite}
+.dossier.is-anime .feuille__ligne:nth-of-type(3) i::after{animation-name:ligne-2}
+.dossier.is-anime .feuille__ligne:nth-of-type(4) i::after{animation-name:ligne-3}
+.dossier.is-anime .feuille__ligne:nth-of-type(5) i::after{animation-name:ligne-4}
+@keyframes ligne-1{0%,4%{transform:scaleX(0)}10%,96%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes ligne-2{0%,10%{transform:scaleX(0)}16%,96%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes ligne-3{0%,16%{transform:scaleX(0)}22%,96%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes ligne-4{0%,22%{transform:scaleX(0)}28%,96%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+.dossier.is-anime .feuille__pied{animation:piece-jointe 8s ease-in-out infinite}
+@keyframes piece-jointe{0%,29%,41%,100%{transform:none;box-shadow:0 0 0 0 rgba(242,97,29,0)}33%{transform:scale(1.07);box-shadow:0 0 0 5px rgba(242,97,29,.35)}37%{transform:scale(1.02);box-shadow:0 0 0 10px rgba(242,97,29,0)}}
+.dossier.is-anime .feuille__sceau{animation:tampon 8s cubic-bezier(.2,.9,.3,1.3) infinite}
+@keyframes tampon{0%,56%{opacity:0;transform:rotate(-18deg) scale(2.6)}61%{opacity:1;transform:rotate(-6deg) scale(.92)}64%,88%{opacity:1;transform:rotate(-6deg) scale(1.25)}95%,100%{opacity:0;transform:rotate(-6deg) scale(1)}}
+.dossier.en-pause .feuille,.dossier.en-pause .feuille *,.dossier.en-pause .feuille__ligne i::after{animation-play-state:paused!important}
 
 .ads-consent {
   position: fixed;
