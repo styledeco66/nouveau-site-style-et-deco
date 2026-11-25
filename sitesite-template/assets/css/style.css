@@ -972,3 +972,5 @@ main.section p{margin:0;color:var(--ardoise)}
 .laisser-avis__g{background:var(--nuit);color:#fff;transition:background .2s ease .24s, color .2s ease .24s}
 .laisser-avis__lien:hover .laisser-avis__g,.laisser-avis__lien:active .laisser-avis__g,.laisser-avis__lien:focus-visible .laisser-avis__g{background:#fff;color:var(--orange-fonce)}
 @media (prefers-reduced-motion: reduce){ .laisser-avis__btn,.laisser-avis__g{transition:none} }
+
+.accent-orange{color:var(--orange)}
