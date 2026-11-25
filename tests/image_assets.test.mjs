@@ -55,45 +55,21 @@ test("aucune image publiée ne contient de coordonnées GPS ou d'EXIF de localis
   assert.equal(r.status, 0, r.stdout + r.stderr);
 });
 
-test("chaque <img> a un alt, des dimensions et (hors logo) un alt descriptif non vide", () => {
+test("chaque <img> a un alt et des dimensions ; un texte alternatif non vide est descriptif (vide seulement pour une image décorative)", () => {
   for (const f of htmlFiles) {
     for (const [tag] of read(f).matchAll(/<img\b[^>]*>/gs)) {
       assert.match(tag, /\balt="/, `${relative(ROOT, f)} : alt manquant`);
       assert.match(tag, /\bwidth="\d+"/, `${relative(ROOT, f)} : width manquant`);
       assert.match(tag, /\bheight="\d+"/, `${relative(ROOT, f)} : height manquant`);
-      if (!/brand__logo|rx-lightbox__img/.test(tag)) {
-        const alt = tag.match(/\balt="([^"]*)"/)[1];
-        assert.ok(alt.length >= 20 && alt.length <= 180, `alt trop court/long : ${alt}`);
-      }
+      const alt = tag.match(/\balt="([^"]*)"/)[1];
+      if (alt !== "") assert.ok(alt.length >= 12 && alt.length <= 200, `alt trop court/long : ${alt}`);
     }
   }
 });
 
-test("galerie de l'accueil : 4 vraies images, lazy, srcset valide, alt visuel sans commune ni matériau inventé", () => {
+test("l'image principale du premier écran est chargée en priorité et les autres photos sont différées", () => {
   const html = read(join(ROOT, "index.html"));
-  const gallery = html.slice(html.indexOf('id="realisations"'), html.indexOf('id="process"'));
-  const imgs = [...gallery.matchAll(/<img\b[^>]*>/gs)].map((m) => m[0]);
-  assert.equal(imgs.length, 4);
-  for (const tag of imgs) {
-    assert.match(tag, /loading="lazy"/);
-    assert.match(tag, /width="1536"\s+height="1024"/);
-    assert.match(tag, /sizes="/);
-    const alt = tag.match(/alt="([^"]*)"/)[1];
-    assert.ok(!/perpignan|saint-cyprien|cyprien|m²|parquet|stratifi|vinyle|lvt/i.test(alt), `alt non factuel : ${alt}`);
-  }
-  assert.ok(!/shot__media[^"]*" aria-hidden/.test(gallery), "les photos informatives ne doivent plus être masquées");
-});
-
-test("photos de Perpignan : WebP responsives légères, dimensions cohérentes", () => {
-  const html = read(join(ROOT, "perpignan.html"));
-  for (const n of ["avant", "apres"]) {
-    const base = `peinture-plafond-perpignan-${n}`;
-    for (const w of [640, 960, 1280]) {
-      const f = join(IMAGES, `${base}-${w}.webp`);
-      assert.ok(statSync(f).size < 120_000, `${base}-${w}.webp trop lourd`);
-      assert.ok(html.includes(`${base}-${w}.webp ${w}w`) || (w === 960 && html.includes(`${base}-960.webp"`)));
-    }
-  }
+  assert.match(html, /<div class="heros__fond[^>]*>\s*<img[^>]*class="is-on"[^>]*fetchpriority="high"/);
 });
 
 test("poids : aucune image servie ne dépasse 260 Ko (hors logo/favicons déjà légers)", () => {

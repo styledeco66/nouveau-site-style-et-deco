@@ -1,0 +1,893 @@
+{
+ "facade-saint-cyprien/index.html": {
+  "canonical": "https://styleetdeco.fr/facade-saint-cyprien/",
+  "h1": [
+   "Ravalement de façade à Saint-Cyprien (66750) — Diagnostic, Traitement & Devis 24 h"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/facade-saint-cyprien/#webpage",
+      "@type": "WebPage",
+      "about": [
+       {
+        "@id": "https://styleetdeco.fr/#business"
+       },
+       {
+        "@id": "https://styleetdeco.fr/#service-renovation-facades"
+       }
+      ],
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/facade-saint-cyprien/#breadcrumb"
+      },
+      "description": "Artisan façadier à Saint-Cyprien (66750) — diagnostic, traitement hydrofuge, peinture façade résistante au littoral méditerranéen. Devis gratuit, réponse sous 24 h.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "mainEntity": {
+       "@id": "https://styleetdeco.fr/#service-renovation-facades"
+      },
+      "name": "Ravalement de façade à Saint-Cyprien (66750) | Style & Déco",
+      "url": "https://styleetdeco.fr/facade-saint-cyprien/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/facade-saint-cyprien/#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/facade-saint-cyprien/",
+        "name": "Ravalement de façade à Saint-Cyprien",
+        "position": 2
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Artisan façadier à Saint-Cyprien (66750) — diagnostic, traitement hydrofuge, peinture façade résistante au littoral méditerranéen. Devis gratuit, réponse sous 24 h.",
+   "og:description": "Rénovation de façade à Saint-Cyprien. Produits adaptés au climat littoral, préparation complète, réponse sous 24 h.",
+   "og:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Ravalement de façade à Saint-Cyprien (66750) | Style & Déco",
+   "og:type": "article",
+   "og:url": "https://styleetdeco.fr/facade-saint-cyprien/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Ravalement de façade à Saint-Cyprien. Diagnostic, traitement, réponse sous 24 h.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "twitter:title": "Ravalement de façade à Saint-Cyprien (66750) | Style & Déco"
+  },
+  "title": "Ravalement de façade à Saint-Cyprien (66750) | Style & Déco"
+ },
+ "index.html": {
+  "canonical": "https://styleetdeco.fr/",
+  "h1": [
+   "Artisan Peintre en bâtiment à Saint-Cyprien & Perpignan"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/#website",
+      "@type": "WebSite",
+      "alternateName": [
+       "Style et Deco",
+       "Style et Déco"
+      ],
+      "inLanguage": "fr-FR",
+      "name": "Style & Déco",
+      "publisher": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "url": "https://styleetdeco.fr/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#business",
+      "@type": "HousePainter",
+      "address": {
+       "@type": "PostalAddress",
+       "addressCountry": "FR",
+       "addressLocality": "Saint-Cyprien",
+       "addressRegion": "Pyrénées-Orientales",
+       "postalCode": "66750",
+       "streetAddress": "18 rue Madame de la Fayette"
+      },
+      "alternateName": [
+       "Style et Deco",
+       "Style et Déco"
+      ],
+      "areaServed": [
+       {
+        "@type": "City",
+        "name": "Saint-Cyprien"
+       },
+       {
+        "@type": "City",
+        "name": "Perpignan"
+       },
+       {
+        "@type": "AdministrativeArea",
+        "name": "Pyrénées-Orientales"
+       }
+      ],
+      "description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales) : peinture intérieure et extérieure, rénovation de façades, enduits et revêtements de sol.",
+      "email": "style.deco66@gmail.com",
+      "hasMap": "https://www.google.com/maps?cid=3698755901832647189",
+      "hasOfferCatalog": {
+       "@type": "OfferCatalog",
+       "itemListElement": [
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-peinture-interieure"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-peinture-exterieure"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-renovation-facades"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-enduits-preparation-finition"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-enduits-decoratifs"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-bandes-joints-placo"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-renovation-degat-des-eaux"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-parquets-revetements-sol"
+         }
+        },
+        {
+         "@type": "Offer",
+         "itemOffered": {
+          "@id": "https://styleetdeco.fr/#service-sols-souples-lvt"
+         }
+        }
+       ],
+       "name": "Prestations de Style & Déco"
+      },
+      "identifier": {
+       "@type": "PropertyValue",
+       "propertyID": "SIRET",
+       "value": "79325004400047"
+      },
+      "image": "https://styleetdeco.fr/assets/images/banniere-2.webp",
+      "logo": {
+       "@type": "ImageObject",
+       "height": 427,
+       "url": "https://styleetdeco.fr/assets/images/logo-fin-640.webp",
+       "width": 640
+      },
+      "name": "Style & Déco",
+      "openingHoursSpecification": [
+       {
+        "@type": "OpeningHoursSpecification",
+        "closes": "18:00:00",
+        "dayOfWeek": [
+         "Monday",
+         "Tuesday",
+         "Wednesday",
+         "Thursday",
+         "Friday"
+        ],
+        "opens": "08:00:00"
+       }
+      ],
+      "sameAs": [
+       "https://www.google.com/maps?cid=3698755901832647189"
+      ],
+      "telephone": "+33650756242",
+      "url": "https://styleetdeco.fr/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#webpage",
+      "@type": "WebPage",
+      "about": [
+       {
+        "@id": "https://styleetdeco.fr/#business"
+       }
+      ],
+      "description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit, réponse sous 24 h.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "name": "Peintre Saint-Cyprien & Perpignan (66) | Style & Déco",
+      "url": "https://styleetdeco.fr/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-peinture-interieure",
+      "@type": "Service",
+      "name": "Peinture intérieure",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Peinture intérieure"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-peinture-exterieure",
+      "@type": "Service",
+      "name": "Peinture extérieure",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Peinture extérieure"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-renovation-facades",
+      "@type": "Service",
+      "name": "Rénovation de façades",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Rénovation de façades"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-enduits-preparation-finition",
+      "@type": "Service",
+      "name": "Enduits de préparation et de finition, dont enduits projetés mécaniquement",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Enduits de préparation et de finition, dont enduits projetés mécaniquement"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-enduits-decoratifs",
+      "@type": "Service",
+      "name": "Enduits décoratifs",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Enduits décoratifs"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-bandes-joints-placo",
+      "@type": "Service",
+      "name": "Bandes et joints de plaques de plâtre",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Bandes et joints de plaques de plâtre"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-renovation-degat-des-eaux",
+      "@type": "Service",
+      "name": "Rénovation après dégât des eaux",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Rénovation après dégât des eaux"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-parquets-revetements-sol",
+      "@type": "Service",
+      "name": "Parquets et revêtements de sol",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Parquets et revêtements de sol"
+     },
+     {
+      "@id": "https://styleetdeco.fr/#service-sols-souples-lvt",
+      "@type": "Service",
+      "name": "Sols souples et revêtements LVT",
+      "provider": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "serviceType": "Sols souples et revêtements LVT"
+     }
+    ]
+   },
+   {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Réponse sous 24 h. Pour un devis précis, on confirme surfaces, état du support et finition attendue."
+      },
+      "name": "Quel est votre délai de réponse pour un devis ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Protection systématique (bâchage/masquage), circulation organisée, nettoyage en fin de journée et fin de chantier."
+      },
+      "name": "Comment garantissez-vous un chantier propre ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui, selon votre zone et le planning. L'objectif reste le même : finition nette et délai respecté."
+      },
+      "name": "Est-ce que vous intervenez sur de petites surfaces ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Ça dépend des pièces et de la lumière. Mat pour masquer les défauts, velours pour l'équilibre, satiné pour zones sollicitées."
+      },
+      "name": "Quelles finitions recommandez-vous ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui. On peut planifier en horaires adaptés et proposer des solutions durables à entretien facile."
+      },
+      "name": "Travaillez-vous avec des pros (bureaux, commerces) ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning. Nous le précisons dès le premier échange."
+      },
+      "name": "Quel est le délai pour démarrer le chantier à Perpignan / Saint-Cyprien ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Le tarif dépend surtout de la surface, de l'état des supports, du niveau de préparation et de la finition choisie. Le devis détaille les postes pour rester lisible."
+      },
+      "name": "Comment est calculé le prix de la prestation (surface, préparation, finition) ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui, si nécessaire pour valider précisément les supports, les contraintes et le rendu attendu, afin d'établir une estimation fiable."
+      },
+      "name": "Proposez-vous une visite sur place avant devis ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "En cas d'ajustement, une reprise est organisée rapidement pour livrer un résultat conforme aux attentes validées ensemble."
+      },
+      "name": "Que se passe-t-il si une retouche est nécessaire après chantier ?"
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan (Pyrénées-Orientales). Peinture intérieure, extérieure, façade et finitions premium. Devis gratuit, réponse sous 24 h.",
+   "og:description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit, réponse sous 24 h.",
+   "og:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Peintre Saint-Cyprien & Perpignan (66) | Style & Déco",
+   "og:type": "website",
+   "og:url": "https://styleetdeco.fr/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Artisan peintre en bâtiment à Saint-Cyprien et Perpignan. Finitions premium et devis gratuit, réponse sous 24 h.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "twitter:title": "Peintre Saint-Cyprien & Perpignan (66) | Style & Déco"
+  },
+  "title": "Peintre Saint-Cyprien & Perpignan (66) | Style & Déco"
+ },
+ "legal/mentions-legales.html": {
+  "canonical": "https://styleetdeco.fr/legal/mentions-legales.html",
+  "h1": [
+   "Mentions légales"
+  ],
+  "jsonld": [],
+  "meta": {
+   "robots": "index,follow"
+  },
+  "title": "Mentions légales | Style & Déco"
+ },
+ "legal/politique-confidentialite.html": {
+  "canonical": "https://styleetdeco.fr/legal/politique-confidentialite.html",
+  "h1": [
+   "Politique de confidentialité"
+  ],
+  "jsonld": [],
+  "meta": {
+   "robots": "index,follow"
+  },
+  "title": "Politique de confidentialité | Style & Déco"
+ },
+ "peintre-saint-cyprien/index.html": {
+  "canonical": "https://styleetdeco.fr/peintre-saint-cyprien/",
+  "h1": [
+   "Peinture intérieure à Saint-Cyprien (66750)"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/peintre-saint-cyprien/#webpage",
+      "@type": "WebPage",
+      "about": [
+       {
+        "@id": "https://styleetdeco.fr/#business"
+       },
+       {
+        "@id": "https://styleetdeco.fr/#service-peinture-interieure"
+       }
+      ],
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/peintre-saint-cyprien/#breadcrumb"
+      },
+      "description": "Artisan peintre à Saint-Cyprien (66750). Peinture intérieure des murs et plafonds, remise en peinture avant location et rénovation de résidences secondaires. Devis gratuit.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "name": "Peintre à Saint-Cyprien (66750) | Peinture intérieure | Style & Déco",
+      "url": "https://styleetdeco.fr/peintre-saint-cyprien/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/peintre-saint-cyprien/#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/peintre-saint-cyprien/",
+        "name": "Peintre à Saint-Cyprien",
+        "position": 2
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Artisan peintre à Saint-Cyprien (66750). Peinture intérieure des murs et plafonds, remise en peinture avant location et rénovation de résidences secondaires. Devis gratuit.",
+   "og:description": "Artisan peintre à Saint-Cyprien (66750). Peinture intérieure des murs et plafonds, remise en peinture avant location et rénovation de résidences secondaires. Devis gratuit.",
+   "og:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Peintre à Saint-Cyprien (66750) | Peinture intérieure | Style & Déco",
+   "og:type": "article",
+   "og:url": "https://styleetdeco.fr/peintre-saint-cyprien/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Artisan peintre à Saint-Cyprien (66750). Peinture intérieure des murs et plafonds, remise en peinture avant location et rénovation de résidences secondaires. Devis gratuit.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "twitter:title": "Peintre à Saint-Cyprien (66750) | Peinture intérieure | Style & Déco"
+  },
+  "title": "Peintre à Saint-Cyprien (66750) | Peinture intérieure | Style & Déco"
+ },
+ "perpignan.html": {
+  "canonical": "https://styleetdeco.fr/perpignan.html",
+  "h1": [
+   "Artisan peintre à Perpignan"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/perpignan.html#webpage",
+      "@type": "WebPage",
+      "about": [
+       {
+        "@id": "https://styleetdeco.fr/#business"
+       },
+       {
+        "@id": "https://styleetdeco.fr/#service-peinture-interieure"
+       },
+       {
+        "@id": "https://styleetdeco.fr/#service-peinture-exterieure"
+       }
+      ],
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/perpignan.html#breadcrumb"
+      },
+      "description": "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit, réponse sous 24 h.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "name": "Artisan Peintre en Bâtiment à Perpignan (66000) | Style & Déco",
+      "url": "https://styleetdeco.fr/perpignan.html"
+     },
+     {
+      "@id": "https://styleetdeco.fr/perpignan.html#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/perpignan.html",
+        "name": "Peintre à Perpignan",
+        "position": 2
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Nous intervenons à Perpignan et dans plusieurs communes alentour, selon la nature et l'organisation des travaux. Les modalités de déplacement sont précisées dans le devis."
+      },
+      "name": "Intervenez-vous dans tout Perpignan ou seulement dans certains quartiers ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Le tarif dépend de la surface, de l'état des supports, de la préparation nécessaire et de la finition choisie. Nous vous répondons sous 24 h, puis nous établissons un devis détaillé après étude de votre projet (une visite sur place peut être proposée)."
+      },
+      "name": "Combien coûte un chantier de peinture à Perpignan ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Démarrage généralement sous 1 à 3 semaines après validation du devis, selon notre planning."
+      },
+      "name": "Quel délai pour démarrer un chantier ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui, nous réalisons des travaux de remise en état des murs et plafonds après un dégât des eaux, lorsque l'origine du sinistre a été traitée et que les supports sont suffisamment secs. Selon leur état, notre intervention peut comprendre les réparations, les enduits, une impression isolante adaptée et les peintures de finition."
+      },
+      "name": "Intervenez-vous après un dégât des eaux ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui, nous étudions aussi les demandes des copropriétés, des agences de location et des bailleurs (parties communes, remises en état, ravalements). Décrivez-nous votre besoin pour recevoir un devis."
+      },
+      "name": "Travaillez-vous avec les syndics et les agences immobilières de Perpignan ?"
+     },
+     {
+      "@type": "Question",
+      "acceptedAnswer": {
+       "@type": "Answer",
+       "text": "Oui. Nous sommes assurés en responsabilité civile professionnelle et en décennale, pour les activités déclarées à nos contrats. Les attestations d'assurance sont remises sur demande."
+      },
+      "name": "Êtes-vous assuré pour les chantiers de façade ?"
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit, réponse sous 24 h.",
+   "og:description": "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit, réponse sous 24 h.",
+   "og:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Artisan Peintre en Bâtiment à Perpignan | Style & Déco",
+   "og:type": "website",
+   "og:url": "https://styleetdeco.fr/perpignan.html",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Artisan peintre à Perpignan : peinture intérieure et extérieure, rénovation des murs et plafonds, enduits et revêtements de sol. Devis gratuit, réponse sous 24 h.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/social-preview.jpg",
+   "twitter:title": "Artisan Peintre en Bâtiment à Perpignan | Style & Déco"
+  },
+  "title": "Artisan Peintre en Bâtiment à Perpignan (66000) | Style & Déco"
+ },
+ "realisations/index.html": {
+  "canonical": "https://styleetdeco.fr/realisations/",
+  "h1": [
+   "Nos réalisations"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/realisations/#webpage",
+      "@type": [
+       "CollectionPage",
+       "WebPage"
+      ],
+      "about": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/realisations/#breadcrumb"
+      },
+      "description": "Chantiers de ravalement de façade et de peinture réalisés par Style & Déco à Perpignan et dans les Pyrénées-Orientales : photographies et déroulé des travaux.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "mainEntity": {
+       "@type": "ItemList",
+       "itemListElement": [
+        {
+         "@type": "ListItem",
+         "name": "Ravalement de façade d'un immeuble à Perpignan (66)",
+         "position": 1,
+         "url": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/"
+        },
+        {
+         "@type": "ListItem",
+         "name": "Mise en peinture complète d'une maison de standing de 300 m² à Perpignan",
+         "position": 2,
+         "url": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/"
+        }
+       ]
+      },
+      "name": "Nos réalisations de peinture et de ravalement de façade | Style & Déco",
+      "url": "https://styleetdeco.fr/realisations/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/realisations/#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/realisations/",
+        "name": "Réalisations",
+        "position": 2
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Chantiers de ravalement de façade et de peinture réalisés par Style & Déco à Perpignan et dans les Pyrénées-Orientales : photographies et déroulé des travaux.",
+   "og:description": "Chantiers de ravalement de façade et de peinture réalisés par Style & Déco à Perpignan et dans les Pyrénées-Orientales : photographies et déroulé des travaux.",
+   "og:image": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+   "og:image:alt": "Immeuble résidentiel de trois niveaux à Perpignan après ravalement : façades beige clair, bande grise percée de deux hublots et balcons à garde-corps blancs",
+   "og:image:height": "1200",
+   "og:image:width": "1600",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Nos réalisations de peinture et de ravalement de façade | Style & Déco",
+   "og:type": "website",
+   "og:url": "https://styleetdeco.fr/realisations/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Chantiers de ravalement de façade et de peinture réalisés par Style & Déco à Perpignan et dans les Pyrénées-Orientales : photographies et déroulé des travaux.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+   "twitter:title": "Nos réalisations de peinture et de ravalement de façade | Style & Déco"
+  },
+  "title": "Nos réalisations de peinture et de ravalement de façade | Style & Déco"
+ },
+ "realisations/peinture-interieure-maison-standing-perpignan/index.html": {
+  "canonical": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/",
+  "h1": [
+   "Mise en peinture complète d'une maison de standing de 300 m² à Perpignan"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/#webpage",
+      "@type": "WebPage",
+      "about": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/#breadcrumb"
+      },
+      "description": "Découvrez notre chantier de peinture intérieure dans une maison de standing de 300 m² à Perpignan : ratissage complet, murs grège, plafonds blancs et Marmorino.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "name": "Peinture intérieure à Perpignan : maison de 300 m² | Style & Déco",
+      "primaryImageOfPage": {
+       "@id": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/#primaryimage"
+      },
+      "url": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/#primaryimage",
+      "@type": "ImageObject",
+      "caption": "Le grand séjour : murs et plafonds peints, sol en grandes dalles gris clair et baie vitrée ouverte sur le jardin.",
+      "contentUrl": "https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp",
+      "height": 1024,
+      "inLanguage": "fr-FR",
+      "url": "https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp",
+      "width": 1536
+     },
+     {
+      "@id": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/realisations/",
+        "name": "Réalisations",
+        "position": 2
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/",
+        "name": "Maison de standing de 300 m² à Perpignan (66)",
+        "position": 3
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Découvrez notre chantier de peinture intérieure dans une maison de standing de 300 m² à Perpignan : ratissage complet, murs grège, plafonds blancs et Marmorino.",
+   "og:description": "Découvrez notre chantier de peinture intérieure dans une maison de standing de 300 m² à Perpignan : ratissage complet, murs grège, plafonds blancs et Marmorino.",
+   "og:image": "https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp",
+   "og:image:alt": "Grand séjour ouvert aux murs blancs et au sol en grandes dalles gris clair, avec une baie vitrée coulissante noire donnant sur un jardin",
+   "og:image:height": "1024",
+   "og:image:width": "1536",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Peinture intérieure à Perpignan : maison de 300 m² | Style & Déco",
+   "og:type": "article",
+   "og:url": "https://styleetdeco.fr/realisations/peinture-interieure-maison-standing-perpignan/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Découvrez notre chantier de peinture intérieure dans une maison de standing de 300 m² à Perpignan : ratissage complet, murs grège, plafonds blancs et Marmorino.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/interieur-sejour-murs-blancs-baie-vitree.webp",
+   "twitter:title": "Peinture intérieure à Perpignan : maison de 300 m² | Style & Déco"
+  },
+  "title": "Peinture intérieure à Perpignan : maison de 300 m² | Style & Déco"
+ },
+ "realisations/ravalement-facade-immeuble-perpignan/index.html": {
+  "canonical": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/",
+  "h1": [
+   "Ravalement de façade d'un immeuble à Perpignan (66)"
+  ],
+  "jsonld": [
+   {
+    "@context": "https://schema.org",
+    "@graph": [
+     {
+      "@id": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/#webpage",
+      "@type": "WebPage",
+      "about": {
+       "@id": "https://styleetdeco.fr/#business"
+      },
+      "breadcrumb": {
+       "@id": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/#breadcrumb"
+      },
+      "description": "Découvrez notre chantier de ravalement de façade à Perpignan : nettoyage, réparation des balcons, traitement des armatures et peinture D2.",
+      "inLanguage": "fr-FR",
+      "isPartOf": {
+       "@id": "https://styleetdeco.fr/#website"
+      },
+      "name": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco",
+      "primaryImageOfPage": {
+       "@id": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/#primaryimage"
+      },
+      "url": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/"
+     },
+     {
+      "@id": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/#primaryimage",
+      "@type": "ImageObject",
+      "caption": "L'immeuble après ravalement : façades homogènes, sous-faces de balcons grises et bande verticale percée de deux hublots.",
+      "contentUrl": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+      "height": 1200,
+      "inLanguage": "fr-FR",
+      "url": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+      "width": 1600
+     },
+     {
+      "@id": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/#breadcrumb",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/",
+        "name": "Accueil",
+        "position": 1
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/realisations/",
+        "name": "Réalisations",
+        "position": 2
+       },
+       {
+        "@type": "ListItem",
+        "item": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/",
+        "name": "Ravalement de façade d'un immeuble à Perpignan (66)",
+        "position": 3
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "meta": {
+   "description": "Découvrez notre chantier de ravalement de façade à Perpignan : nettoyage, réparation des balcons, traitement des armatures et peinture D2.",
+   "og:description": "Découvrez notre chantier de ravalement de façade à Perpignan : nettoyage, réparation des balcons, traitement des armatures et peinture D2.",
+   "og:image": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+   "og:image:alt": "Immeuble résidentiel de trois niveaux à Perpignan après ravalement : façades beige clair, bande grise percée de deux hublots et balcons à garde-corps blancs",
+   "og:image:height": "1200",
+   "og:image:width": "1600",
+   "og:locale": "fr_FR",
+   "og:site_name": "Style & Déco",
+   "og:title": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco",
+   "og:type": "article",
+   "og:url": "https://styleetdeco.fr/realisations/ravalement-facade-immeuble-perpignan/",
+   "robots": "index,follow,max-image-preview:large",
+   "twitter:card": "summary_large_image",
+   "twitter:description": "Découvrez notre chantier de ravalement de façade à Perpignan : nettoyage, réparation des balcons, traitement des armatures et peinture D2.",
+   "twitter:image": "https://styleetdeco.fr/assets/images/realisations/ravalement-facade-perpignan/resultat-ensemble-1600.webp",
+   "twitter:title": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco"
+  },
+  "title": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco"
+ }
+}
