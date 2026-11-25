@@ -291,9 +291,26 @@
     images.forEach(function(im, k){ im.classList.toggle("is-on", k === n); });
     $(".js-compteur").textContent = "Étape " + (n + 1) + " sur " + blocs.length;
   }
+  var ecranEtroit = window.matchMedia("(max-width: 1000px)");
   if ("IntersectionObserver" in window){
-    var io2 = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) active(blocs.indexOf(e.target)); }); }, {rootMargin:"-45% 0px -45% 0px"});
+    var io2 = new IntersectionObserver(function(es){ if (ecranEtroit.matches) return; es.forEach(function(e){ if (e.isIntersecting) active(blocs.indexOf(e.target)); }); }, {rootMargin:"-45% 0px -45% 0px"});
     blocs.forEach(function(b){ io2.observe(b); });
+  }
+  /* Téléphone et tablette : la photo reste en haut ; l'étape active est la dernière dont le début est passé sous la photo */
+  var visuelFixe = $(".js-visuel"), etapeAttente = false;
+  function majEtapeEtroit(){
+    if (!ecranEtroit.matches || !visuelFixe || !blocs.length) return;
+    var ligne = visuelFixe.getBoundingClientRect().bottom + 90, n = 0;
+    blocs.forEach(function(b, k){ if (b.getBoundingClientRect().top <= ligne) n = k; });
+    active(n);
+  }
+  if (blocs.length && visuelFixe){
+    window.addEventListener("scroll", function(){
+      if (etapeAttente) return; etapeAttente = true;
+      requestAnimationFrame(function(){ etapeAttente = false; majEtapeEtroit(); });
+    }, {passive:true});
+    window.addEventListener("resize", majEtapeEtroit);
+    majEtapeEtroit();
   }
 
   /* Chiffres du héros : comptage jusqu'à la valeur finale (déjà écrite dans la page) */
@@ -366,8 +383,16 @@
     if ($("#contact")) new IntersectionObserver(function(es){ dansContact = es[0].isIntersecting; majFlottants(); }, {threshold:.2}).observe($("#contact"));
   } else { horsHeros = true; majFlottants(); }
   /* Mur d'avis : une seule série d'avis dans la page ; la boucle continue est créée ici (le texte n'est pas dupliqué dans le HTML) */
-  $$(".rangee").forEach(function(r){
-    if (reduit) return;
+  var etroit = window.matchMedia("(max-width: 720px)").matches;
+  var rangees = $$(".rangee");
+  if (etroit && rangees.length > 1){
+    /* Téléphone : les six avis dans une seule rangée, à faire glisser du doigt */
+    $$(".carte-avis", rangees[1]).forEach(function(c){ rangees[0].appendChild(c); });
+    rangees[1].hidden = true;
+    rangees = [rangees[0]];
+  }
+  rangees.forEach(function(r){
+    if (reduit || etroit) return;
     $$(".carte-avis", r).forEach(function(c){ var k = c.cloneNode(true); k.setAttribute("aria-hidden", "true"); $$("a", k).forEach(function(a){ a.tabIndex = -1; }); r.appendChild(k); });
     r.classList.add("is-boucle");
   });

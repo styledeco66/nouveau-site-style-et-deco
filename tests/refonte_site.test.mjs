@@ -266,7 +266,7 @@ test("avis : l'invitation à laisser un avis Google est présente sur les pages 
   for (const page of ["index.html", "peintre-saint-cyprien/index.html", "facade-saint-cyprien/index.html", "perpignan.html", "realisations/index.html"]) {
     const html = read(page);
     assert.match(html, /Vous avez fait appel à nous \?/, page);
-    assert.match(html, /<a class="laisser-avis__lien" href="https:\/\/www\.google\.com\/[^"]+" target="_blank" rel="noopener noreferrer">/, page);
+    assert.match(html, /<a class="laisser-avis__lien" href="https:\/\/g\.page\/r\/CRVSnVflnlQzEAE\/review" target="_blank" rel="noopener noreferrer">/, `${page} : lien officiel pour laisser un avis`);
   }
 });
 
@@ -288,4 +288,14 @@ test("boutons d'avis : tous les boutons Google (laisser un avis, voir sur Google
   assert.match(css, /\.laisser-avis__lien:hover \.laisser-avis__btn/);
   assert.match(css, /\.verifier,\.avis-heros__lien\{[^}]*background:linear-gradient/);
   assert.match(css, /\.verifier:hover[^{]*\{background-size:51% 100%/);
+});
+
+test("téléphone : avis à faire glisser (une rangée, pas de défilement automatique) et photo fixe de l'étape par étape", () => {
+  const css = read("assets/css/style.css");
+  assert.match(css, /\.avis \.rangee\{[^}]*overflow-x:auto;scroll-snap-type:x mandatory/);
+  assert.match(css, /\.avis \.carte-avis p\{[^}]*-webkit-line-clamp:unset/);
+  assert.match(css, /\.etapes__visuel\{display:block;position:sticky;top:84px/);
+  const js = read("assets/js/app.js");
+  assert.match(js, /rangees\[1\]\.hidden = true/);
+  assert.match(js, /function majEtapeEtroit/);
 });
