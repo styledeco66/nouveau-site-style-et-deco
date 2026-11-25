@@ -103,3 +103,17 @@ test("les deux fiches se renvoient l'une vers l'autre", () => {
   assert.match(read("realisations/pose-parquet-local-commercial-perpignan/index.html"), /class="autre-real" href="\/realisations\/pose-sol-maison-estagel\/"/);
   assert.match(read("realisations/pose-sol-maison-estagel/index.html"), /class="autre-real" href="\/realisations\/pose-parquet-local-commercial-perpignan\/"/);
 });
+
+test("les fiches parquet parlent de sol : ni formules toutes faites (finition nette, coupes nettes…), ni murs", () => {
+  for (const f of FICHES) {
+    const html = read(`realisations/${f.slug}/index.html`);
+    const avantContact = html.slice(0, html.indexOf('<section class="sec contact"'));
+    const visible = avantContact
+      .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ")
+      .replace(/\ssrc="[^"]*"/g, "") // les noms de fichiers ne comptent pas
+      .replace(/<[^>]+?(alt="[^"]*")[^>]*>/g, " $1 ")
+      .replace(/<[^>]+>/g, " ");
+    assert.doesNotMatch(visible, /\bmurs?\b/i, `${f.slug} : il est question de murs`);
+    assert.doesNotMatch(visible, /\bnett?es?\b|\bsoign\w+|impeccable|parfaitement/i, `${f.slug} : formule toute faite`);
+  }
+});
