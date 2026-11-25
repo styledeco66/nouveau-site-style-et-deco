@@ -244,8 +244,8 @@ button,input,textarea{font:inherit;color:inherit}
 .note-g .etoiles{font-size:20px;display:block}
 .note-g a{font-size:14px;font-weight:600}
 .rangee{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-bottom:16px;padding-inline:20px}
-.rangee.is-boucle{flex-wrap:nowrap;justify-content:flex-start;width:max-content;padding-inline:0;animation:file 80s linear infinite}
-.rangee--inverse.is-boucle{animation-direction:reverse;animation-duration:95s}
+.rangee.is-boucle{flex-wrap:nowrap;justify-content:flex-start;width:max-content;padding-inline:0;animation:file 50s linear infinite}
+.rangee--inverse.is-boucle{animation-direction:reverse;animation-duration:60s}
 .avis:hover .rangee{animation-play-state:paused}
 .carte-avis{width:380px;flex:none;background:var(--blanc);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;margin:0}
 .carte-avis p{margin:0;font-size:16px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:9;overflow:hidden}
@@ -959,3 +959,13 @@ main.section p{margin:0;color:var(--ardoise)}
 .real__autres li span{color:var(--ardoise);font-size:15px}
 .final__zone{font-size:15px;opacity:.85}
 
+
+/* Défilements un peu plus rapides (photos du haut, mur d'avis) */
+.piste{animation-duration:36s}
+
+/* Bouton « laisser un avis » : orange en permanence, blanc quand on appuie dessus */
+.laisser-avis__btn{background:var(--orange);color:#fff;box-shadow:0 12px 28px -12px rgba(242,97,29,.7)}
+.laisser-avis__g{background:#fff;color:var(--orange-fonce)}
+.laisser-avis__lien:hover .laisser-avis__btn{background:var(--orange-fonce)}
+.laisser-avis__lien:active .laisser-avis__btn,.laisser-avis__lien:focus-visible .laisser-avis__btn{background:#fff;color:var(--orange-fonce);transform:none;box-shadow:0 0 0 2px var(--orange)}
+.laisser-avis__lien:active .laisser-avis__g{background:var(--orange);color:#fff}
