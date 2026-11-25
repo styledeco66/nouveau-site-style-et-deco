@@ -269,3 +269,7 @@ test("avis : l'invitation à laisser un avis Google est présente sur les pages 
     assert.match(html, /<a class="laisser-avis__lien" href="https:\/\/www\.google\.com\/[^"]+" target="_blank" rel="noopener noreferrer">/, page);
   }
 });
+
+test("photos : la hauteur affichée n'est jamais fixée par les attributs width/height (cadrages de la maquette conservés)", () => {
+  assert.match(read("assets/css/style.css"), /(^|\n)img\{height:auto\}/);
+});

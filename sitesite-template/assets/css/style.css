@@ -894,6 +894,8 @@ a.heros__assure:hover{border-color:var(--orange);background:rgba(242,97,29,.12)}
 .is-hidden{display:none!important}
 .barre-mobile{transition:transform .25s ease}
 .barre-mobile.is-away{transform:translateY(120%)}
+/* Les attributs width/height des photos servent à réserver la place (pas de saut de page) : ils ne doivent jamais fixer la hauteur affichée */
+img{height:auto}
 
 /* ---------- Accueil : éléments reprenant les textes du site en ligne ---------- */
 .sec__tete .d.d--long{font-size:clamp(28px, 3.3vw, 44px);max-width:24ch}
