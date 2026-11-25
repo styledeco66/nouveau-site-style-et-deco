@@ -99,7 +99,7 @@ test("l'empreinte change quand le contenu change, et seules les pages concernée
     const loading = [
       "index.html", "perpignan.html", "peintre-saint-cyprien/index.html", "facade-saint-cyprien/index.html", "realisations/index.html",
       "realisations/ravalement-facade-immeuble-perpignan/index.html", "realisations/peinture-interieure-maison-standing-perpignan/index.html", "realisations/sol-aspect-parquet-local-commercial-perpignan/index.html", "realisations/pose-sol-maison-estagel/index.html", "realisations/peinture-express-local-commercial-saint-nazaire/index.html",
-      "legal/mentions-legales.html", "legal/politique-confidentialite.html",
+      "legal/mentions-legales.html", "legal/politique-confidentialite.html", "en-bref/index.html",
     ];
     assert.deepEqual(updated.changed.sort(), loading.sort(), "toutes les pages qui chargent lead-form.js (formulaire ou fenêtre d'appel), et elles seules");
     assert.match(read(path.join(site, "index.html")), new RegExp(`lead-form\\.js\\?v=${fingerprint(lead)}`));

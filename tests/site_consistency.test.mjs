@@ -17,6 +17,7 @@ const PUBLIC_PAGES = {
   "perpignan.html": `${ORIGIN}/perpignan.html`,
   "peintre-saint-cyprien/index.html": `${ORIGIN}/peintre-saint-cyprien/`,
   "facade-saint-cyprien/index.html": `${ORIGIN}/facade-saint-cyprien/`,
+  "en-bref/index.html": `${ORIGIN}/en-bref/`,
 };
 const OTHER_PAGES = ["merci.html", "merci-rappel.html", "lead-rate-limited.html", "legal/mentions-legales.html", "legal/politique-confidentialite.html"];
 

@@ -889,5 +889,77 @@
    "twitter:title": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco"
   },
   "title": "Ravalement de façade d'un immeuble à Perpignan | Style & Déco"
- }
+ },
+"en-bref/index.html": {
+ "canonical": "https://styleetdeco.fr/en-bref/",
+ "h1": [
+  "Style & Déco en bref"
+ ],
+ "jsonld": [
+  {
+   "@context": "https://schema.org",
+   "@graph": [
+    {
+     "@type": [
+      "WebPage",
+      "AboutPage"
+     ],
+     "@id": "https://styleetdeco.fr/en-bref/#webpage",
+     "url": "https://styleetdeco.fr/en-bref/",
+     "name": "Style & Déco en bref : peintre à Saint-Cyprien (66)",
+     "description": "Prestations, communes desservies, assurances, déroulement d’un devis, horaires et contact de Style & Déco, artisan peintre à Saint-Cyprien.",
+     "inLanguage": "fr-FR",
+     "isPartOf": {
+      "@id": "https://styleetdeco.fr/#website"
+     },
+     "about": [
+      {
+       "@id": "https://styleetdeco.fr/#business"
+      }
+     ],
+     "breadcrumb": {
+      "@id": "https://styleetdeco.fr/en-bref/#breadcrumb"
+     }
+    },
+    {
+     "@type": "BreadcrumbList",
+     "@id": "https://styleetdeco.fr/en-bref/#breadcrumb",
+     "itemListElement": [
+      {
+       "@type": "ListItem",
+       "position": 1,
+       "name": "Accueil",
+       "item": "https://styleetdeco.fr/"
+      },
+      {
+       "@type": "ListItem",
+       "position": 2,
+       "name": "Style & Déco en bref",
+       "item": "https://styleetdeco.fr/en-bref/"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "meta": {
+  "description": "Prestations, communes desservies, assurances, déroulement d’un devis, horaires et contact de Style & Déco, artisan peintre à Saint-Cyprien.",
+  "robots": "index,follow,max-image-preview:large",
+  "og:type": "website",
+  "og:locale": "fr_FR",
+  "og:site_name": "Style & Déco",
+  "og:title": "Style & Déco en bref : peintre à Saint-Cyprien (66)",
+  "og:description": "Prestations, communes desservies, assurances, déroulement d’un devis, horaires et contact de Style & Déco, artisan peintre à Saint-Cyprien.",
+  "og:url": "https://styleetdeco.fr/en-bref/",
+  "og:image": "https://styleetdeco.fr/assets/images/realisations/sol-maison-estagel/resultat-ensemble-1600.webp",
+  "og:image:width": "1600",
+  "og:image:height": "1200",
+  "og:image:alt": "Pièce de vie après la pose d’un sol clair dans le séjour et d’un aspect bois foncé dans la cuisine",
+  "twitter:card": "summary_large_image",
+  "twitter:title": "Style & Déco en bref : peintre à Saint-Cyprien (66)",
+  "twitter:description": "Prestations, communes desservies, assurances, déroulement d’un devis, horaires et contact de Style & Déco, artisan peintre à Saint-Cyprien.",
+  "twitter:image": "https://styleetdeco.fr/assets/images/realisations/sol-maison-estagel/resultat-ensemble-1600.webp"
+ },
+ "title": "Style & Déco en bref : peintre à Saint-Cyprien (66)"
+}
 }
