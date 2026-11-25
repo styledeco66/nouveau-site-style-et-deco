@@ -959,25 +959,3 @@ main.section p{margin:0;color:var(--ardoise)}
 .real__autres li span{color:var(--ardoise);font-size:15px}
 .final__zone{font-size:15px;opacity:.85}
 
-/* ---------- Photos : montrées entières, dans leurs proportions d'origine (aucun recadrage serré, aucun zoom) ---------- */
-.heros__fond img{transform:none}
-.heros__fond img.is-on{animation:none}
-.anim-zoom,.anim-zoom.is-visible{transform:none;opacity:1;transition:none}
-.tuile,.tuile--col{grid-template-columns:minmax(0,1fr);align-content:start}
-.tuile img,.tuile--col img{height:auto;min-height:0;aspect-ratio:auto}
-.piste figure{width:auto}
-.piste img{width:auto;height:210px;max-width:none;object-fit:contain;background:var(--pierre)}
-.cas__principale{aspect-ratio:4/3;background:var(--nuit-fonce)}
-.cas__principale img{object-fit:contain}
-.vignette{background:var(--pierre)}
-.vignette img{object-fit:contain}
-.etapes__visuel{background:var(--nuit-fonce)}
-.etapes__visuel img,.etapes__visuel img.is-on{object-fit:contain;transform:none}
-.autre img,.chantier__photo img,.carte-real__photo img,.recit__photos img,.avant-apres img,.texte-photo__img img,.service__photo img,.constat__photo img,.galerie img,.photo-une img{aspect-ratio:auto;height:auto;max-height:none}
-.autre-real img{height:auto;min-height:0;align-self:center;object-fit:contain}
-.carte-real:hover .carte-real__photo img,.galerie figure:hover img,.autre-real:hover img,.service:hover .service__photo img{transform:none}
-.chantier__photo,.carte-real__photo,.service__photo,.texte-photo__img,.constat__photo,.galerie figure{align-self:start}
-@media (max-width: 1000px){
-  .piste img{height:160px}
-  .etape-bloc img{aspect-ratio:auto;height:auto}
-}

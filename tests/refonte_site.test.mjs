@@ -269,10 +269,3 @@ test("avis : l'invitation à laisser un avis Google est présente sur les pages 
     assert.match(html, /<a class="laisser-avis__lien" href="https:\/\/www\.google\.com\/[^"]+" target="_blank" rel="noopener noreferrer">/, page);
   }
 });
-
-test("photos : jamais de zoom animé ni de recadrage serré (proportions d'origine)", () => {
-  const css = read("assets/css/style.css");
-  assert.match(css, /\.heros__fond img\.is-on\{animation:none\}/);
-  assert.match(css, /\.tuile img,\.tuile--col img\{height:auto;min-height:0;aspect-ratio:auto\}/);
-  assert.match(css, /\.cas__principale img\{object-fit:contain\}/);
-});
