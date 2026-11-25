@@ -20,7 +20,7 @@ test("animations : désactivées si mouvement réduit, page Perpignan exclue, pa
   assert.match(js, /if \(assur && !reduit && "IntersectionObserver" in window && !\/\\\/perpignan/);
   assert.match(js, /classList\.toggle\("en-pause", !visible\)/);
   const css = read("assets/css/style.css");
-  assert.match(css, /\.dossier\.is-anime \.feuille--rc\{animation:feuille-rc 8s/);
+  assert.match(css, /\.dossier\.is-anime \.feuille--rc\{animation:feuille-rc 4s/);
   assert.match(css, /\.dossier\.en-pause[^{]*\{animation-play-state:paused!important\}/);
 });
 
