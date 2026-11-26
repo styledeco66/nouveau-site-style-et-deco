@@ -53,7 +53,7 @@ refusé (403) et le formulaire affichait l'erreur générique. Corrigé par la l
   sinon 403.
 - **Validation serveur** : formulaire connu, téléphone (9 à 15 chiffres), longueurs max (nom 100, ville 100, détails 3000,
   e-mail 254), champs obligatoires selon le mode (devis : nom, téléphone, e-mail, ville, détails ; rappel : nom et téléphone ;
-  l'e-mail est facultatif mais doit être valide s'il est renseigné — mêmes règles pour les trois formulaires), corps ≤ 20 000 caractères, `application/json` ou
+  l'e-mail est facultatif mais doit être valide s'il est renseigné — mêmes règles pour les trois formulaires), champs texte ≤ 20 000 caractères (demande JSON avec photos ≤ 5,5 millions de caractères), `application/json` ou
   `application/x-www-form-urlencoded` uniquement. Le sujet de l'e-mail est toujours fixé côté serveur (« DEMANDE DE DEVIS »,
   « … - Perpignan » pour la page Perpignan, « [RAPPEL CLIENT] Nouveau rappel à effectuer »).
 - **Adresse e-mail** : obligatoire pour une demande de devis, **facultative pour une demande de rappel** (décision du dirigeant) ;
@@ -172,7 +172,15 @@ confirmation rappel, alerte interne de rappel, rappel interne programmé. L'enga
 - **Coordonnées** : source unique `BRAND` dans `netlify/lib/emails.mjs` (nom, activité, « Adresse administrative » 18 rue Madame de la Fayette 66750 Saint-Cyprien France — formulation qui ne laisse pas entendre un établissement ouvert au public —, téléphone `tel:+33650756242`, e-mail `mailto:style.deco66@gmail.com`, site `https://styleetdeco.fr`). Signature des confirmations clients : nom, activité, téléphone, e-mail, site ; pied de tous les e-mails : activité, adresse administrative, téléphone, e-mail, site. Toutes les coordonnées sont cliquables et reprises dans la version texte brut.
 - **Logo** : le PNG officiel `sitesite-template/assets/images/email/logo-style-deco-email.png` (dérivé de `logo-fin-640.webp`, recadré sur ses marges transparentes : 512 × 312 px, transparence conservée, sans métadonnées, palette indexée de 256 couleurs, 44 Ko) est **hébergé sur notre domaine** et chargé directement par le HTML des quatre e-mails :
   `https://styleetdeco.fr/assets/images/email/logo-style-deco-email.png` (132 px dans les confirmations clients, aucun logo dans les notifications internes ; texte alternatif « Style & Déco — Le Reflet de vos Envies »). La photo de chantier de la confirmation de devis est `chantier-facade-email.jpg` (1200 × 520 px, JPEG sans métadonnées, 122 Ko) servie depuis le même dossier.
-  **Aucune pièce jointe, aucun CID, aucun base64, aucune data URI, aucun SVG** : une image jointe peut apparaître comme pièce jointe « noname ». Plus aucune variable ne permet de réactiver l'ancienne méthode (un test vérifie que ni `attachments`, ni `cid:`, ni `base64` n'existent dans le code d'envoi).
+  **Les images du modèle ne sont jamais jointes** (ni CID, ni data URI, ni SVG) : une image jointe sans nom peut apparaître comme pièce jointe « noname ». Seule exception : les photos d'un devis, ci-dessous.
+
+## Photos jointes à un devis
+
+- Facultatives, 5 au maximum, sur les formulaires de devis uniquement (jamais sur un rappel).
+- Le navigateur les réduit (1600 px au plus, JPEG), ce qui retire leurs données de localisation.
+- La fonction n'accepte que du JPEG en base64 ; elle les joint à la seule notification interne (`photo-1.jpg`, `content_id` `photo-1`), où elles s'affichent sous la description des travaux. La confirmation au client n'en contient pas.
+- **La demande passe avant les photos** : une photo illisible est écartée et signalée ; si l'envoi avec photos échoue (côté serveur ou navigateur), la demande repart sans elles, la notification demande de les réclamer et le visiteur en est informé sur la page de confirmation.
+- Rien n'est enregistré sur le site : les photos ne vivent que dans l'e-mail.
   Le logo n'est disponible en production qu'**après la publication** de la PR (le fichier est livré avec elle) : ne pas activer les confirmations avant. Le fichier est servi avec un cache d'un an (`/assets/*`, `immutable`) : si le logo change un jour, utiliser un nouveau nom de fichier.
 - **Contenu transactionnel** : aucune publicité, aucun suivi, aucune inscription à une liste. Les confirmations clients saluent le client par le nom saisi, rappellent sa ville et (devis) un extrait de son message, **après nettoyage** (`safeName`, `safeCity`, `safeExcerpt` dans `netlify/lib/emails.mjs`) : le nom n'accepte que des lettres, espaces, apostrophes et traits d'union (sinon « Bonjour, »), la ville que lettres, chiffres et parenthèses ; le message perd tout lien, nom de domaine, adresse e-mail et numéro de téléphone ; 40 / 60 / 280 caractères au plus. Cela évite qu'un tiers utilise le formulaire pour faire envoyer un message à une adresse quelconque depuis notre domaine ; les demandes suspectes (quarantaine) ne reçoivent aucune confirmation. La confirmation ne
   promet ni devis établi, ni date de chantier. Tout contenu saisi est échappé dans les e-mails HTML. La note Google affichée (`BRAND.googleRating`, `BRAND.googleCount`) doit rester égale à `scripts/google-reviews.json` (un test le vérifie).

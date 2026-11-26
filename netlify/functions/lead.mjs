@@ -17,7 +17,8 @@ import {
 // LEAD_QUARANTINE_EMAIL (optionnelle : destinataire de la quarantaine, ex. adresse+verif@gmail.com ; à défaut LEAD_TO_EMAIL).
 // Activation explicite (absentes = désactivé) : LEAD_CLIENT_CONFIRMATIONS=on (e-mail de confirmation au client),
 // LEAD_SCHEDULED_REMINDERS=on (rappel interne programmé avant l'ouverture).
-// Ces envois secondaires ne sont actifs que si le contexte est explicitement « production ». Aucune pièce jointe n'est jamais envoyée.
+// Ces envois secondaires ne sont actifs que si le contexte est explicitement « production ». Seules pièces jointes
+// possibles : les photos facultatives d'un devis, dans la notification interne.
 // Voir docs/lead-delivery.md.
 
 const RESEND_URL = "https://api.resend.com/emails";
@@ -25,7 +26,11 @@ const DEFAULT_ALLOWED_ORIGINS = ["https://styleetdeco.fr"];
 const SUCCESS_DEVIS = "/merci.html";
 const SUCCESS_CALLBACK = "/merci-rappel.html";
 const MAX_SCHEDULE_AHEAD_MS = 29 * 24 * 60 * 60 * 1000; // Resend : 30 jours maximum
-const MAX_BODY_CHARS = 20000;
+const MAX_BODY_CHARS = 20000; // champs texte
+const MAX_PHOTOS = 5;
+const MAX_PHOTO_CHARS = 1_200_000; // base64 d'une photo (environ 900 Ko)
+const MAX_JSON_CHARS = 5_500_000; // demande avec photos, sous la limite de 6 Mo des fonctions Netlify
+const PHOTO_BUDGET_MS = 25000;
 const RESEND_TIMEOUT_MS = 8000;
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 
@@ -165,6 +170,18 @@ const validateLead = (raw) => {
   return { lead };
 };
 
+// Photos d'un devis : JPEG préparés par le navigateur, en base64 (« /9j/ » = début d'un fichier JPEG). Une photo illisible
+// est écartée et signalée, jamais la demande. `photos_lost` : photos que le navigateur n'a pas réussi à transmettre.
+const isJpegBase64 = (value) =>
+  typeof value === "string" && value.length <= MAX_PHOTO_CHARS && value.length % 4 === 0 && /^\/9j\/[A-Za-z0-9+/]+={0,2}$/.test(value);
+
+const readPhotos = (raw) => {
+  const sent = Array.isArray(raw.photos) ? raw.photos : [];
+  const accepted = sent.slice(0, MAX_PHOTOS).filter(isJpegBase64);
+  const declared = Math.max(0, Math.trunc(Number(raw.photos_lost)) || 0);
+  return { accepted, lost: Math.min(MAX_PHOTOS, sent.length - accepted.length + declared) };
+};
+
 const emailSubject = (lead, slot) => {
   if (lead.priority === PRIORITY_CALLBACK) {
     // Hors créneau « sous 30 min », le sujet indique la prochaine ouverture (le contenu reste identique).
@@ -185,7 +202,7 @@ const splitRecipients = (value) =>
 
 // Notification interne principale (devis ou rappel). Quarantaine : jamais supprimée ; vers LEAD_QUARANTINE_EMAIL si définie,
 // sinon vers le destinataire habituel (préfixe seul).
-const buildEmail = (lead, receivedAt, env, review, { slot, reference } = {}) => {
+const buildEmail = (lead, receivedAt, env, review, { slot, reference, photos = [], photosLost = 0 } = {}) => {
   const recipients = review && String(env.LEAD_QUARANTINE_EMAIL || "").trim() ? env.LEAD_QUARANTINE_EMAIL : env.LEAD_TO_EMAIL;
   const subject = `${review ? REVIEW_PREFIX : ""}${emailSubject(lead, slot)}`;
   const email = { from: env.LEAD_FROM_EMAIL, to: splitRecipients(recipients), subject };
@@ -204,9 +221,13 @@ const buildEmail = (lead, receivedAt, env, review, { slot, reference } = {}) => 
     email.html = alert.html;
   } else {
     // Demande de devis : notification premium (design B), une seule par demande ; le message du client est reproduit intégralement.
-    const alert = devisAlert({ lead, receivedAt: new Date(receivedAt), reference, origin: ORIGIN_LABELS[lead.form], formCode: lead.form, reviewReasons: review ? review.reasons : null });
+    const alert = devisAlert({ lead, receivedAt: new Date(receivedAt), reference, origin: ORIGIN_LABELS[lead.form], formCode: lead.form, reviewReasons: review ? review.reasons : null, photos: { count: photos.length, lost: photosLost } });
     email.text = alert.text;
     email.html = alert.html;
+    if (photos.length) {
+      // `content_id` : la photo s'affiche dans le message, à l'emplacement prévu par le modèle.
+      email.attachments = photos.map((content, index) => ({ content, filename: `photo-${index + 1}.jpg`, content_type: "image/jpeg", content_id: `photo-${index + 1}` }));
+    }
   }
   // Répondre au prospect depuis la boîte de réception.
   if (lead.email) email.reply_to = lead.email;
@@ -413,13 +434,15 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
 
   if (!isForm && !contentType.startsWith("application/json")) return fail(415, "unsupported_media_type");
 
+  const maxChars = isForm ? MAX_BODY_CHARS : MAX_JSON_CHARS; // les photos ne passent que par l'envoi JSON
   const declaredLength = Number(request.headers.get("content-length") || 0);
-  if (declaredLength > MAX_BODY_CHARS * 4) return fail(413, "payload_too_large");
+  if (declaredLength > (isForm ? MAX_BODY_CHARS * 4 : MAX_JSON_CHARS)) return fail(413, "payload_too_large");
   const text = await request.text();
-  if (text.length > MAX_BODY_CHARS) return fail(413, "payload_too_large");
+  if (text.length > maxChars) return fail(413, "payload_too_large");
 
   const raw = parseBody(text, contentType);
   if (!raw) return fail(400, "invalid_request");
+  if (!isForm && JSON.stringify({ ...raw, photos: undefined }).length > MAX_BODY_CHARS) return fail(413, "payload_too_large");
 
   // Honeypot : champ invisible que seuls les robots remplissent. Refus générique (même réponse qu'une validation
   // ordinaire : rien ne révèle le critère), aucun e-mail. Vérifié côté serveur, donc aussi pour les appels directs.
@@ -459,8 +482,24 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   const key = submissionKey(raw, lead, now);
   const reference = trackingReference(key);
 
-  const email = buildEmail(lead, receivedAt.toISOString(), env, review, { slot, reference });
-  const main = await deliverMain(email, key, env, fetchImpl, { deadline: Date.now() + MAIN_BUDGET_MS, sleep });
+  const photos = isCallback ? { accepted: [], lost: 0 } : readPhotos(raw);
+  let photosLost = photos.lost;
+  let main = null;
+  if (photos.accepted.length) {
+    const withPhotos = buildEmail(lead, receivedAt.toISOString(), env, review, { slot, reference, photos: photos.accepted, photosLost });
+    main = await deliverMain(withPhotos, key, env, fetchImpl, { deadline: Date.now() + PHOTO_BUDGET_MS, sleep });
+    if (!main.ok) {
+      console.warn("lead: envoi avec photos impossible, nouvel essai sans photos");
+      photosLost += photos.accepted.length;
+      main = null;
+    }
+  }
+  if (!main) {
+    const email = buildEmail(lead, receivedAt.toISOString(), env, review, { slot, reference, photosLost });
+    // Autre clé après un échec avec photos : le contenu n'est plus le même.
+    const mainKey = photos.accepted.length ? `${key}-sans-photos` : key;
+    main = await deliverMain(email, mainKey, env, fetchImpl, { deadline: Date.now() + MAIN_BUDGET_MS, sleep });
+  }
   if (!main.ok) return fail(502, "delivery_failed");
 
   // La notification principale est acceptée : le visiteur reçoit SA confirmation tout de suite. Les envois secondaires
@@ -481,7 +520,7 @@ export const handleLead = async (request, { env = {}, fetchImpl = fetch, now = (
   if (isForm) {
     return new Response(null, { status: 303, headers: { Location: next, "Cache-Control": "no-store" } });
   }
-  return Response.json({ ok: true, kind: isCallback ? "callback" : "devis", next }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ ok: true, kind: isCallback ? "callback" : "devis", next, ...(photosLost ? { photosLost } : {}) }, { headers: { "Cache-Control": "no-store" } });
 };
 
 export const config = {
