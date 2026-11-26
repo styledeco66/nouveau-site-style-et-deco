@@ -13,7 +13,13 @@ class PerpignanCanonicalRedirectTests(unittest.TestCase):
     def test_realisations_has_no_dead_wildcard_rule(self):
         rules = REDIRECTS.read_text(encoding="utf-8").splitlines()
         self.assertIn("/realisations /realisations/ 301", rules)
-        self.assertFalse([r for r in rules if r.startswith("/realisations/")])
+        self.assertFalse([r for r in rules if r.startswith("/realisations/") and "*" in r.split()[0]])
+
+    def test_former_facade_project_url_redirects_to_current_page(self):
+        rules = REDIRECTS.read_text(encoding="utf-8").splitlines()
+        self.assertIn(
+            "/realisations/facade-eclatante-perpignan/ /realisations/ravalement-facade-immeuble-perpignan/ 301", rules
+        )
 
 
 if __name__ == "__main__":
