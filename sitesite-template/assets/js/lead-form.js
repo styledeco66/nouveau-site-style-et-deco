@@ -10,6 +10,8 @@
   const PHOTO_SIZES = [[1600, 0.75], [1280, 0.65], [960, 0.6]];
   const PHOTO_TIMEOUT_MS = 60000; // un envoi de photos peut être long sur un réseau mobile
   const PHOTOS_LOST_KEY = "styledeco-photos-perdues";
+  const PHONE_TEXT = "06 50 75 62 42";
+  const PHONE_HREF = "tel:+33650756242";
   const ERROR_MESSAGE =
     "Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.";
 
@@ -50,10 +52,25 @@
     }
   };
 
+  // Le numéro écrit dans un message se touche pour appeler. Il reprend le lien du pied de page, donc aussi le numéro
+  // de suivi des annonces quand la mesure Google Ads l'a remplacé.
+  const linkPhone = (status) => {
+    const doc = status.ownerDocument;
+    const parts = doc ? status.textContent.split(PHONE_TEXT) : [];
+    if (parts.length !== 2) return;
+    const footer = doc.querySelector('.pied a[href^="tel:"]');
+    const link = doc.createElement("a");
+    link.className = "lien";
+    link.href = footer ? footer.getAttribute("href") : PHONE_HREF;
+    link.textContent = footer ? footer.textContent.trim() : PHONE_TEXT;
+    status.replaceChildren(parts[0], link, parts[1]);
+  };
+
   const setStatus = (status, message) => {
     if (!status) return;
     status.textContent = message;
     status.hidden = !message;
+    linkPhone(status);
   };
 
   const readAsDataUrl = (file) =>

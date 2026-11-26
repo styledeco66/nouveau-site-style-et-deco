@@ -130,6 +130,24 @@ for (const [label, fetchImpl] of Object.entries(failures)) {
   });
 }
 
+test("échec : le numéro du message est un lien d'appel qui reprend celui du pied de page", async () => {
+  for (const [footer, expected] of [
+    [null, { href: "tel:+33650756242", label: "06 50 75 62 42" }],
+    [{ getAttribute: () => "tel:0900000000", textContent: " 09 00 00 00 00 " }, { href: "tel:0900000000", label: "09 00 00 00 00" }],
+  ]) {
+    const { bindLeadForm } = loadModule();
+    const form = makeForm(baseFields);
+    let parts;
+    form.status.ownerDocument = { querySelector: () => footer, createElement: (tag) => ({ tag }) };
+    form.status.replaceChildren = (...nodes) => { parts = nodes; };
+    bindLeadForm(form, makeDeps(async () => new Response("{}", { status: 502 })));
+    await form.submit();
+    const [before, link, after] = parts;
+    assert.equal(before + "06 50 75 62 42" + after, ERROR_MESSAGE);
+    assert.deepEqual(plain({ tag: link.tag, href: link.href, label: link.textContent, classe: link.className }), { tag: "a", ...expected, classe: "lien" });
+  }
+});
+
 test("le message d'erreur exporté est exactement celui demandé", () => {
   assert.equal(loadModule().ERROR_MESSAGE, ERROR_MESSAGE);
 });
