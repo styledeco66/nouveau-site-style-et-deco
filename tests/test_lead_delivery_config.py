@@ -188,7 +188,9 @@ class LeadDeliveryConfigTests(unittest.TestCase):
 
     def test_rate_limit_rewrite_page_shows_the_exact_error_without_javascript(self):
         page = (SITE / "lead-rate-limited.html").read_text(encoding="utf-8")
-        self.assertIn("Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.", page)
+        text = re.sub(r"<[^>]+>", "", page)
+        self.assertIn("Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.", text)
+        self.assertIn('href="tel:+33650756242">06 50 75 62 42</a>', page)
         self.assertIn("<meta name=\"robots\" content=\"noindex\"", page)
 
 

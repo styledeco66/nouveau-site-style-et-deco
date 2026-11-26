@@ -24,6 +24,19 @@
   function mailValide(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
   function rempli(v){ return v.trim().length > 1; }
 
+  /* Message d'un formulaire : sa place est au-dessus du bouton (échec d'envoi). Pour une saisie à corriger, il rejoint
+     le champ concerné, puis revient à sa place à l'envoi suivant. */
+  function rangerMessage(zone){ if (zone && zone.repere) zone.repere.parentNode.insertBefore(zone, zone.repere.nextSibling); }
+  function montrerChamp(c, zone){
+    var bloc = c.closest(".champ");
+    if (zone && bloc) bloc.appendChild(zone);
+    if (!bloc || c.closest("dialog")){ c.focus(); return; }
+    c.focus({preventScroll:true});
+    /* Le champ et son explication restent lisibles, clavier du téléphone ouvert compris */
+    var r = bloc.getBoundingClientRect(), bas = window.matchMedia("(pointer: coarse)").matches ? window.innerHeight / 2 : window.innerHeight;
+    if (r.top < 90 || r.bottom > bas) bloc.scrollIntoView({block:"start"});
+  }
+
   /* Statut d'ouverture (bandeau du haut) : heure de Paris, jours fériés et fermetures compris */
   function majStatut(){
     var now = new Date(), ouvert = false, rapide = false, copie = copieRappel();
@@ -56,6 +69,7 @@
 
   function verifier(form){
     var zone = $(".js-form-status", form);
+    rangerMessage(zone);
     $$("[aria-invalid]", form).forEach(function(c){ c.removeAttribute("aria-invalid"); });
     var rappel = enRappel(form);
     var regles = [
@@ -74,7 +88,7 @@
       if (!regles[i][1](c.value)){
         c.setAttribute("aria-invalid", "true");
         if (zone){ zone.textContent = regles[i][2]; zone.hidden = false; }
-        c.focus();
+        montrerChamp(c, zone);
         return false;
       }
     }
@@ -84,6 +98,8 @@
 
   $$(".js-lead-form").forEach(function(form){
     form.setAttribute("novalidate", "");
+    var message = $(".js-form-status", form);
+    if (message) message.repere = message.parentNode.insertBefore(document.createComment("message"), message);
     /* Phase de capture : un formulaire invalide n'atteint jamais l'envoi de lead-form.js */
     form.addEventListener("submit", function(e){ if (!verifier(form)){ e.preventDefault(); e.stopImmediatePropagation(); } }, true);
     form.addEventListener("input", function(e){ if (e.target.removeAttribute) e.target.removeAttribute("aria-invalid"); });
@@ -137,13 +153,16 @@
       var panneau = $(".js-panneau", boite);
       if (panneau) panneau.setAttribute("aria-labelledby", rappel ? "tab-rappel" : "tab-devis");
     }
-    var zone = $(".js-form-status", form); if (zone) zone.hidden = true;
+    var zone = $(".js-form-status", form); if (zone){ zone.hidden = true; rangerMessage(zone); }
   }
   if (formContact){
     $$(".onglets button", boite).forEach(function(b){ b.addEventListener("click", function(){ appliquerMode(formContact, b.dataset.mode === "rappel" ? "callback" : "devis"); }); });
     appliquerMode(formContact, "callback");
-    /* Tout bouton « devis » ouvre l'onglet devis, avec le projet déjà indiqué s'il y en a un */
+    /* Tout bouton « devis » mène au formulaire (et non au titre de la section), onglet devis ouvert,
+       avec le projet déjà indiqué s'il y en a un */
+    if (!boite.id) boite.id = "demande-devis";
     $$(".js-devis").forEach(function(a){
+      if (a.getAttribute("href") === "#contact") a.setAttribute("href", "#" + boite.id);
       a.addEventListener("click", function(){
         appliquerMode(formContact, "devis");
         var d = champ(formContact, "details");
@@ -152,6 +171,8 @@
       });
     });
   }
+  /* Arrivée depuis un bouton « devis » d'une page sans formulaire (« En bref », pages légales) */
+  if (formContact && window.location.hash === "#" + boite.id) appliquerMode(formContact, "devis");
   /* Liens du site actuel vers un formulaire en mode rappel */
   $$('[data-form-mode-intent="callback"]').forEach(function(a){ a.addEventListener("click", function(){ if (formContact) appliquerMode(formContact, "callback"); }); });
   $$('[data-form-mode-intent="devis"]').forEach(function(a){ a.addEventListener("click", function(){ if (formContact) appliquerMode(formContact, "devis"); }); });
@@ -397,7 +418,7 @@
   /* Appel : compose sur mobile, fenêtre (numéro + rappel) sur ordinateur */
   var dlg = $(".js-dialog"), tactile = window.matchMedia("(pointer: coarse)").matches;
   function ouvrir(focusRappel){
-    var z = $(".js-form-status", dlg); if (z) z.hidden = true;
+    var z = $(".js-form-status", dlg); if (z){ z.hidden = true; rangerMessage(z); }
     if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
     if (focusRappel){ var n = champ(dlg, "name"); if (n) n.focus(); }
   }

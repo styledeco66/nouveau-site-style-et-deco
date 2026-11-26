@@ -436,7 +436,9 @@ test("sans JavaScript, un échec renvoie une page HTML avec le message d'erreur 
   assert.equal(response.status, 502);
   assert.match(response.headers.get("content-type"), /text\/html/);
   assert.equal(response.headers.get("location"), null);
-  assert.ok((await response.text()).includes("Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42."));
+  const html = await response.text();
+  assert.ok(html.replace(/<[^>]+>/g, "").includes("Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42."));
+  assert.ok(html.includes('<a href="tel:+33650756242">06 50 75 62 42</a>'), "le numéro se touche pour appeler");
 });
 
 test("échec Resend (5xx, 4xx, réseau) : jamais de succès", async () => {

@@ -147,6 +147,9 @@ button,input,textarea{font:inherit;color:inherit}
 .champ input[aria-invalid=true]{border-color:#B3261E;background:#FFF5F4}
 .champ small{font-weight:400;color:var(--ardoise)}
 .erreur{color:#B3261E;font-size:14px;font-weight:600;margin:0}
+.erreur .lien{color:inherit;white-space:nowrap}
+/* Message placé sous un champ du formulaire de contact : il ne touche pas le bouton d'envoi */
+.grille-champs .champ .erreur{margin-bottom:12px}
 /* Photos jointes à un devis : un texte cliquable sur la ligne « Détails » ; les 5 cases ne s'ouvrent qu'au clic. */
 .saisie-details{position:relative}
 .photos[hidden],.photos__panneau[hidden]{display:none}
@@ -273,7 +276,7 @@ button,input,textarea{font:inherit;color:inherit}
 .contact{background:var(--nuit);color:#fff}
 .contact .sec__tete p{color:var(--brume)}
 .contact__grille{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
-.formulaire{background:var(--blanc);color:var(--encre);border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:20px}
+.formulaire{background:var(--blanc);color:var(--encre);border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:20px;scroll-margin-top:14px}
 .onglets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;background:var(--pierre);border-radius:12px;padding:5px}
 .onglets button{border:0;background:transparent;min-height:50px;border-radius:9px;font-weight:700;font-size:16px;cursor:pointer;color:var(--ardoise);transition:background .2s,color .2s,box-shadow .2s}
 .onglets button[aria-selected=true]{background:var(--blanc);color:var(--nuit);box-shadow:0 2px 10px rgba(11,26,46,.12)}

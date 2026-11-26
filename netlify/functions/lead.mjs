@@ -34,6 +34,7 @@ const PHOTO_BUDGET_MS = 25000;
 const RESEND_TIMEOUT_MS = 8000;
 const IDEMPOTENCY_WINDOW_MS = 10 * 60 * 1000;
 
+const PHONE_TEXT = "06 50 75 62 42";
 const ERROR_MESSAGE =
   "Votre demande n’a pas pu être envoyée. Réessayez dans quelques minutes ou appelez le 06 50 75 62 42.";
 
@@ -65,7 +66,7 @@ const SUBMISSION_ID = /^[A-Za-z0-9_-]{8,64}$/;
 const errorResponse = (status, code, wantsHtml, extraHeaders = {}) => {
   const headers = { "Cache-Control": "no-store", ...extraHeaders };
   if (wantsHtml) {
-    const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><title>Envoi impossible | Style &amp; Deco</title></head><body><main><p role="alert">${ERROR_MESSAGE}</p><p><a href="/">Retour à l’accueil</a></p></main></body></html>`;
+    const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><title>Envoi impossible | Style &amp; Deco</title></head><body><main><p role="alert">${ERROR_MESSAGE.replace(PHONE_TEXT, `<a href="tel:+33650756242">${PHONE_TEXT}</a>`)}</p><p><a href="/">Retour à l’accueil</a></p></main></body></html>`;
     return new Response(html, { status, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
   }
   return Response.json({ ok: false, error: code }, { status, headers });

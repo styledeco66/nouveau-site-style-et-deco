@@ -50,6 +50,14 @@ if(t==="devisvide"){var c2=$(".formulaire");$('.onglets button[data-mode="devis"
  setTimeout(function(){note("msg="+$(".js-form-status",g2).textContent+" | focus="+(document.activeElement&&document.activeElement.name))},600)}
 if(t==="rappelmail"){var g3=$(".formulaire .js-lead-form");saisir($('[name="name"]',g3),"Test Rappel");saisir($('[name="phone"]',g3),"0612345678");envoyer(g3)}
 if(t==="dialog"){var d=$(".js-dialog");d.showModal();var h=$(".js-lead-form",d);saisir($('[name="name"]',h),"Test Dialogue");saisir($('[name="phone"]',h),"0612345678");envoyer(h)}
+if(t==="cible"){var liens=[].slice.call(document.querySelectorAll("a.js-devis")).map(function(a){return a.getAttribute("href")});
+ note("liens="+liens.filter(function(h,i){return liens.indexOf(h)===i}).join(",")+" | cible="+(document.getElementById("demande-devis")||{}).className)}
+if(t==="arrivee"){note("mode="+$(".js-formulaire").dataset.mode)}
+if(t==="champ"){var c3=$(".formulaire");$('.onglets button[data-mode="devis"]',c3).click();var g4=$(".js-lead-form",c3);envoyer(g4);
+ setTimeout(function(){var z=$(".js-form-status",g4),sous=z.parentNode.className.indexOf("champ")>=0?z.parentNode.querySelector("input").name:"hors champ";
+ saisir($('[name="name"]',g4),"Test");saisir($('[name="phone"]',g4),"0612345678");saisir($('[name="email"]',g4),"test@example.com");saisir($('[name="city"]',g4),"Perpignan");saisir($('[name="details"]',g4),"Salon a repeindre");
+ $('.onglets button[data-mode="rappel"]',c3).click();
+ note("sous="+sous+" | apres="+(z.parentNode===g4&&z.nextElementSibling===$(".js-form-submit",g4)?"a sa place":"ailleurs"))},600)}
 if(t==="statut"){note("statut="+$(".js-statut-titre").textContent+" | promesse="+$(".js-promesse").textContent)}
 }catch(e){note("EXC "+e.message)}},800)});})();`;
 
@@ -197,4 +205,21 @@ test("navigateur : le bandeau d'ouverture et la promesse de rappel sont renseign
   const info = attr(await dump("/?t=statut"), "test");
   assert.match(info, /statut=.+ \| promesse=.+/);
   assert.doesNotMatch(info, /promesse=\s*$/);
+});
+
+test("navigateur : tous les boutons devis d'une page à formulaire mènent au formulaire", { skip }, async () => {
+  for (const page of ["/", "/perpignan.html", "/facade-saint-cyprien/"]) {
+    assert.equal(attr(await dump(`${page}?t=cible`), "test"), "liens=#demande-devis | cible=formulaire js-formulaire", page);
+  }
+});
+
+test("navigateur : l'adresse /#demande-devis ouvre l'onglet devis, l'accueil seul reste en rappel", { skip }, async () => {
+  assert.equal(attr(await dump("/?t=arrivee#demande-devis"), "test"), "mode=devis");
+  assert.equal(attr(await dump("/?t=arrivee"), "test"), "mode=rappel");
+});
+
+test("navigateur : le message d'une saisie à corriger se place sous le champ, puis revient au-dessus du bouton", { skip }, async () => {
+  leads.length = 0;
+  assert.equal(attr(await dump("/?t=champ"), "test"), "sous=name | apres=a sa place");
+  assert.equal(leads.length, 0);
 });

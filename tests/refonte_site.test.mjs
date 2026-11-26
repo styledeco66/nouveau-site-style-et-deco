@@ -302,3 +302,17 @@ test("téléphone : les avis défilent comme sur ordinateur, en cartes plus peti
   assert.doesNotMatch(js, /rangees\[1\]\.hidden/);
   assert.match(js, /function majEtapeEtroit/);
 });
+
+test("boutons devis : depuis une page sans formulaire, ils ouvrent le formulaire de devis de l'accueil", () => {
+  assert.match(read("index.html"), /<div class="formulaire js-formulaire" id="demande-devis"/);
+  let total = 0;
+  for (const page of PAGES) {
+    const html = read(page);
+    if (html.includes("js-formulaire")) continue;
+    for (const tag of html.match(/<a\b[^>]*\bjs-devis\b[^>]*>/g) || []) {
+      total += 1;
+      assert.match(tag, /href="\/#demande-devis"/, `${page} : ${tag}`);
+    }
+  }
+  assert.ok(total >= 7, `boutons vérifiés : ${total}`);
+});
