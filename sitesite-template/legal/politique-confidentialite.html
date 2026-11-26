@@ -67,7 +67,7 @@
   <section class="sec" aria-label="Politique de confidentialité"><div class="wrap prose">
     <div style="max-width: 920px;">
       
-      <p>Dernière mise à jour : 25/11/2026</p>
+      <p>Dernière mise à jour : 26/11/2026</p>
 
       <h2>1. Responsable de traitement</h2>
       <p>
@@ -109,23 +109,34 @@
         <li><strong>Tri des demandes</strong> : un contrôle automatique repère les messages manifestement publicitaires ou automatisés. Ces messages ne sont pas supprimés : ils sont placés dans une boîte de vérification que nous consultons manuellement, et ne déclenchent aucune confirmation automatique.</li>
       </ul>
 
+      <h3>2.5 Mesure d’audience</h3>
+      <p>
+        Pour savoir quelles pages sont consultées et à quel moment un parcours s’interrompt, le site utilise Umami Cloud, sans cookie.
+        Sont enregistrés : les pages consultées, le site de provenance et le nom de la campagne, le type d’appareil, le navigateur, le système, la taille de l’écran, la langue, la localisation approximative (pays, région, ville) et des actions sur le site (clic sur le numéro ou l’adresse e-mail, descente dans la page, formulaire affiché, commencé, à corriger ou non envoyé).
+        Ce que vous saisissez dans les formulaires n’est pas transmis à ce service.
+        L’adresse IP et le type de navigateur servent à calculer un identifiant de visiteur qui change chaque mois ; l’adresse IP n’est pas enregistrée dans les statistiques. Les identifiants de clic publicitaire sont retirés des adresses avant l’envoi.
+      </p>
+
       <h2>3. Finalités du traitement</h2>
       <ul>
         <li>Répondre aux demandes de contact, de devis et de rappel, et en accuser réception.</li>
         <li>Organiser le suivi commercial et opérationnel des demandes.</li>
         <li>Mesurer les devis liés à une annonce Google Ads et, lorsque le suivi des appels est activé, les appels associés. Cette mesure dépend de votre accord.</li>
+        <li>Mesurer la fréquentation du site et en améliorer l’utilisation.</li>
       </ul>
 
       <h2>4. Bases légales</h2>
       <ul>
         <li>Mesures précontractuelles et exécution d’une demande (devis/rappel).</li>
         <li>Consentement pour tout traceur non essentiel, le cas échéant.</li>
+        <li>Intérêt légitime pour la mesure d’audience, à laquelle vous pouvez vous opposer (<a href="#cookies">rubrique 9</a>).</li>
       </ul>
 
       <h2>5. Destinataires des données</h2>
       <p>
         Les données sont destinées à EI Style et Deco et, lorsque nécessaire, à des prestataires techniques
         indispensables au service (notamment Netlify pour l’hébergement et Resend pour l’envoi des e-mails de demande, de confirmation et de rappel interne). Les données ne sont pas vendues.
+        Umami Software, Inc. traite les données de mesure d’audience pour notre compte.
         Google reçoit les données de mesure publicitaire avec votre accord. Consultez la <a href="https://policies.google.com/privacy?hl=fr">politique de confidentialité de Google</a>.
       </p>
 
@@ -134,6 +145,8 @@
         <li>Prospects : 36 mois maximum à compter du dernier contact sans suite.</li>
         <li>Clients : conservation selon les obligations légales, notamment comptables et fiscales.</li>
         <li>Votre choix concernant la mesure publicitaire est conservé pendant six mois sur votre navigateur.</li>
+        <li>Statistiques d’audience : six mois.</li>
+        <li>Votre refus de la mesure d’audience reste enregistré sur votre navigateur tant que vous ne l’effacez pas.</li>
       </ul>
 
       <h2>7. Hébergement et transferts hors UE</h2>
@@ -141,6 +154,9 @@
         Le site est hébergé par Netlify. Cet hébergement peut impliquer des transferts de données hors de l’Union
         européenne. Lorsque ces transferts existent, ils s’appuient sur des garanties appropriées, telles que les
         clauses contractuelles types.
+      </p>
+      <p>
+        Les données de mesure d’audience sont traitées par Umami Software, Inc. (San Francisco, États-Unis) et hébergées aux États-Unis et en Allemagne. Les transferts hors de l’Union européenne sont encadrés par les clauses contractuelles types de son <a href="https://umami.is/dpa" target="_blank" rel="noopener noreferrer">accord de traitement des données</a>.
       </p>
 
       <h2>8. Vos droits (RGPD)</h2>
@@ -159,6 +175,13 @@
         Si vous avez déjà donné votre accord, le bouton « Gestion des cookies » permet de retirer votre accord. Sur une visite issue d’une annonce, il permet aussi de modifier votre choix.
       </p>
       <button type="button" class="ads-consent-settings" data-ads-consent-settings hidden>Gestion des cookies</button>
+
+      <h3>Mesure d’audience</h3>
+      <p>
+        La mesure d’audience décrite à la rubrique 2.5 n’utilise pas de cookie et ne sert pas à la publicité. Vous pouvez la refuser avec le bouton ci-dessous : votre choix est enregistré sur ce navigateur.
+      </p>
+      <p data-audience-etat role="status"></p>
+      <button type="button" class="btn btn--ligne btn--petit" data-audience-choix hidden>Ne plus compter mes visites</button>
 
       <h2>10. Contact</h2>
       <p>
@@ -209,9 +232,10 @@
 </form>
   </div>
 </dialog>
-  <script src="../assets/js/lead-form.js?v=3aebb75b5a"></script>
+  <script src="../assets/js/lead-form.js?v=4c253a9bb6"></script>
   <script src="../assets/js/business-hours.js?v=9743aa534c"></script>
   <script src="../assets/js/app.js?v=a06006511b"></script>
   <script src="/assets/js/google-ads-measurement.js?v=d1be9065ea"></script>
+  <script src="/assets/js/audience.js?v=ed61da3182"></script>
 </body>
 </html>

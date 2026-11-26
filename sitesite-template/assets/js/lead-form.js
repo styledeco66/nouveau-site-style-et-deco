@@ -95,6 +95,7 @@
         return;
       }
 
+      window.StyleDecoAudience?.sendFailed(form);
       setStatus(status, ERROR_MESSAGE);
       if (submit) {
         submit.disabled = false;

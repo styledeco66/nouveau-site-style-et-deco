@@ -133,7 +133,7 @@ class LeadFormMarkupTests(unittest.TestCase):
         app = (SITE / "assets" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertNotIn("form_submit_", app)
 
-    def test_csp_restricts_form_actions_and_limits_connections_to_google_ads(self):
+    def test_csp_restricts_form_actions_and_limits_connections_to_measurement_services(self):
         headers = (SITE / "_headers").read_text(encoding="utf-8")
         self.assertIn("form-action 'self'", headers)
         self.assertIn("default-src 'self'", headers)
@@ -147,6 +147,7 @@ class LeadFormMarkupTests(unittest.TestCase):
             "https://www.google.com",
             "https://www.google.fr",
             "https://ad.doubleclick.net",
+            "https://gateway.umami.is",
         })
 
 
