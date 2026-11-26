@@ -147,6 +147,21 @@ button,input,textarea{font:inherit;color:inherit}
 .champ input[aria-invalid=true]{border-color:#B3261E;background:#FFF5F4}
 .champ small{font-weight:400;color:var(--ardoise)}
 .erreur{color:#B3261E;font-size:14px;font-weight:600;margin:0}
+/* Photos jointes à un devis : un texte cliquable sur la ligne « Détails » ; les 5 cases ne s'ouvrent qu'au clic. */
+.saisie-details{position:relative}
+.photos[hidden],.photos__panneau[hidden]{display:none}
+.photos__ouvrir{position:absolute;top:-7px;right:0;display:inline-flex;align-items:center;gap:6px;padding:7px 0;border:0;background:none;font-family:inherit;font-size:14px;line-height:1.5;cursor:pointer}
+.photos__ouvrir svg{flex:none;color:var(--orange-fonce)}
+.photos__panneau{margin:14px 0}
+.photos__liste{display:grid;grid-template-columns:repeat(5,minmax(0,72px));gap:10px;margin:0;padding:0;list-style:none}
+.photos__liste li{position:relative;aspect-ratio:1}
+.photos__case{display:grid;place-items:center;width:100%;height:100%;padding:0;border-radius:10px;border:1.5px dashed var(--ardoise);background:var(--pierre);color:var(--nuit);cursor:pointer;transition:border-color .2s,background-color .2s}
+.photos__case:hover{border-color:var(--orange);background:var(--orange-pale)}
+.photos__liste img{display:block;width:100%;height:100%;object-fit:cover;border-radius:10px;border:1.5px solid var(--trait)}
+.photos__retirer{position:absolute;top:-8px;right:-6px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:var(--nuit);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+.photos__fichier{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.photos__etat{display:block;margin-top:10px;font-size:13px;color:var(--ardoise)}
+.photos__etat:empty{display:none}
 .ok-box{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .coche{width:52px;height:52px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center}
 .coche path{stroke-dasharray:30;stroke-dashoffset:30;animation:trace .6s .15s ease forwards}

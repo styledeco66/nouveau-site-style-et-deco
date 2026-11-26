@@ -72,7 +72,7 @@ test("tailles de texte lisibles sur téléphone : corps 17 px, titre 34 px (28 p
   assert.match(TEMPLATES.alerte().html, /font-size:34px;[^"]*"[^>]*>Marie Exemple</, "nom du client à 34 px dans l'alerte interne");
 });
 
-test("images en HTTPS sur notre domaine : logo et photo dans les e-mails clients, aucune pièce jointe, aucun CID, aucun base64", () => {
+test("images en HTTPS sur notre domaine : logo et photo dans les e-mails clients, aucune pièce jointe, aucun CID, aucun base64 hors photos d'un devis", () => {
   for (const name of CLIENTS) {
     const { html } = TEMPLATES[name]();
     assert.match(html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="132" alt="Style &amp; Déco/, name);
@@ -81,7 +81,7 @@ test("images en HTTPS sur notre domaine : logo et photo dans les e-mails clients
   }
   for (const file of ["../netlify/lib/emails.mjs", "../netlify/functions/lead.mjs"]) {
     const source = readFileSync(new URL(file, import.meta.url), "utf8").replace(/\/\/[^\n]*/g, "");
-    assert.doesNotMatch(source, /attachments|content_id|contentId|cid:|data:image|base64|logoAttachment|LEAD_EMAIL_LOGO_MODE/, file);
+    assert.doesNotMatch(source, /data:image|logoAttachment|LEAD_EMAIL_LOGO_MODE/, file);
   }
 });
 

@@ -3,7 +3,7 @@
 //   - clients (design A) : confirmation de devis, confirmation de rappel ;
 //   - internes (design B) : alerte de rappel, rappel programmé, alerte de devis.
 // Contraintes e-mail respectées : mise en page en tableaux, styles en ligne, largeur fluide ≤ 600 px, polices système,
-// images HTTPS hébergées sur le site (aucune pièce jointe, aucun CID, aucun base64), aucun script.
+// images HTTPS hébergées sur le site, aucun script.\n// Seule exception : les photos qu'un client joint à son devis, affichées dans la notification interne (`cid:`).
 // Toute donnée saisie par le visiteur est échappée (escapeHtml) ; les confirmations clients n'affichent le nom, la ville et
 // le message qu'après nettoyage (aucun lien, aucune adresse, longueur limitée : voir safeName / safeExcerpt).
 // Aucune dépendance.
@@ -104,7 +104,7 @@ export const safeCity = (city) => {
 
 const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
 
-const STYLE = `<style>body{margin:0;padding:0;-webkit-text-size-adjust:100%}img{-ms-interpolation-mode:bicubic}a{color:${C.orangeText}}@media only screen and (max-width:620px){.sd-w{width:100%!important;border-radius:0!important}.sd-px{padding-left:22px!important;padding-right:22px!important}.sd-h1{font-size:28px!important;line-height:1.15!important}.sd-big{font-size:32px!important}.sd-col{display:block!important;width:100%!important;text-align:left!important;padding-bottom:4px!important}.sd-hide{display:none!important}}</style>`;
+const STYLE = `<style>body{margin:0;padding:0;-webkit-text-size-adjust:100%}img{-ms-interpolation-mode:bicubic}a{color:${C.orangeText}}@media only screen and (max-width:620px){.sd-w{width:100%!important;border-radius:0!important}.sd-px{padding-left:22px!important;padding-right:22px!important}.sd-h1{font-size:28px!important;line-height:1.15!important}.sd-big{font-size:32px!important}.sd-col{display:block!important;width:100%!important;text-align:left!important;padding-bottom:4px!important}.sd-hide{display:none!important}.sd-photo{max-width:100%!important}}</style>`;
 
 const doc = ({ title, preheader, body, note }) => `<!doctype html>
 <html lang="fr" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${escapeHtml(title)}</title>
@@ -241,6 +241,9 @@ const renderClient = (o) => {
 
 // ── Design B : notifications internes (opérationnelles) ───────────────────────────────────────────────────────────
 
+const photosLostSentence = (count) =>
+  `Le client a voulu joindre ${count > 1 ? `${count} photos qui n'ont pas pu être transmises` : "une photo qui n'a pas pu être transmise"} : à lui demander en répondant à sa demande.`;
+
 /**
  * @param {object} o
  * @param {string} o.title      Titre (unique <h1>, dans la barre du haut).
@@ -271,12 +274,22 @@ const renderInternal = (o) => {
   const message = o.section
     ? `<div style="margin:22px 0 6px;${t(13, 800, C.orangeText, "letter-spacing:1px;text-transform:uppercase")}">${escapeHtml(o.section.title)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.pale};border-radius:12px"><tr><td style="padding:16px 18px;${t(16, 400, C.ink, "line-height:1.6;overflow-wrap:anywhere;word-break:break-word")}">${escapeHtml(o.section.text).replace(/\r\n|\r|\n/g, "<br>")}</td></tr></table>`
     : "";
+  const count = o.photos?.count || 0;
+  const lost = o.photos?.lost || 0;
+  const cell = (n) => (n > count ? '<td class="sd-col" width="50%">&nbsp;</td>' : `<td class="sd-col" width="50%" valign="top" style="padding:0 4px 8px"><img class="sd-photo" src="cid:photo-${n}" width="256" alt="Photo ${n} envoyée par le client" style="display:block;width:100%;max-width:256px;height:auto;border:0;border-radius:10px;${t(13, 600, C.slate)}"></td>`);
+  const rows = Array.from({ length: Math.ceil(count / 2) }, (_, k) => `<tr>${cell(2 * k + 1)}${cell(2 * k + 2)}</tr>`).join("");
+  const gallery = count
+    ? `<div style="margin:22px 0 8px;${t(13, 800, C.orangeText, "letter-spacing:1px;text-transform:uppercase")}">Photos du client (${count})</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.pale}" style="background:${C.pale};border-radius:12px"><tr><td style="padding:12px 8px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`
+    : "";
+  const missing = lost
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.orangePale}" style="margin:22px 0 0;background:${C.orangePale};border-radius:12px;border:2px solid ${C.orange}"><tr><td style="padding:14px 16px;${t(15, 700, C.ink, "line-height:1.5")}">${escapeHtml(photosLostSentence(lost))}</td></tr></table>`
+    : "";
   const table = shown.length
     ? `<div style="margin:22px 0 0;${t(13, 800, C.orangeText, "letter-spacing:1px;text-transform:uppercase")}">${escapeHtml(o.factsTitle || "Informations")}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;border-top:1px solid ${C.line}">${shown
         .map(([label, value, href]) => `<tr><td class="sd-col" width="140" valign="top" style="padding:12px 0;border-bottom:1px solid ${C.line};${t(14, 600, C.slate, "line-height:1.5")}">${escapeHtml(label)}</td><td class="sd-col" valign="top" style="padding:12px 0;border-bottom:1px solid ${C.line};${t(15, 700, C.ink, "line-height:1.5;overflow-wrap:anywhere;word-break:break-word")}">${href ? `<a href="${escapeHtml(href)}" style="${t(15, 700, C.ink)}">${escapeHtml(value)}</a>` : nb(value)}</td></tr>`)
         .join("")}</table>`
     : "";
-  const body = `${top}${section(`${banner}${tag}${lead}${email}${buttons}${instruction}${message}${table}`, 30, 34)}`;
+  const body = `${top}${section(`${banner}${tag}${lead}${email}${buttons}${instruction}${message}${gallery}${missing}${table}`, 30, 34)}`;
   const html = doc({ title: o.title, preheader: o.preheader, body, note: "Notification interne Style & Déco : à ne pas transférer au client." });
   const text = [
     o.title,
@@ -287,6 +300,8 @@ const renderInternal = (o) => {
     ...(o.buttons || []).map((b) => `${b.label} : ${b.href.replace(/^(tel|mailto):/, "")}`),
     ...((o.buttons || []).length ? [""] : []),
     ...(o.section ? [`${o.section.title} :`, o.section.text, ""] : []),
+    ...(count ? [`Photos du client : ${count} jointe${count > 1 ? "s" : ""} à ce message`, ""] : []),
+    ...(lost ? [photosLostSentence(lost), ""] : []),
     ...facts.map(([l, v]) => `${l} : ${v}`),
   ]
     .join("\n")
@@ -415,7 +430,7 @@ export const reminderEmail = ({ lead, receivedAt, reference, origin, when, fallb
 // Notification interne d'une demande de DEVIS. Une seule notification par demande. Toutes les données du formulaire sont
 // affichées ; le message du client est reproduit intégralement. `formCode` (lead_hero…) reste dans la version texte pour le
 // classement. `reviewReasons` : demande suspecte (quarantaine), signalée en tête du message.
-export const devisAlert = ({ lead, receivedAt, reference, origin, formCode, reviewReasons }) => {
+export const devisAlert = ({ lead, receivedAt, reference, origin, formCode, reviewReasons, photos }) => {
   const rendered = renderEmail({
     design: "B",
     kind: "Demande de devis",
@@ -428,6 +443,7 @@ export const devisAlert = ({ lead, receivedAt, reference, origin, formCode, revi
     email: lead.email ? { value: lead.email, href: `mailto:${lead.email}` } : undefined,
     buttons: [{ label: `Appeler le ${lead.phone}`, href: telHref(lead.phone) }, ...(lead.email ? [{ label: "Répondre par e-mail", href: `mailto:${lead.email}` }] : [])],
     section: lead.details ? { title: "Description des travaux", text: lead.details } : undefined,
+    photos,
     factsTitle: "Informations de suivi",
     facts: [
       ["Téléphone", lead.phone, telHref(lead.phone), false, true],
@@ -451,6 +467,8 @@ export const devisAlert = ({ lead, receivedAt, reference, origin, formCode, revi
     ["Ville / Zone", lead.city],
     ["Type de travaux", lead.subject],
     ["Détails", lead.details],
+    ["Photos", photos?.count ? `${photos.count} jointe${photos.count > 1 ? "s" : ""} à ce message` : ""],
+    ["Photos non transmises", photos?.lost ? `${photos.lost} : à demander au client` : ""],
     ["Origine", origin],
     ["Reçu le", parisDateTime(receivedAt)],
     ["Référence", reference],
