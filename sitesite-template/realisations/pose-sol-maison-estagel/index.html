@@ -91,7 +91,7 @@
 
 
   <link rel="preload" href="../../assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="../../assets/css/style.css?v=8951ca052b" />
+  <link rel="stylesheet" href="../../assets/css/style.css?v=a87a700a5b" />
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -255,7 +255,17 @@
 <label class="champ" for="c-tel">Téléphone<input id="c-tel" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" required></label>
 <label class="champ plein js-email-field" for="c-mail"><span class="js-email-label" data-label-devis="E-mail" data-label-callback="E-mail (facultatif)">E-mail</span><input id="c-mail" name="email" type="email" autocomplete="email" placeholder="vous@exemple.fr" required></label>
 <label class="champ plein js-devis-required" for="c-ville">Ville / Zone<input id="c-ville" name="city" type="text" autocomplete="address-level2" placeholder="Ex : Perpignan, Saint-Cyprien…" required></label>
+<div class="plein saisie-details js-devis-only">
 <label class="champ plein js-devis-only" for="c-details">Détails<textarea id="c-details" name="details" rows="4" placeholder="Surface, support, contraintes de délai, rendu souhaité…" required></textarea></label>
+<div class="photos" data-photos hidden>
+<button type="button" class="lien photos__ouvrir" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6H7l1.5-2h7L17 6h1.5A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.5"/></svg>Ajouter des photos</button>
+<div class="photos__panneau" hidden>
+<ul class="photos__liste"></ul>
+<small class="photos__etat" role="status"></small>
+</div>
+<input class="photos__fichier" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
+</div>
+</div>
 </div>
 <p class="erreur js-form-status" role="alert" hidden></p>
 <button class="btn btn--orange js-form-submit" type="submit" data-label-devis="Recevoir mon devis" data-label-callback="Recevoir mon rappel">Recevoir mon rappel</button>

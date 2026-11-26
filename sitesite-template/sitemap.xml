@@ -39,7 +39,7 @@
   </url>
   <url>
     <loc>https://styleetdeco.fr/peintre-saint-cyprien/</loc>
-    <lastmod>2026-11-23</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
@@ -55,7 +55,7 @@
   </url>
   <url>
     <loc>https://styleetdeco.fr/realisations/</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
@@ -215,6 +215,36 @@
     <image:image>
       <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-local-saint-nazaire/apres-fond-960.webp</image:loc>
       <image:title>Fond du local terminé</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://styleetdeco.fr/realisations/peinture-piece-de-vie-saint-cyprien/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/resultat-cheminee-1600.webp</image:loc>
+      <image:title>Pièce de vie repeinte à Saint-Cyprien, côté cheminée</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/protection-sejour-960.webp</image:loc>
+      <image:title>Sol et mobilier protégés avant les travaux</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/murs-en-cours-porte-960.webp</image:loc>
+      <image:title>Murs de la pièce de vie pendant les travaux</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/murs-finis-proteges-sejour-960.webp</image:loc>
+      <image:title>Murs terminés et protégés avant la peinture des plafonds</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/resultat-escalier-960.webp</image:loc>
+      <image:title>Murs repeints près de l’escalier</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://styleetdeco.fr/assets/images/realisations/peinture-piece-de-vie-saint-cyprien/resultat-cuisine-960.webp</image:loc>
+      <image:title>Pièce de vie repeinte vue depuis la cuisine</image:title>
     </image:image>
   </url>
   <url>

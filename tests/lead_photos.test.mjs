@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import vm from "node:vm";
 
@@ -157,4 +157,17 @@ test("navigateur : photos écartées par le serveur signalées ; panne complète
 test("navigateur : aucune photo envoyée avec une demande de rappel", async () => {
   const r = await submit({ photos: CHOSEN, responses: [{ ok: true }], priority: "RAPPEL_30_MIN" });
   assert.equal(r.calls[0].photos, undefined);
+});
+
+test("pages : tout formulaire de devis propose l'ajout de photos", () => {
+  const site = new URL("../sitesite-template/", import.meta.url);
+  const forms = readdirSync(site, { recursive: true })
+    .filter((file) => file.endsWith(".html"))
+    .flatMap((file) => (readFileSync(new URL(file, site), "utf8").match(/<form\b[\s\S]*?<\/form>/g) || []).map((html) => ({ file, html })))
+    .filter(({ html }) => html.includes('name="details"'));
+  assert.equal(forms.length, 11);
+  for (const { file, html } of forms) {
+    assert.match(html, /data-photos/, file);
+    assert.match(html, /class="photos__fichier" type="file" accept="image\/\*" multiple/, file);
+  }
 });
