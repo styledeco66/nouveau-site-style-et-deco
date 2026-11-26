@@ -95,12 +95,12 @@ test("sécurité : aucune ressource externe dans les pages ni script incorporé,
   const headers = read("_headers");
   const csp = headers.match(/Content-Security-Policy: (.+)/)[1];
   assert.match(csp, /^default-src 'self';/);
-  assert.match(csp, /; script-src 'self' https:\/\/www\.googletagmanager\.com https:\/\/www\.googleadservices\.com https:\/\/www\.google\.com https:\/\/www\.gstatic\.com;/);
+  assert.match(csp, /; script-src 'self' https:\/\/www\.googletagmanager\.com https:\/\/www\.googleadservices\.com https:\/\/www\.google\.com https:\/\/www\.gstatic\.com https:\/\/cloud\.umami\.is;/);
   assert.match(csp, /; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none';/);
 });
 
 test("JavaScript : app.js, lead-form.js et business-hours.js sont du code valide", () => {
-  for (const f of ["app.js", "lead-form.js", "business-hours.js", "merci.js", "google-ads-measurement.js"]) new vm.Script(read(`assets/js/${f}`), { filename: f });
+  for (const f of ["app.js", "lead-form.js", "business-hours.js", "merci.js", "google-ads-measurement.js", "audience.js"]) new vm.Script(read(`assets/js/${f}`), { filename: f });
 });
 
 const FORMS_SERVEUR = new Set([...readFileSync(path.join(ROOT, "netlify/functions/lead.mjs"), "utf8").match(/const ORIGIN_LABELS = \{([\s\S]*?)\};/)[1].matchAll(/^\s*(lead_[a-z_]+):/gm)].map((m) => m[1]));
@@ -125,7 +125,7 @@ test("formulaires : chaque formulaire envoie à la fonction « lead » avec un n
     }
     if (/<form\b/.test(html)) {
       const order = [...html.matchAll(/<script src="[^"]*assets\/js\/([a-z-]+)\.js\?v=[0-9a-f]{10}"/g)].map((m) => m[1]);
-      assert.deepEqual(order, ["lead-form", "business-hours", "app", "google-ads-measurement"], `${page} : scripts dans l'ordre`);
+      assert.deepEqual(order, ["lead-form", "business-hours", "app", "google-ads-measurement", "audience"], `${page} : scripts dans l'ordre`);
     }
   }
   assert.ok(total >= 20, `formulaires trouvés : ${total}`);
