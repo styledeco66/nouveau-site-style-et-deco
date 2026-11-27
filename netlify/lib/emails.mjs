@@ -12,26 +12,19 @@
 export const BRAND = {
   name: "Style & Déco",
   tagline: "Artisan peintre en bâtiment",
-  place: "Saint-Cyprien — Pyrénées-Orientales",
-  addressLabel: "Adresse administrative", // pas un établissement accueillant du public
-  street: "18 rue Madame de la Fayette",
-  postalCode: "66750",
-  city: "Saint-Cyprien",
-  country: "France",
+  zone: "Saint-Cyprien · Perpignan",
   phone: "06 50 75 62 42",
   phoneHref: "tel:+33650756242",
   email: "style.deco66@gmail.com",
-  emailHref: "mailto:style.deco66@gmail.com",
   site: "https://styleetdeco.fr",
   siteLabel: "styleetdeco.fr",
-  // Preuves affichées dans les e-mails clients : mêmes valeurs que scripts/google-reviews.json (un test vérifie l'égalité).
+  // Preuve affichée dans les e-mails clients : même note que scripts/google-reviews.json (un test vérifie l'égalité).
+  // Le nombre d'avis n'est volontairement pas affiché.
   googleRating: "4,9",
-  googleCount: 17,
 };
 
 const C = {
   nuit: "#0B2341", // bleu nuit (en-tête, pied)
-  nuit2: "#071A31", // bleu nuit profond (pied)
   orange: "#F2611D", // orange des actions
   orangeText: "#B8450C", // orange foncé pour les petits textes (contraste)
   pale: "#F2F5F9", // fond des encadrés
@@ -39,13 +32,11 @@ const C = {
   line: "#DCE3EC", // filets
   ink: "#0B1A2E", // texte
   slate: "#55627A", // texte secondaire
-  green: "#12805C", // validé
   fond: "#E6EBF2", // fond extérieur
   brume: "#C3CFE2", // texte clair sur bleu nuit
-  faint: "#8FA3C2", // petit texte sur bleu nuit
   white: "#ffffff",
-  star: "#F5A623",
-  okOnNuit: "#5FD3A3",
+  star: "#FBBC04", // jaune des étoiles Google
+  doux: "#F7F9FC", // fond du pied client
 };
 // Polices système uniquement (aucune police externe) : fiables dans toutes les messageries.
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Helvetica,Roboto,Arial,sans-serif";
@@ -53,8 +44,6 @@ const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Helve
 // Images : HTTPS sur notre domaine, chargées directement par le HTML (jamais en pièce jointe : une image jointe peut apparaître
 // comme pièce jointe « noname » dans certaines messageries).
 export const LOGO_HTTPS_URL = `${BRAND.site}/assets/images/email/logo-style-deco-email.png`;
-export const PHOTO_HTTPS_URL = `${BRAND.site}/assets/images/email/chantier-facade-email.jpg`;
-export const PHOTO_CAPTION = "Chantier réalisé à Perpignan : ravalement d'un immeuble";
 export const LOGO_ALT = "Style & Déco — Le Reflet de vos Envies";
 
 export const escapeHtml = (value) =>
@@ -102,20 +91,24 @@ export const safeCity = (city) => {
   return /^[\p{L}\d' ()-]{1,60}$/u.test(c) && !/\d{6,}/.test(c) ? c : "";
 };
 
+const HOURS = "Du lundi au vendredi, de 8 h à 18 h";
+const INSURANCE = "Assurance décennale et RC Pro";
+const REPLY = "Une précision à nous transmettre ? Répondez simplement à ce message.";
+
 const t = (size, weight, color, extra = "") => `font-family:${FONT};font-size:${size}px;font-weight:${weight};color:${color};${extra}`;
 
 const STYLE = `<style>body{margin:0;padding:0;-webkit-text-size-adjust:100%}img{-ms-interpolation-mode:bicubic}a{color:${C.orangeText}}@media only screen and (max-width:620px){.sd-w{width:100%!important;border-radius:0!important}.sd-px{padding-left:22px!important;padding-right:22px!important}.sd-h1{font-size:28px!important;line-height:1.15!important}.sd-big{font-size:32px!important}.sd-col{display:block!important;width:100%!important;text-align:left!important;padding-bottom:4px!important}.sd-hide{display:none!important}.sd-photo{max-width:100%!important}}</style>`;
 
-const doc = ({ title, preheader, body, note }) => `<!doctype html>
+const doc = ({ title, preheader, body, note, width = 600, radius = 18 }) => `<!doctype html>
 <html lang="fr" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${escapeHtml(title)}</title>
 ${STYLE}</head>
 <body style="margin:0;padding:0;background:${C.fond}" bgcolor="${C.fond}"><div lang="fr" dir="ltr">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.fond};font-size:1px;line-height:1px">${escapeHtml(preheader || title)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.fond}" style="background:${C.fond}"><tr><td align="center" style="padding:28px 12px">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sd-w" style="width:100%;max-width:600px;background:${C.white};border-radius:18px;overflow:hidden">
+<table role="presentation" width="${width}" cellpadding="0" cellspacing="0" border="0" class="sd-w" style="width:100%;max-width:${width}px;background:${C.white};border-radius:${radius}px;overflow:hidden">
 ${body}
-</table>
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sd-w" style="width:100%;max-width:600px"><tr><td class="sd-px" style="padding:18px 8px;text-align:center;${t(12, 400, C.slate, "line-height:1.5")}">${escapeHtml(note)}</td></tr></table>
+</table>${note ? `
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sd-w" style="width:100%;max-width:600px"><tr><td class="sd-px" style="padding:18px 8px;text-align:center;${t(12, 400, C.slate, "line-height:1.5")}">${escapeHtml(note)}</td></tr></table>` : ""}
 </td></tr></table></div></body></html>`;
 
 const button = (label, href, { full = false, outline = false } = {}) => {
@@ -128,111 +121,72 @@ const button = (label, href, { full = false, outline = false } = {}) => {
 const section = (html, top = 28, bottom = 0) => `<tr><td class="sd-px" style="padding:${top}px 36px ${bottom}px">${html}</td></tr>`;
 
 // ── Design A : e-mails clients ───────────────────────────────────────────────────────────────────────────────────────
+// Même présentation que l'e-mail de demande d'avis Google : filet orange, logo centré, remerciement au nom du client,
+// carte bleu nuit avec l'information principale et le bouton d'appel, signature, pied clair.
 
-const stepHtml = ({ state, title, text }, last) => {
-  const dot = {
-    done: [`background:${C.green};color:${C.white}`, "&#10003;", C.green],
-    current: [`background:${C.orange};color:${C.white}`, "&#9679;", C.orange],
-    next: [`background:${C.white};color:${C.slate};border:2px solid ${C.line}`, "&nbsp;", C.white],
-  }[state];
-  const line = last ? "" : `border-bottom:1px solid ${C.line};`;
-  return `<tr><td width="40" valign="top" style="padding:16px 0;${line}"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="28" height="28" align="center" valign="middle" bgcolor="${dot[2]}" style="width:28px;height:28px;border-radius:14px;${dot[0]};${t(14, 800, C.white)}">${dot[1]}</td></tr></table></td><td valign="top" style="padding:16px 0 16px 4px;${line}"><div style="${t(17, 800, C.nuit)}">${nb(title)}</div><div style="margin-top:3px;${t(15, 400, C.slate, "line-height:1.5")}">${nb(text)}</div></td></tr>`;
-};
+const row = (html, padding, bg = C.white, extra = "") =>
+  `<tr><td class="sd-px" align="center" bgcolor="${bg}" style="padding:${padding};background:${bg};text-align:center;${extra}">${html}</td></tr>`;
 
-const recapHtml = (rows, message) => {
-  const lines = rows
-    .filter(([, v]) => v)
-    .map(([l, v]) => `<tr><td class="sd-col" width="130" valign="top" style="padding:7px 0;${t(14, 600, C.slate)}">${escapeHtml(l)}</td><td class="sd-col" valign="top" style="padding:7px 0;${t(15, 700, C.ink)}">${nb(v)}</td></tr>`)
-    .join("");
-  const quote = message
-    ? `<tr><td colspan="2" style="padding:12px 0 0"><div style="padding:14px 16px;background:${C.white};border-radius:10px;border:1px solid ${C.line};${t(15, 400, C.ink, "line-height:1.55;font-style:italic")}">&laquo;&nbsp;${nb(message)}&nbsp;&raquo;</div></td></tr>`
-    : "";
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.pale};border-radius:14px"><tr><td style="padding:20px 22px"><div style="${t(13, 800, C.orangeText, "letter-spacing:1px;text-transform:uppercase")}">Votre demande</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px">${lines}${quote}</table></td></tr></table>`;
-};
+const cardHtml = (card) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.nuit}" style="background:${C.nuit};border-radius:20px"><tr><td align="center" style="padding:32px 18px 28px;text-align:center"><div style="${t(13, 800, C.brume, "letter-spacing:1.5px;text-transform:uppercase")}">${escapeHtml(card.label)}</div><div class="sd-big" style="margin:8px 0 0;${t(card.value.length > 20 ? 28 : 36, 800, C.white, "line-height:1.2;letter-spacing:-.5px")}">${nb(card.value)}</div><div style="margin:10px auto 22px;max-width:390px;${t(15, 400, C.brume, "line-height:1.6")}">${nb(card.text)}</div>${card.question ? `<div style="margin:0 0 12px;${t(17, 800, C.white)}">${escapeHtml(card.question)}</div>` : ""}<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto"><tr><td align="center" bgcolor="${C.orange}" style="background:${C.orange};border-radius:999px"><a href="${BRAND.phoneHref}" style="display:inline-block;padding:16px 34px;border-radius:999px;${t(18, 800, C.white, "text-decoration:none")}">Appeler maintenant</a></td></tr></table><div style="margin-top:14px;${t(14, 400, C.brume, "line-height:1.6")}"><a href="${BRAND.phoneHref}" style="color:${C.white};font-weight:800;text-decoration:none;white-space:nowrap">${BRAND.phone}</a><br>${nb(HOURS)}</div></td></tr></table>`;
 
-const callBox = (title, text) =>
-  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px solid ${C.line};border-radius:14px"><tr><td class="sd-px" style="padding:24px 26px"><div style="${t(20, 800, C.nuit)}">${escapeHtml(title)}</div><div style="margin:6px 0 18px;${t(15, 400, C.slate, "line-height:1.5")}">${nb(text)}</div>${button(`Appeler le ${BRAND.phone}`, BRAND.phoneHref)}<div style="margin-top:14px;${t(14, 400, C.slate)}">Ou répondez simplement à ce message.</div></td></tr></table>`;
+const recapHtml = (city, message) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.pale}" style="background:${C.pale};border-radius:16px"><tr><td align="center" style="padding:20px 22px;text-align:center"><div style="${t(13, 800, C.orangeText, "letter-spacing:1.5px;text-transform:uppercase")}">Votre demande</div>${city ? `<div style="margin-top:8px;${t(17, 800, C.nuit)}">${nb(city)}</div>` : ""}${message ? `<div style="margin-top:8px;${t(15, 400, C.ink, "line-height:1.6;font-style:italic;overflow-wrap:anywhere")}">&laquo;&nbsp;${nb(message)}&nbsp;&raquo;</div>` : ""}</td></tr></table>`;
 
 const proofHtml = () =>
-  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="sd-col" valign="middle" style="padding:4px 0;${t(14, 500, C.slate)}"><span style="color:${C.star};letter-spacing:2px">&#9733;&#9733;&#9733;&#9733;&#9733;</span>&nbsp; <b style="color:${C.nuit}">${BRAND.googleRating}/5</b> sur Google, ${BRAND.googleCount} avis</td><td class="sd-col" valign="middle" align="right" style="padding:4px 0;${t(14, 500, C.slate)}"><span style="color:${C.green}">&#10003;</span>&nbsp; Assurance décennale et RC Pro</td></tr></table>`;
-
-const footerHtml = () =>
-  `<tr><td class="sd-px" bgcolor="${C.nuit2}" style="padding:30px 36px;background:${C.nuit2}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="sd-col" valign="top" style="${t(14, 400, C.brume, "line-height:1.7")}"><div style="${t(18, 800, C.white, "margin-bottom:2px")}">${escapeHtml(BRAND.name)}</div>${escapeHtml(BRAND.tagline)}<br>Du lundi au vendredi, de 8&nbsp;h à 18&nbsp;h</td><td class="sd-col" valign="top" align="right" style="${t(14, 400, C.brume, "line-height:1.7")}"><a href="${BRAND.phoneHref}" style="color:${C.white};font-weight:800;text-decoration:none">${BRAND.phone}</a><br><a href="${BRAND.emailHref}" style="color:${C.brume};text-decoration:none">${BRAND.email}</a><br><a href="${BRAND.site}" style="color:${C.brume};text-decoration:none">${BRAND.siteLabel}</a></td></tr></table><div style="margin-top:20px;padding-top:16px;border-top:1px solid #213B5F;${t(12, 400, C.faint, "line-height:1.5")}">${escapeHtml(BRAND.name)}, ${escapeHtml(BRAND.street)}, ${BRAND.postalCode} ${escapeHtml(BRAND.city)} (${BRAND.addressLabel.toLowerCase()})</div></td></tr>`;
+  `<div style="${t(22, 400, C.star, "letter-spacing:4px;line-height:1.2")}">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div style="margin-top:6px;${t(16, 400, C.slate)}"><b style="color:${C.nuit}">${BRAND.googleRating}/5</b> sur Google</div><div style="margin-top:4px;${t(14, 400, C.slate)}">${INSURANCE}</div>`;
 
 /**
  * Modèle des e-mails clients (design A).
  * @param {object} o
- * @param {string} o.title        Titre principal (unique <h1>).
+ * @param {string} o.subject      Titre du document (onglet, lecteurs d'écran).
+ * @param {string} o.name         Nom nettoyé du client ; vide = remerciement neutre. Donne l'unique <h1>.
+ * @param {string} o.intro        Phrase sous le remerciement.
  * @param {string} [o.preheader]  Aperçu affiché dans la liste des messages.
- * @param {string} o.subtitle     Phrase sous le titre.
- * @param {string} [o.greeting]   « Bonjour Marie Dupont, »
- * @param {string[]} [o.paragraphs]
- * @param {{label:string,value:string,sub?:string}} [o.highlight]  Créneau de rappel en grand.
- * @param {{title:string,steps:{state:string,title:string,text:string}[]}} [o.steps]
- * @param {{title:string,text:string}} [o.note]  Court encadré d'information (ex. hors horaires).
- * @param {[string,string][]} [o.recap]  Lignes du récapitulatif ; o.message : message du client (nettoyé).
- * @param {{title:string,text:string}} o.help  Encadré « un détail à ajouter ? » avec bouton d'appel.
+ * @param {string} [o.textLead]   Phrase complète placée en tête de la version texte.
+ * @param {{label:string,value:string,text:string,question?:string}} o.card  Information principale + bouton d'appel.
+ * @param {string} [o.city]       Ville (nettoyée).
+ * @param {string} [o.message]    Message du client (nettoyé).
+ * @param {string} o.reference
  */
 const renderClient = (o) => {
-  const hero = `<tr><td class="sd-px" bgcolor="${C.nuit}" style="padding:38px 36px 40px;background:${C.nuit}"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#1B3557" style="background:#1B3557;border-radius:999px;padding:7px 14px;${t(14, 700, C.white)}"><span style="color:${C.okOnNuit}">&#10003;</span>&nbsp;&nbsp;Demande reçue</td></tr></table><h1 class="sd-h1" style="margin:20px 0 12px;${t(34, 800, C.white, "line-height:1.12;letter-spacing:-.5px")}">${escapeHtml(o.title)}</h1><p style="margin:0;${t(18, 400, C.brume, "line-height:1.5")}">${nb(o.subtitle)}</p></td></tr>`;
-  const head = `<tr><td class="sd-px" bgcolor="${C.white}" style="padding:20px 36px;background:${C.white}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td valign="middle"><img src="${LOGO_HTTPS_URL}" width="132" alt="${escapeHtml(LOGO_ALT)}" style="display:block;border:0;outline:none;height:auto;${t(15, 800, C.nuit)}"></td><td class="sd-hide" valign="middle" align="right" style="${t(13, 600, C.nuit, "line-height:1.45")}">${escapeHtml(BRAND.tagline)}<br><span style="color:${C.slate}">Saint-Cyprien · Perpignan</span></td></tr></table></td></tr>`;
-  const photo = `<tr><td style="padding:0;line-height:0"><img src="${PHOTO_HTTPS_URL}" width="600" alt="${escapeHtml(PHOTO_CAPTION)}" style="display:block;width:100%;height:auto;border:0"></td></tr><tr><td class="sd-px" bgcolor="${C.pale}" style="padding:10px 36px;background:${C.pale};${t(13, 600, C.slate)}">${escapeHtml(PHOTO_CAPTION)}</td></tr>`;
-  const para = (p) => `<p style="margin:0 0 14px;${t(17, 400, C.ink, "line-height:1.6")}">${nb(p)}</p>`;
-  const intro = [o.greeting, ...(o.paragraphs || [])].filter(Boolean).map(para).join("");
-  const highlight = o.highlight
-    ? section(
-        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.orangePale};border-radius:16px"><tr><td class="sd-px" style="padding:26px 28px"><div style="${t(13, 800, C.orangeText, "letter-spacing:1px;text-transform:uppercase")}">${escapeHtml(o.highlight.label)}</div><div class="sd-big" style="margin:4px 0 6px;${t(o.highlight.value.length > 20 ? 32 : 42, 800, C.nuit, "line-height:1.1;letter-spacing:-1px")}">${nb(o.highlight.value)}</div>${o.highlight.sub ? `<div style="${t(16, 400, C.slate, "line-height:1.5")}">${nb(o.highlight.sub)}</div>` : ""}</td></tr></table>`,
-        32
-      )
-    : "";
-  const steps = o.steps
-    ? section(`<div style="${t(22, 800, C.nuit)}">${escapeHtml(o.steps.title)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:4px">${o.steps.steps.map((s, k) => stepHtml(s, k === o.steps.steps.length - 1)).join("")}</table>`, 8)
-    : "";
-  const note = o.note ? section(`<div style="${t(18, 800, C.nuit)}">${escapeHtml(o.note.title)}</div><p style="margin:6px 0 0;${t(15, 400, C.slate, "line-height:1.55")}">${nb(o.note.text)}</p>`, 4) : "";
+  const title = o.name ? `Merci ${o.name} !` : "Merci pour votre demande !";
+  const heading = o.name ? `Merci <span style="color:${C.orange}">${escapeHtml(o.name)}</span>&nbsp;!` : `Merci pour votre <span style="color:${C.orange}">demande</span>&nbsp;!`;
   const body = [
-    head,
-    hero,
-    o.highlight ? "" : photo,
-    highlight,
-    section(intro, o.highlight ? 28 : 32),
-    steps,
-    note,
-    section(recapHtml(o.recap || [], o.message), 22),
-    section(callBox(o.help.title, o.help.text), 22),
-    section(proofHtml(), 26),
-    section(`<p style="margin:0;${t(17, 400, C.ink, "line-height:1.6")}">À très vite,<br><b style="color:${C.nuit}">${escapeHtml(BRAND.name)}</b></p>`, 24, 34),
-    footerHtml(),
+    `<tr><td height="6" bgcolor="${C.orange}" style="height:6px;background:${C.orange};font-size:0;line-height:0">&nbsp;</td></tr>`,
+    row(`<img src="${LOGO_HTTPS_URL}" width="280" alt="${escapeHtml(LOGO_ALT)}" style="display:block;margin:0 auto;width:280px;max-width:80%;height:auto;border:0;outline:none;${t(18, 800, C.nuit)}">`, "30px 24px 6px"),
+    row(`<h1 class="sd-h1" style="margin:0 0 18px;${t(o.name.length > 18 ? 28 : 34, 800, C.nuit, "line-height:1.2;letter-spacing:-.5px;overflow-wrap:anywhere")}">${heading}</h1><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto"><tr><td width="56" height="4" bgcolor="${C.orange}" style="width:56px;height:4px;background:${C.orange};border-radius:2px;font-size:0;line-height:0">&nbsp;</td></tr></table>`, "14px 28px 0"),
+    row(`<p style="margin:0 0 14px;${t(17, 400, C.ink, "line-height:1.6")}">${nb(o.intro)}</p>`, "24px 40px 16px"),
+    row(cardHtml(o.card), "0 20px"),
+    o.city || o.message ? row(recapHtml(o.city, o.message), "16px 20px 0") : "",
+    row(proofHtml(), "30px 28px 0"),
+    row(`<p style="margin:0;${t(17, 400, C.ink, "line-height:1.6")}">À bientôt,<br><b style="color:${C.nuit}">${escapeHtml(BRAND.name)}</b></p><p style="margin:18px 0 0;${t(14, 400, C.slate, "line-height:1.6")}">${REPLY}</p>`, "28px 40px 32px"),
+    row(`<div style="${t(13, 700, C.nuit, "line-height:1.6")}">${escapeHtml(BRAND.tagline)} · ${escapeHtml(BRAND.zone)}</div><div style="margin-top:4px"><a href="${BRAND.site}" style="${t(13, 600, C.slate, "text-decoration:underline")}">${BRAND.siteLabel}</a></div><div style="margin-top:10px;${t(12, 400, C.slate)}">Référence : ${escapeHtml(o.reference)}</div>`, "20px 24px", C.doux, `border-top:1px solid ${C.line}`),
   ].join("\n");
-  const html = doc({ title: o.title, preheader: o.preheader, body, note: "Message envoyé automatiquement après votre demande sur styleetdeco.fr. Vous pouvez répondre à cet e-mail." });
+  const html = doc({ title: o.subject, preheader: o.preheader, body, width: 560, radius: 0 });
   const text = [
-    o.title,
-    "",
-    o.subtitle,
+    title,
     "",
     ...(o.textLead ? [o.textLead, ""] : []),
-    ...(o.highlight ? [`${o.highlight.label} : ${o.highlight.value}`, ...(o.highlight.sub ? [o.highlight.sub] : []), ""] : []),
-    ...(o.greeting ? [o.greeting, ""] : []),
-    ...(o.paragraphs || []).flatMap((p) => [p, ""]),
-    ...(o.steps ? [`${o.steps.title}`, ...o.steps.steps.map((s) => `- ${s.title} : ${s.text}`), ""] : []),
-    ...(o.note ? [`${o.note.title} ${o.note.text}`, ""] : []),
-    "Votre demande",
-    ...(o.recap || []).filter(([, v]) => v).map(([l, v]) => `${l} : ${v}`),
-    ...(o.message ? [`Votre message : « ${o.message} »`] : []),
+    o.intro,
     "",
-    `${o.help.title} ${o.help.text}`,
-    `Appelez le ${BRAND.phone} ou répondez simplement à ce message.`,
+    ...(o.textLead ? [] : [`${o.card.label} ${o.card.value}`]),
+    o.card.text,
     "",
-    `${BRAND.googleRating}/5 sur Google, ${BRAND.googleCount} avis · Assurance décennale et RC Pro`,
+    `${o.card.question ? `${o.card.question} ` : ""}Appelez le ${BRAND.phone}, ${HOURS.toLowerCase()}.`,
     "",
-    "À très vite,",
+    ...(o.city || o.message ? ["Votre demande", ...(o.city ? [`Ville : ${o.city}`] : []), ...(o.message ? [`Votre message : « ${o.message} »`] : []), ""] : []),
+    `${BRAND.googleRating}/5 sur Google · ${INSURANCE}`,
+    "",
+    "À bientôt,",
     BRAND.name,
-    BRAND.tagline,
-    BRAND.phone,
-    BRAND.email,
+    "",
+    REPLY,
     "",
     "--",
-    `${BRAND.addressLabel} : ${BRAND.street}, ${BRAND.postalCode} ${BRAND.city}, ${BRAND.country}`,
+    `${BRAND.tagline} · ${BRAND.zone}`,
     BRAND.site,
+    `Référence : ${o.reference}`,
   ]
     .join("\n")
     .trim();
@@ -316,63 +270,45 @@ export const renderEmail = (o) => (o.design === "B" ? renderInternal(o) : render
 export const SUBJECT_CONFIRM_DEVIS = "Votre demande de devis est bien arrivée | Style & Déco";
 export const SUBJECT_CONFIRM_CALLBACK = "Votre demande de rappel est bien arrivée | Style & Déco";
 
-const greeting = (name) => {
-  const n = safeName(name);
-  return n ? `Bonjour ${n},` : "Bonjour,";
-};
-
 // Confirmation envoyée au client pour une demande de devis. Pas de promesse de devis établi ni de date de chantier.
 // `lead` : nom, ville et message du client (nettoyés ici) ; absent = confirmation générique.
-export const devisConfirmation = ({ receivedAt, reference, lead }) =>
+export const devisConfirmation = ({ reference, lead }) =>
   renderEmail({
-    title: "Votre demande de devis est bien arrivée.",
+    subject: SUBJECT_CONFIRM_DEVIS,
     preheader: "Nous revenons vers vous sous 24 h, par téléphone ou par e-mail.",
-    subtitle: "Nous revenons vers vous sous 24 h, par téléphone ou par e-mail.",
-    greeting: greeting(lead?.name),
-    paragraphs: ["Merci d'avoir contacté Style & Déco. Nous avons bien reçu votre demande et nous la lisons avec attention."],
-    steps: {
-      title: "Et maintenant ?",
-      steps: [
-        { state: "done", title: "Votre demande est reçue", text: `Reçue le ${parisDateTime(receivedAt)}. Rien à refaire de votre côté.` },
-        { state: "current", title: "Nous vous répondons", text: "Sous 24 h, par téléphone ou par e-mail, pour comprendre votre projet." },
-        { state: "next", title: "Visite si besoin, puis devis", text: "Un devis détaillé, poste par poste. L'attestation d'assurance est remise avec le devis, sur demande." },
-      ],
+    name: safeName(lead?.name),
+    intro: "Nous avons bien reçu votre demande de devis et nous la lisons avec attention.",
+    card: {
+      label: "Nous revenons vers vous",
+      value: "sous 24 h",
+      text: "Par téléphone ou par e-mail, pour parler de votre projet. Si besoin, nous passons sur place avant de préparer un devis détaillé, poste par poste.",
+      question: "Un détail à ajouter ?",
     },
-    recap: [
-      ["Référence", reference],
-      ["Ville", safeCity(lead?.city)],
-    ],
+    city: safeCity(lead?.city),
     message: safeExcerpt(lead?.details),
-    help: { title: "Un détail à ajouter ?", text: "Pour un projet urgent ou une précision, appelez-nous du lundi au vendredi, de 8 h à 18 h." },
+    reference,
   });
 
 // Confirmation envoyée au client pour une demande de rappel : `sentence` = business-hours.describe(slot).sentence.
-export const callbackConfirmation = ({ receivedAt, reference, sentence, lead }) => {
+export const callbackConfirmation = ({ reference, sentence, lead }) => {
   const when = sentence.replace(/^Nous vous (rappelons|recontacterons) /, "").replace(/\.$/, "");
   const phone = String(lead?.phone || "").replace(/[^\d+ .()-]/g, "").slice(0, 25);
+  const soon = /^sous 30 minutes/.test(when);
   return renderEmail({
-    title: "Votre demande de rappel est bien arrivée.",
+    subject: SUBJECT_CONFIRM_CALLBACK,
     preheader: sentence,
     textLead: sentence, // phrase complète (version texte brut)
-    subtitle: "Laissez votre téléphone libre : nous vous appelons.",
-    greeting: greeting(lead?.name),
-    paragraphs: [
-      "Merci pour votre demande. Notre échange est gratuit et sans engagement : nous parlons de votre projet et, si besoin, nous convenons d'un devis ou d'une visite sur place.",
-    ],
-    highlight: {
+    name: safeName(lead?.name),
+    intro: "Nous avons bien reçu votre demande de rappel. Notre échange est gratuit et sans engagement.",
+    card: {
       label: "Nous vous rappelons",
       value: when,
-      sub: phone ? `au ${phone}, du lundi au vendredi de 8 h à 18 h.` : "du lundi au vendredi de 8 h à 18 h.",
+      text: soon
+        ? `Gardez votre téléphone près de vous : nous vous appelons${phone ? ` au ${phone}` : ""}.`
+        : `${phone ? `Au ${phone}. ` : ""}Les rappels reprennent dès l'ouverture, sans heure exacte garantie.`,
+      question: "Un projet urgent ?",
     },
-    note: /^sous 30 minutes/.test(when)
-      ? undefined
-      : { title: "Hors de nos horaires ?", text: "Les rappels reprennent dès l'ouverture, du lundi au vendredi à 8 h, sans heure exacte garantie." },
-    recap: [
-      ["Reçue le", parisDateTime(receivedAt)],
-      ["Référence", reference],
-      ["Ville", safeCity(lead?.city)],
-    ],
-    help: { title: "Un projet urgent ?", text: "Appelez-nous directement, nous décrochons du lundi au vendredi, de 8 h à 18 h." },
+    reference,
   });
 };
 
