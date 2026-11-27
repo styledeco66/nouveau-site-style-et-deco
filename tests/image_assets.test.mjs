@@ -69,7 +69,7 @@ test("chaque <img> a un alt et des dimensions ; un texte alternatif non vide est
 
 test("l'image principale du premier écran est chargée en priorité et les autres photos sont différées", () => {
   const html = read(join(ROOT, "index.html"));
-  assert.match(html, /<div class="heros__fond[^>]*>\s*<img[^>]*class="is-on"[^>]*fetchpriority="high"/);
+  assert.match(html, /<div class="heros__fond[^>]*>\s*(?:<picture><source[^>]*>)?<img[^>]*class="is-on"[^>]*fetchpriority="high"/);
 });
 
 test("poids : aucune image servie ne dépasse 260 Ko (hors logo/favicons déjà légers)", () => {
