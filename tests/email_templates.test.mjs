@@ -35,14 +35,15 @@ test("palette du site : bleu nuit et orange, plus aucune trace du noir et or de 
     assert.match(html, /#0B2341/i, `${name} : bleu nuit`);
     assert.match(html, /#F2611D/i, `${name} : orange`);
   }
-  for (const name of CLIENTS) assert.match(TEMPLATES[name]().html, /Appeler le 06 50 75 62 42/, `${name} : bouton d'appel`);
+  for (const name of CLIENTS) assert.match(TEMPLATES[name]().html, /<a href="tel:\+33650756242"[^>]*>Appeler maintenant<\/a>/, `${name} : bouton d'appel`);
 });
 
 test("contraste : textes ≥ 4,5:1 (3:1 pour le bouton, texte gras de 18 px)", () => {
   const pairs = [["#0B1A2E", "#ffffff"], ["#55627A", "#ffffff"], ["#55627A", "#F2F5F9"], ["#0B1A2E", "#F2F5F9"], ["#B8450C", "#F2F5F9"], ["#B8450C", "#FFF1EA"], ["#ffffff", "#0B2341"],
-    ["#C3CFE2", "#0B2341"], ["#C3CFE2", "#071A31"], ["#8FA3C2", "#071A31"], ["#0B2341", "#FFF1EA"], ["#12805C", "#ffffff"]];
+    ["#C3CFE2", "#0B2341"], ["#0B2341", "#FFF1EA"], ["#55627A", "#F7F9FC"], ["#0B2341", "#F7F9FC"]];
   for (const [fg, bg] of pairs) assert.ok(contrast(fg, bg) >= 4.5, `${fg} sur ${bg} : ${contrast(fg, bg).toFixed(2)}`);
   assert.ok(contrast("#ffffff", "#F2611D") >= 3, "bouton orange (texte gras 18 px)");
+  assert.ok(contrast("#F2611D", "#ffffff") >= 3, "nom du client en orange (titre gras de 28 px au moins)");
 });
 
 test("structure compatible messageries et accessibilité : lang/dir, title, h1 unique, tableaux de présentation, aperçu", () => {
@@ -72,11 +73,11 @@ test("tailles de texte lisibles sur téléphone : corps 17 px, titre 34 px (28 p
   assert.match(TEMPLATES.alerte().html, /font-size:34px;[^"]*"[^>]*>Marie Exemple</, "nom du client à 34 px dans l'alerte interne");
 });
 
-test("images en HTTPS sur notre domaine : logo et photo dans les e-mails clients, aucune pièce jointe, aucun CID, aucun base64 hors photos d'un devis", () => {
+test("images en HTTPS sur notre domaine : seul le logo dans les e-mails clients, aucune pièce jointe, aucun CID, aucun base64 hors photos d'un devis", () => {
   for (const name of CLIENTS) {
     const { html } = TEMPLATES[name]();
-    assert.match(html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="132" alt="Style &amp; Déco/, name);
-    if (name === "devis") assert.match(html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/chantier-facade-email\.jpg" width="600" alt="Chantier réalisé à Perpignan/, name);
+    assert.match(html, /<img src="https:\/\/styleetdeco\.fr\/assets\/images\/email\/logo-style-deco-email\.png" width="280" alt="Style &amp; Déco/, name);
+    assert.equal((html.match(/<img\b/g) || []).length, 1, `${name} : pas de photo de chantier`);
     assert.doesNotMatch(html, /cid:|data:image|base64/, name);
   }
   for (const file of ["../netlify/lib/emails.mjs", "../netlify/functions/lead.mjs"]) {
@@ -85,6 +86,7 @@ test("images en HTTPS sur notre domaine : logo et photo dans les e-mails clients
   }
 });
 
+// La photo de chantier n'est plus dans les nouveaux e-mails mais reste publiée : les e-mails déjà envoyés la chargent.
 test("fichiers d'image publiés sous assets/images/email/ : logo PNG 512 × 312 et photo JPEG 1200 × 520, légers, sans métadonnées", () => {
   const png = readFileSync(new URL("../sitesite-template/assets/images/email/logo-style-deco-email.png", import.meta.url));
   assert.equal(png.readUInt32BE(16), 512);
@@ -106,25 +108,31 @@ test("fichiers d'image publiés sous assets/images/email/ : logo PNG 512 × 312 
   assert.deepEqual([width, height], [1200, 520]);
 });
 
-test("contenu des e-mails clients : bouton d'appel, créneau en grand, suivi, référence, preuves, version texte complète", () => {
+test("contenu des e-mails clients : remerciement au nom du client, délai ou créneau en grand, appel, référence, note, version texte complète", () => {
   const devis = TEMPLATES.devis();
   assert.match(devis.html, /href="tel:\+33650756242"/);
-  assert.match(devis.html, /Votre demande de devis est bien arrivée\./);
-  assert.match(devis.html, /Et maintenant \?/);
+  assert.match(devis.html, /<h1[^>]*>Merci <span[^>]*>Marie Exemple<\/span>&nbsp;!<\/h1>/);
+  assert.match(devis.html, />sous 24[\u00a0 ]h</);
   assert.match(devis.html, /A1B2C3D4/);
-  assert.match(devis.html, /Bonjour Marie Exemple,/);
   assert.match(devis.html, /Repeindre un salon de 30 m²/);
+  assert.match(devis.html, />Perpignan</);
+  assert.match(devis.text, /^Merci Marie Exemple !$/m);
   assert.match(devis.text, /Référence : A1B2C3D4/);
   assert.match(devis.text, /Appelez le 06 50 75 62 42/);
   const rappel = TEMPLATES.rappel();
   assert.match(rappel.html, /Nous vous rappelons/);
   assert.match(rappel.html, /lundi à partir de 8[\u00a0 ]h/);
-  assert.match(rappel.html, /au 06 12 34 56 78/);
+  assert.match(rappel.html, /Au 06 12 34 56 78/);
+  assert.match(rappel.html, /sans heure exacte garantie/);
   assert.ok(rappel.text.includes(sentence), "phrase complète dans la version texte");
+  const soon = callbackConfirmation({ receivedAt: fri, reference: "R", sentence: "Nous vous rappelons sous 30 minutes.", lead });
+  assert.match(soon.html, />sous 30 minutes</);
+  assert.doesNotMatch(soon.html, /sans heure exacte/, "en journée : pas de mention hors horaires");
   for (const { html, text } of [devis, rappel]) {
     assert.ok(html.includes(`${BRAND.googleRating}/5`) && html.includes("Assurance décennale et RC Pro"));
-    assert.ok(text.includes(BRAND.street) && text.includes(BRAND.site));
+    assert.ok(text.includes(`${BRAND.googleRating}/5 sur Google`) && text.includes(BRAND.site));
     assert.doesNotMatch(text, /<[a-z][^>]*>/i);
+    for (const output of [html, text]) assert.doesNotMatch(output, /\d+\s+(avis|commentaires)/i, "le nombre d'avis n'est pas affiché");
   }
   assert.ok(!TEMPLATES.devis().text.includes("devis est établi"), "aucune promesse de devis établi");
 });
@@ -132,7 +140,6 @@ test("contenu des e-mails clients : bouton d'appel, créneau en grand, suivi, r�
 test("la note Google affichée dans les e-mails est celle de scripts/google-reviews.json", () => {
   const cfg = JSON.parse(readFileSync(new URL("../scripts/google-reviews.json", import.meta.url), "utf8"));
   assert.equal(BRAND.googleRating, cfg.rating);
-  assert.equal(BRAND.googleCount, cfg.count);
 });
 
 test("échappement HTML de toutes les données saisies", () => {
@@ -166,8 +173,8 @@ test("anti-abus : le nom, la ville et le message repris dans la confirmation cli
   for (const bad of ["Marie 0612345678", "Marie.com", "Marie <b>", "A".repeat(41), "M@rie", "Marie: https://x.y", ""]) assert.equal(safeName(bad), "", `nom refusé : ${bad}`);
   assert.equal(safeCity("Saint-Cyprien (66750)"), "Saint-Cyprien (66750)");
   for (const bad of ["Voir www.evil.example", "Perpignan https://x.y", "0612345678901"]) assert.equal(safeCity(bad), "", `ville refusée : ${bad}`);
-  assert.match(devisConfirmation({ receivedAt: fri, reference: "R", lead: { name: "Marie 0612345678" } }).text, /^Bonjour,$/m, "salutation neutre sans nom exploitable");
-  assert.match(devisConfirmation({ receivedAt: fri, reference: "R" }).text, /^Bonjour,$/m, "confirmation générique sans données");
+  assert.match(devisConfirmation({ receivedAt: fri, reference: "R", lead: { name: "Marie 0612345678" } }).text, /^Merci pour votre demande !$/m, "remerciement neutre sans nom exploitable");
+  assert.match(devisConfirmation({ receivedAt: fri, reference: "R" }).text, /^Merci pour votre demande !$/m, "confirmation générique sans données");
 });
 
 test("le HTML transmis à Resend est exactement celui du modèle (confirmations, alerte, rappel programmé) ; aucune pièce jointe", async () => {
@@ -196,12 +203,11 @@ test("le HTML transmis à Resend est exactement celui du modèle (confirmations,
   assert.ok(by("lead-").html.includes("Appeler le 06 12 34 56 78"));
 });
 
-test("coordonnées : clients = pied (téléphone, e-mail, site, adresse administrative) sans répétition inutile ; internes = aucune coordonnée de Style & Déco", () => {
+test("coordonnées : clients = téléphone et site, ni adresse postale ni adresse e-mail affichées ; internes = aucune coordonnée de Style & Déco", () => {
   for (const name of CLIENTS) {
     const { html } = TEMPLATES[name]();
-    assert.equal((html.match(/style\.deco66@gmail\.com/g) || []).length, 2, `${name} : e-mail dans le lien et son libellé du pied`);
-    assert.ok(html.includes("18 rue Madame de la Fayette") && html.includes("adresse administrative"));
-    assert.equal((html.match(/18 rue Madame de la Fayette/g) || []).length, 1, `${name} : adresse une seule fois`);
+    assert.ok(html.includes("06 50 75 62 42") && html.includes('href="https://styleetdeco.fr"'), name);
+    assert.doesNotMatch(html, /style\.deco66@gmail\.com|18 rue Madame de la Fayette|adresse administrative/, name);
   }
   for (const name of INTERNES) {
     const { html } = TEMPLATES[name]();

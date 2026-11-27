@@ -83,7 +83,7 @@ test("1. devis normal : notification interne + confirmation client (e-mail oblig
   assert.ok(confirm.body.text.includes("Nous revenons vers vous sous 24 h"));
   assert.ok(confirm.body.html.includes("sous 24"));
   for (const forbidden of ["devis est établi", "chantier est programmé", "date d'intervention"]) assert.ok(!confirm.body.text.includes(forbidden));
-  assert.ok(confirm.body.text.includes("Bonjour Paul Martin,"), "le nom saisi sert à saluer le client (nettoyé)");
+  assert.ok(confirm.body.text.includes("Merci Paul Martin !"), "le nom saisi sert à saluer le client (nettoyé)");
 });
 
 test("2. rappel avec e-mail, en journée : alerte immédiate + confirmation « sous 30 minutes », aucun rappel programmé", async () => {
