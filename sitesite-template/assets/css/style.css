@@ -1198,13 +1198,13 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
   .recit--mosaique figcaption{font-size:13px;line-height:1.35}
 }
 
-/* Accueil, téléphone uniquement : photo d'ambiance fixe en haut du premier écran, voile bleu nuit plus dense à gauche
+/* Accueil, Réalisations, Saint-Cyprien, Perpignan et Façade, téléphone uniquement : photo d'ambiance fixe en haut du premier écran, voile bleu nuit plus dense à gauche
    (sous les textes) qui laisse voir la pièce à droite, puis fondu dans le bleu nuit. L'ordinateur garde ses photos. */
 @media (max-width: 720px){
-  .heros--accueil{--photo-h:clamp(480px, 142vw, 760px)}
-  .heros--accueil .heros__fond{bottom:auto;height:var(--photo-h);overflow:hidden}
-  .heros--accueil .heros__fond img{object-position:50% 100%}
-  .heros--accueil .heros__fond picture:first-child img{opacity:1;animation:zoomlent 9s ease-out forwards}
-  .heros--accueil .heros__fond picture:not(:first-child),.heros--accueil .heros__chantier{display:none}
-  .heros--accueil .heros__voile{bottom:auto;height:var(--photo-h);background:linear-gradient(180deg, rgba(11,35,65,0) 55%, var(--nuit) 100%), linear-gradient(90deg, rgba(11,35,65,.88) 0%, rgba(11,35,65,.7) 45%, rgba(11,35,65,.36) 75%, rgba(11,35,65,.18) 100%)}
+  .heros--ambiance{--photo-h:clamp(480px, 142vw, 760px)}
+  .heros--ambiance .heros__fond{bottom:auto;height:min(var(--photo-h), 100%);overflow:hidden}
+  .heros--ambiance .heros__fond img{object-position:50% 100%}
+  .heros--ambiance .heros__fond picture:first-child img{opacity:1;animation:zoomlent 9s ease-out forwards}
+  .heros--ambiance .heros__fond picture:not(:first-child),.heros--ambiance .heros__chantier{display:none}
+  .heros--ambiance .heros__voile{bottom:auto;height:min(var(--photo-h), 100%);background:linear-gradient(180deg, rgba(11,35,65,0) 55%, var(--nuit) 100%), linear-gradient(90deg, rgba(11,35,65,.88) 0%, rgba(11,35,65,.7) 45%, rgba(11,35,65,.36) 75%, rgba(11,35,65,.18) 100%)}
 }
