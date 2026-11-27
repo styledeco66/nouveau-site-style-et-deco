@@ -251,6 +251,9 @@
         });
         if (delivered.kind === "devis" && delivered.next === SUCCESS_URL) {
           window.StyleDecoAds?.registerQuote(form.dataset.submissionId);
+          try {
+            window.StyleDecoChatGPTAds?.registerQuote(form.dataset.submissionId);
+          } catch (error) { /* la mesure ne doit jamais bloquer la confirmation */ }
         }
         if (photosLost) markPhotosLost(photosLost);
         redirect(delivered.next);
