@@ -1207,4 +1207,6 @@ h3 .h-suite{font-size:.78em;font-weight:600;margin-top:.3em}
   .heros--ambiance .heros__fond picture:first-child img{opacity:1;animation:zoomlent 9s ease-out forwards}
   .heros--ambiance .heros__fond picture:not(:first-child),.heros--ambiance .heros__chantier{display:none}
   .heros--ambiance .heros__voile{bottom:auto;height:min(var(--photo-h), 100%);background:linear-gradient(180deg, rgba(11,35,65,0) 55%, var(--nuit) 100%), linear-gradient(90deg, rgba(11,35,65,.88) 0%, rgba(11,35,65,.7) 45%, rgba(11,35,65,.36) 75%, rgba(11,35,65,.18) 100%)}
+  /* Façade : cadrage sur le ciel et la toiture. */
+  .heros--ambiance.heros--facade .heros__fond img{object-position:50% 0%}
 }
